@@ -90,7 +90,7 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      links: [
+     /* links: [
         {
           title: 'Docs',
           items: [
@@ -117,7 +117,7 @@ const config: Config = {
             },
           ],
         },
-        {
+      /!*  {
           title: 'More',
           items: [
             {
@@ -129,8 +129,8 @@ const config: Config = {
               href: 'https://github.com/facebook/docusaurus',
             },
           ],
-        },
-      ],
+        },*!/
+      ],*/
       copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
     },
     prism: {
