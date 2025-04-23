@@ -1,0 +1,75 @@
+---
+title: useEffect
+---
+
+# Definicja
+
+:::info `useEffect()`
+- to hook w React, który pozwala na wykonywanie efektów ubocznych w komponentach funkcyjnych. Służy do obsługi m.in.:
+  - Pobierania danych z API
+  - Subskrypcji - np. WebSocket:
+    - WebSocket to protokół komunikacyjny, który
+        - umożliwia dwukierunkową komunikację między klientem (np. przeglądarką) a serwerem w czasie rzeczywistym
+        - jest bardziej wydajny niż HTTP dla aplikacji wymagających natychmiastowej wymiany danych, np.:
+            - Czaty online (Messenger, WhatsApp Web)
+            - Powiadomienia push
+            - Streaming danych (kursy walut, giełda, dane IoT)
+            - Multiplayer w grach
+  - Obsługi timera (setTimeout, setInterval)
+  - Sprzątania po komponentach (np. odpinanie event listenerów)
+:::
+
+# Prosta aplikacja
+## Gdy komponent jest renderowny, wywoływany jest `useEffect()`
+```typescript
+import {useState, useEffect} from 'react'
+
+function App() {
+    const [licznik, setLicznik] = useState(0)
+    const [kolor, setKolor] = useState("red");
+
+    useEffect(() => {
+        console.log("Komponent został wyrenderowany!", new Date().toLocaleTimeString());
+    });
+
+    return (
+        <>
+            <p>Licznik kliknięć: {licznik}</p>
+            <button onClick={() => setLicznik(licznik+1) }>
+                Kliknij mnie!
+            </button>
+            <button onClick={() => setKolor(kolor === "red" ? "blue" : "red")}>Zmień kolor</button>
+        </>
+    )
+}
+
+
+export default App
+
+```
+
+## `useEffect` jest wywoływany wtedy, gdy zmieni się licznil
+Zmieniamy definicję `useEffect`
+```typescript
+useEffect(() => {
+    console.log("Wartość licznika uległa zmianie", new Date().toLocaleTimeString());
+},[licznik]);
+```
+
+
+## `useEffect` jest wywoływany tylko raz
+Zmieniamy definicję `useEffect`
+```typescript
+useEffect(() => {
+    console.log("tylko raz się uruchomi", new Date().toLocaleTimeString());
+},[]);
+```
+
+
+
+
+
+
+
+
+

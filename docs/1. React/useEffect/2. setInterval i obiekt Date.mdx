@@ -1,0 +1,180 @@
+---
+title: setInterval oraz obiekt Date
+---
+
+# Definicja funkcji `setInterval`
+:::info Funkcja `setInterval()`
+- funkcja wbudowana w JavaScript, która cyklicznie wykonuje jakiś kod co określony czas (np. co 1000 milisekund = 1 sekunda).
+- uruchamia się ciągle, co zadany czas
+- Jest asynchroniczny – nie blokuje głównego wątku
+- trzeba go zatrzymywać ręcznie, jeśli nie chcemy, żeby leciał wiecznie
+
+:::
+
+
+# Projekt - aplikacja MyClock
+
+## Próby z `setInterval` oraz `Date`
+### Jak działa `setInterval()`?
+- utwórz projekt:  Vite, React, TypeScript
+- w głównym folderze zrób plik `myTests.js`
+
+#### Pierwsza werjsa - licznik sekund
+```javascript
+let count = 0;
+
+const intervalId = setInterval (()=> {
+    count++
+    console.log("licznik: ", count)
+}, 1000)
+```
+
+#### Druga wersja - zatrzymanie licznika
+`setInterval` zwraca *ID*, które możesz użyć do zatrzymania cyklicznego działania funkcji.
+```javascript
+let count = 0;
+
+const intervalId = setInterval (()=> {
+    count++
+    console.log("licznik: ", count)
+
+    if(count === 4){
+        clearInterval(intervalId);
+        console.log("Stop")
+    }
+}, 1000)
+```
+
+### Obiekt `Date`
+:::info
+- to wbudowany obiekt w JavaScript, który reprezentuje datę i czas.
+- Możesz za jego pomocą:
+    - Uzyskać aktualną datę/godzinę
+    - Tworzyć własne daty
+    - Dodawać/odejmować czas
+    - Formatować datę do stringa
+Wyczyść zawartość poprzedniego pliku i wklej
+
+:::
+
+WYCZYŚĆ ZAWARTOŚĆ PLIKU `myTests.js`
+
+#### Jak wygląda obiekt `Date`?
+Wpisz poniższy kod
+```javascript
+const date = new Date();
+console.log(date)
+
+```
+
+
+#### Metody obiektu `Date`
+```javascript
+const date = new Date();
+console.log(date)
+
+console.log(`rok             ${ date.getFullYear()}`);
+console.log(`miesiąc         ${ date.getMonth()}`);
+console.log(`dzień miesiąca  ${ date.getDate()}`);
+console.log(`dzień tygodnia  ${ date.getDay()}`);
+console.log(`godzina         ${ date.getHours()}`);
+console.log(`minuta          ${ date.getMinutes()}`);
+console.log(`sekunda         ${ date.getSeconds()}`);
+```
+
+#### Formatowanie
+```javascript
+const date = new Date();
+console.log(date)
+
+console.log(date.toLocaleDateString());
+console.log(date.toLocaleTimeString());
+console.log(date.toLocaleString());
+```
+
+#### Wyświetlanie czasu w Japonii
+```javascript
+const tokyoTime = now.toLocaleTimeString("pl-PL", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+
+});
+console.log(`Czas w Tokio: ${tokyoTime}`);
+```
+
+## Wracamy do projektu React
+Utwórz komponent `MyClock.tsx`
+
+:::tip Programistyczna sztuczka - koniunkcja `&&` jako `if`
+```bash
+>> true && "coś"
+"coś"
+>> false && "coś"
+false
+```
+
+:::
+
+
+```typescript
+import {useEffect, useState} from "react";
+
+
+const MyClock = () => {
+    const [time, setTime] = useState<string>("");
+    const [showTimer, setShowTimer] = useState<boolean>(true);
+
+    useEffect(()=>{
+        const updateTime = ()=>{
+            const now = new Date();
+            const formatted = now.toLocaleTimeString()
+            setTime(formatted)
+
+        }
+
+        updateTime();
+
+        const intervalId = setInterval(updateTime, 1000);
+
+        return ()=> clearInterval(intervalId);
+    }, [])
+
+
+    return (
+        <>
+            {
+                showTimer &&  <div style={{ fontSize: "2rem" , textAlign: "center" ,
+                                            marginTop: "2rem",  }} >
+                Aktualny czas: {time}
+                </div>
+            }
+
+            <button onClick={() => setShowTimer(true)}
+                    style={{color:"beige", backgroundColor: "#123abc", margin:"10px",
+                            padding:"20px"}}
+            >Pokaż zegarek</button>
+            <button onClick={() => setShowTimer(false)}
+                    style={{color:"#123abc", backgroundColor: "beige", margin:"10px",
+                            padding:"20px"}}
+            >Schowaj zegarek</button>
+        </>
+
+    )
+}
+export default MyClock
+```
+
+
+
+
+
+
+
+
+
+
+
+
