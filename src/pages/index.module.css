@@ -8,6 +8,24 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(
+          135deg,
+          #61DAFB 10%,    /* React */
+          #3C873A 20%,     /* Node.js */
+          #4DB33D 30%,    /* MongoDB */
+          #303030 40%,    /* Express */
+
+          #F7DF1E 80%,    /* JavaScript */
+          #3178C6 100%    /* TypeScript */
+  );
+  color: #61dafb; /* kolor Reacta dla tekstu */
+}
+
+.heroBanner h1 {
+  color: #61dafb; /* tytuł – React blue */
+}
+.heroBanner p {
+  color: #9feaf9; /* podtytuł – jaśniejszy niebieski */
 }
 
 @media screen and (max-width: 996px) {
@@ -15,9 +33,27 @@
     padding: 2rem;
   }
 }
+.buttons button,
+.buttons a {
+  background-color:#ece008 ; /* kolor Node.js */
+  color:#12aaaa  !important;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
 
+.buttons button:hover,
+.buttons a:hover {
+  background-color:#4DB33D;
+  color: #ece008 !important;
+}
+
+/*
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+*/
