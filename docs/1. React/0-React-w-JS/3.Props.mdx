@@ -1,0 +1,265 @@
+---
+title: Props
+---
+
+# Definicja propsa
+:::info Props
+- `props` (*properties*) to sposób przekazywania danych z komponentu rodzica do komponentu dziecko
+- propsy to wartości przekazywane jako atrybuty w JSX i są niemutowalne (nie można ich zmieniać wewnątrz komponentu, który je otrzymuje).
+    - W React `props` są traktowane jako dane "tylko do odczytu". Komponent dziecka nie powinien zmieniać wartości otrzymanych propsów, ponieważ są one kontrolowane przez rodzica.
+    - Jeśli chcesz zmodyfikować dane, musisz to zrobić w rodzicu, a następnie przekazać zaktualizowane wartości do dziecka jako nowe propsy.
+
+:::
+
+# Przykład z propsami
+## Prosty props
+- utwórz projekt React przy użyciu Vite
+- zainstaluj zależności zdefiniowane w `package.json` przy użyciu `npm install`
+- w folderze `src` zrób nowy plik `Welcome.jsx`
+```javascript
+function Welcome(props) {
+    return <h1> Hello, {props.name} !</h1>;
+}
+
+export default Welcome;
+```
+
+Zmień zawartość pliku `App.jsx` na:
+```javascript
+import Welcome from './Welcome';
+
+function App() {
+
+  return (
+    <div>
+        <Welcome name="Arabela"/>
+        <Welcome name="Stella" />
+        <Welcome name="Xymena" />
+    </div>
+  )
+}
+
+export default App
+```
+- z `App.jsx` przekazaliśmy do `Welcome.jsx` props `name`, który przechowuje różnie wartości typu `string`
+- komponent `Welcome` został użyty kilka razy, a wartość `name` za każdym razem była inna.
+
+## Destrukturyzacja props
+Zmień część zawrtości pliku `Welcome.jsx` na:
+```javascript
+function Welcome({ name }) {
+    return <h1> Hello, {name} !</h1>;
+}
+
+export default Welcome;
+```
+- obiekt `props`, którego atrybutami są wszystkie właściwości użyte w `App.js` (w naszym przypadku jest to jedna właściwość `name`)
+- został zdestrukturyzowany `({name})` i przekazany jako argument do funkcji `Welcome`
+- dzięki destrukturyzacji mamy bezpośredni dostęp do właściwości `name`.
+
+## Jeden props wiele różnych typów danych
+Utwórz nowy plik w już istniejącym projekcie. Będzie to nowy komponent  `UserCard.jsx`
+```javascript
+const UserCard = ({ name, age, hobbies }) => {
+    return (
+        <div>
+            <h1> User Card</h1>
+            <h2> {name} </h2>
+            <p> Age: {age}</p>
+            <p>Hobbies: {hobbies.join(', ')}</p>
+        </div>
+    )
+}
+
+export default UserCard
+
+
+```
+Zmień zawartość `App.jsx`
+  - skasuj to, co zwracał ten komponent
+  - dodaj ten kod:
+```javascript
+import UserCard from "./UserCard.jsx";
+
+function App() {
+
+  return (
+    <div>
+        <UserCard name="Ewan" age={19} hobbies={["traveling", "eating"]} />
+        <UserCard name="Tupak" age={49} hobbies={["coding", "gaming", "flighting"]} />
+
+    </div>
+  )
+}
+
+export default App
+
+```
+, **czyli wartościami propsów może być dowolny rodzaj danych**.
+
+## Domyślne wartości propsa
+Wróćmy do komponentu `Welcome.jsx`
+```javascript
+function Welcome({ name = 'Guest' }) {
+    return <h1> Hello, {name} !</h1>;
+}
+```
+Zmieńmy zawartość `App.jsx`
+```javascript
+import Welcome from "./Welcome.jsx";
+
+
+function App() {
+
+  return (
+    <div>
+       <Welcome />
+       <Welcome name="Ricardo" />
+    </div>
+  )
+}
+```
+## Przekazywanie funkcji w props - podstawa wzajemnej komunikacji między komponentami
+Zróbmy nowy komponent `Button.jsx`
+```javascript
+function Button({ onClick, label }) {
+    return <button onClick={onClick}> { label }</button>;
+}
+
+export default Button
+```
+
+Na nowo przepiszmy `App.jsx`
+```javascript
+import Button from "./Button.jsx";
+
+function App() {
+    const handleClick = () => {
+        alert("Button clicked");
+    }
+
+
+  return (
+    <div>
+        <Button onClick={handleClick} label="Click Me, please!"/>
+    </div>
+  )
+}
+```
+
+- wysyłamy referencję do funkcji `handleClick` jako wartość atrybutu `onClick`
+- w komponencie `Button.jsx` używamy tej referencji jako wartości budowanego atrybutu `onClick`
+- nasz komponent nazywa się `Button` i używa wbudowanego komponentu `button` (nazwy naszy komponentów powinny być pisane w *PascalCase*, bo wbudowana zawsza zaczynają się małą literą)
+- gdy klikniemy przycisk zdefiniowany w komponencie `Button`, uruchomimy funkcję zdefiniowaną w komponencie `App`,
+
+---
+# Przekazywanie całych obieków jako props
+Komponent `UserProfile`
+
+```javascript
+
+
+const UserProfile = ({user})=>{
+    return(<div>
+        <h2>{user.name}</h2>
+        <p>Age: {user.age}</p>
+        <p>Email: {user.email}</p>
+    </div>)
+}
+
+
+export default UserProfile
+
+```
+Użycie tego komponentu w `App.jsx`
+```javascript
+import UserProfile from "./UserProfile.jsx";
+
+const user = {
+    name: "Jaśko",
+    age: 22,
+    email: "jasko@xx.com.pl"
+}
+
+function App() {
+
+
+  return (
+    <>
+    <UserProfile user={user} />
+    </>
+  )
+}
+
+export default App
+```
+---
+# Przekazywanie komponentów jako props (`children`)
+Prop children pozwala na przekazanie komponentu (lub kilku komponentów) do wnętrza innego komponentu.
+Jest to podstawowy sposób na kompozycję w React.
+
+Komponent `Card`
+```javascript
+const Card = ({children})=>{
+    return(
+        <div className=style={{border:'1px solid #ccc', padding: '20px'}}>
+            {children}
+        </div>)
+}
+```
+Użycie komponentu `Card` w `App.jsx`
+```javascript
+import Card from "./Card.jsx";
+
+function App() {
+
+
+  return (
+    <>
+        <Card>
+            <h1>Tytuł</h1>
+            <p>To jest coś</p>
+            <p>to jest coś innego</p>
+        </Card>
+    </>
+  )
+}
+
+
+```
+a nawet tak
+```javascript
+import Card from "./Card.jsx";
+function App() {
+
+
+  return (
+    <>
+        <Card>
+            <h1>Tytuł</h1>
+            <p>To jest coś</p>
+             <Card>
+                <h3>Wewnętrzny Card</h3>
+                <h4>Ala ma kota, a kot ma Alę.</h4>
+
+        </Card>
+        </Card>
+    </>
+  )
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

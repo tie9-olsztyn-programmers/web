@@ -1,0 +1,89 @@
+---
+title: Pierwszy komponent
+---
+
+---
+
+# Co to jest komponent?
+:::info Komponent
+- Komponenty to podstawowy element budulcowy w React.
+- To specjalna funkcja (kiedyś komponenty były pisane jako klasy), która zwraca JSX
+
+:::
+
+# Co to jest JSX?
+:::tip JSX
+JSX (JavaScrip XML)
+- to rozszerzenie składni JavaScript, które pozwala pisać kod podobny do HTML bezpośrednio w plikach JavaScript.
+- jest powszechnie używane w React, ponieważ ułatwia definiowanie struktury i wyglądu komponentów, łącząc logikę z widokiem w jednym miejscu.
+
+:::
+
+- wygląda jak HTML, ale działa jak JavaScript:
+  - w JSX możesz pisać elementy HTML w środku kodu JavaScript.
+  - React następnie przekształca JSX w zwykły JavaScript podczas kompilacji.
+```javascript
+function HelloWorld() {
+    return <h1>Hello, World!</h1>;
+}
+```
+` <h1>Hello, World!</h1>` - to jest JSX
+
+- JSX wstawia kod JavaScript wewnątrz `{  }`:
+    - Możesz bezpośrednio umieszczać wyrażenia JavaScript w JSX za pomocą `{  }`
+```javascript
+function Greeting({ name }) {
+    return <p>Hello, { name }!</p>;
+}
+```
+
+- JSX jest przekształcany do `React.createElement()`:
+    - Pod maską, JSX jest tłumaczony na wywołania React.createElement(), które tworzą strukturę DOM wirtualnego drzewa React.
+```js
+const element = <h1>Hello, World!</h1>;
+// Jest tłumaczone na:
+const element = React.createElement('h1', null, 'Hello, World!');
+```
+- JSX używa className zamiast class:
+    - W React, zamiast atrybutu class, używamy className (ponieważ class jest zarezerwowanym słowem w JavaScript).
+```js
+//...
+    return <div className="container">Content here</div>
+```
+
+# Utworzenie pierwszego komponentu
+W folderze `src` zrób podfolder `components` i w nim plik `HelloWorld.js`
+```js
+import React from 'react';
+
+function HelloWorld() {
+    return <h1>Hello, World!</h1>;
+}
+
+export default HelloWorld;
+```
+
+Zmień zawartość `App.js` na:
+```js
+import HelloWorld from './components/HelloWorld';
+
+function App() {
+
+  return (
+    <>
+        <HelloWorld />
+    </>
+  )
+}
+
+export default App
+```
+W komponencie `App` pisząc `<HelloWorld />` użyliśmy komponentku `HelloWorld`.
+Każde kolejne dopisanie `<HelloWorld />` w `App` spowoduje dodanie nowego komponentu.
+
+
+
+
+
+
+
