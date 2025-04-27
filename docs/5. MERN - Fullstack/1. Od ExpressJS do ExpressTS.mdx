@@ -1,0 +1,297 @@
+---
+title: Od ExpressJS do ExpressTS
+
+---
+# Tworzymy projekst Express w WebStorm
+
+- Webstorm:
+    - projekt Express:
+        - bez View Engine,
+        - z Stylesheet ustawionym na Plain CSS
+    - utwórz folder `src`:
+        - utwórz w nim folder `models`
+        - do folderu `src` przenieś folder `routes`
+        - do folderu `src` przenieś plik `app.js`
+
+- zainstaluj podstawowe pakiety potrzebne dla TypeScript:
+    - `npm install --save-dev typescript ts-node @types/node @types/express nodemon`
+- zrób plik dla TypeScript `npx tsc --init` i wprowadź zmiany:
+```typescript
+{
+  "compilerOptions": {
+
+    /* Language and Environment */
+    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+
+    /* Modules */
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    "rootDir": "./src",                                  /* Specify the root folder within your source files. */
+.
+    ...                         .
+     "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
+
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+
+    /* Type Checking */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+
+    /* Completeness */
+
+    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+  }
+}
+
+```
+
+- zmień rozszerzenie `/bin/www.js` na `/bin/www.ts` pisząc w terminalu instrukcję `mv bin/www bin/www.ts`
+- w gównej ścieżce zrób plik `.env` z zawartością:
+```dotenv
+MONGO_URI=mongodb://localhost:27017/mydatabase
+PORT=5000
+```
+STRUKTURA PROJEKTU POWINNA WYGLĄDAĆ TAK:
+```
+<twojaNazwaProjektu>
+    |- .idea
+    |- bin
+        |-- www.ts
+    |- node_modules
+    |- public
+    |- src
+        |--  models
+        |--  routes
+        |--  app.ts
+    |- .env
+    |- package.json
+    |- package-lock.json
+    |- tsconfig.json
+```
+
+# Konfiguracja Express w `app.js`
+## Importy
+### ExpressJS
+- to framework dla Node.js, który ułatwia budowę backendu –
+- obsługuje
+    - trasy,
+    - middleware,
+    - requesty
+    - responsy.
+
+<span style={{color:'#ff7339'}}>
+    Nie musisz instalować, ale brakuje obsługi typów, więc doinstaluj typy:
+</span>
+`npm install @types/express --save-dev`
+
+
+### CORS (Cross-Origin Resource Sharing)
+CORS pozwala na wysyłanie żądań między różnymi domenami - np:
+- frontend na `http://localhost:3000` chce połączyć się z
+- backendem na  `http://localhost:5000`
+
+Bez CORS przeglądarka nie pozwoli na komunikację między backendem a frontendem.
+
+INSTALACJA
+`npm install cors`
+`npm install @types/cors --save-dev  # Typy dla TS`
+
+### Moduł `path`
+- moduł path to wbudowana biblioteka Node.js do pracy z systemowymi ścieżkami plików.
+- przykładowe użycie
+```ts
+import path from "path";
+app.use(express.static(path.join(__dirname, "../public")));
+```
+czyli pliki statyczne w Express będą dostępne w folderze public
+
+### `dotenv` – Obsługa zmiennych środowiskowych
+Pozwala przechowywać wrażliwe dane (np. hasła do bazy, klucze API) w pliku .env, zamiast trzymać je w kodzie.
+
+*instalacja*: `npm install dotenv`
+*instalacja typów*: `npm install @types/dotenv --save-dev`
+
+**przykładowe użycie**
+```ts
+import dotenv from "dotenv";
+dotenv.config(); // Załaduj zmienne z `.env`
+
+const port = process.env.PORT || 3000; // Pobiera wartość z .env
+```
+
+## Przekształcamy zawartość pliku `app.ts` :
+```ts
+import express from "express";
+import cors from "cors";
+import path from "path";
+import dotenv from "dotenv";
+
+
+dotenv.config();
+
+
+const app = express();
+
+app.use(cors());
+app.use(express.json()); // Parsowanie JSON w requestach
+
+
+app.use(express.static(path.join(__dirname, "../public")));
+
+
+app.get("/", (req, res) => {
+  res.json({ message: "API Express + TypeScript działa!" });
+});
+
+export default app;
+```
+# Zmiany w pliku startowym `/bin/www.ts`
+## Importy
+### `debug`  - biblioteka do logowania komunikatów
+- umożliwia logowanie komunikatów w trakcie działania aplikacji.
+- jest lżejsza niż `console.log( )`, bo nie loguje nic, jeśli nie ustawisz zmiennej `DEBUG`.
+- jest często używana w Express, m.in. w pliku bin/www.ts.
+**instalacja**: `npm install debug`
+**instalacja** typów: `npm install @types/debug --save-dev`
+
+**Logger** to narzędzie do rejestrowania (logowania) informacji o działaniu aplikacji.
+Zamiast używać zwykłego `console.log()`, możemy korzystać z dedykowanego loggera, który:
+- organizuje logi w aplikacji
+- pozwala filtrować logi według kategorii
+ - nie obciąża aplikacji, jeśli debugowanie jest wyłączone
+`const debugLog = debug("express-ts-mongodb:server"); // Tworzy instancję loggera`
+
+`express-ts-mongodb:server ` to *namespace* (przestrzeń nazw) loggera.
+Dzięki temu możemy włączyć logowanie tylko dla konkretnej części aplikacji.
+
+```ts
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+import  app from '../src/app';
+import debug from 'debug';
+import http from 'http';
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+const debugLog = debug("express-ts-mongodb:server"); // Tworzy instancję loggera
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val: string): number | string | false {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error: NodeJS.ErrnoException) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr?.port;
+  debug('Listening on ' + bind);
+}
+
+```
+
+# Konfiguracja `package.json`
+```json
+"scripts": {
+  "start": "node dist/bin/www.js",
+  "dev": "ts-node bin/www.ts",
+  "build": "tsc"
+},
+```
+wszystko działa oprócz `npm run build`
+```
+error TS6059: File '/home/js/WebstormProjects/express-ts-mongodb/bin/www.ts' is not under 'rootDir' '/home/js/WebstormProjects/express-ts-mongodb/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+```
+TypeScript zakłada, że wszystkie źródła muszą być w `rootDir`, a `bin/www.ts` leży poza nim (`src`), stąd błąd.
+Przeniesiemy folder bin do src/bin
+teraz package.json
+```json
+"scripts": {
+  "start": "node dist/bin/www.js",
+  "dev": "ts-node src/bin/www.ts",
+  "build": "tsc"
+},
+```
+
+
+
+
+
+
+
+
+
+
+

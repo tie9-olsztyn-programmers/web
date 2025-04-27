@@ -4,28 +4,29 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(
-          135deg,
-          #61DAFB 10%,    /* React */
-          #3C873A 20%,     /* Node.js */
-          #4DB33D 30%,    /* MongoDB */
-          #303030 40%,    /* Express */
-
-          #F7DF1E 80%,    /* JavaScript */
-          #3178C6 100%    /* TypeScript */
-  );
-  color: #61dafb; /* kolor Reacta dla tekstu */
+    padding: 4rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+            135deg,
+            #1e1e1e 10%, /* głębszy ExpressJS */
+            #0066cc 35%, /* mocniejszy TypeScript */
+            #28a745 65%, /* żywszy MongoDB */
+            #00d8ff 90% /* neonowy React */
+    );
+    /*   color: #F7DF1E; !* <-- JavaScript yellow for text *!
+       text-shadow: 1px 1px 4px #00000088;}*/
 }
 
 .heroBanner h1 {
-  color: #61dafb; /* tytuł – React blue */
+    color: #F7DF1E; /* JavaScript yellow */
+    text-shadow: 1px 1px 4px #00000088;
 }
+
 .heroBanner p {
-  color: #9feaf9; /* podtytuł – jaśniejszy niebieski */
+    color: #ffffff; /* biały podtytuł dla kontrastu */
+    text-shadow: 1px 1px 4px #00000088;
 }
 
 @media screen and (max-width: 996px) {
@@ -36,7 +37,7 @@
 .buttons button,
 .buttons a {
   background-color:#ece008 ; /* kolor Node.js */
-  color:#12aaaa  !important;
+  color: #0066cc !important;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: bold;
@@ -46,7 +47,7 @@
 
 .buttons button:hover,
 .buttons a:hover {
-  background-color:#4DB33D;
+  background-color: #0066cc;
   color: #ece008 !important;
 }
 
