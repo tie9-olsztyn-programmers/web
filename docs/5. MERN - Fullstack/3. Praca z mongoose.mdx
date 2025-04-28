@@ -1,0 +1,91 @@
+---
+title: Praca z mongoose - apka Task
+---
+Poznamy pracę z biblioteką `mongoose` na przykładzie aplikacji `Task`, w której zadanie mam tytuł i krótki opis.
+
+
+:::tip Interfejs (Interface)
+- to definicja typów w *TypeScript*, która mówi,
+    - jakie pola powinny znajdować się w obiekcie,
+    - jaki typ danych będzie przechowywany w tych polach,
+- nie tworzy rzeczywistych danych w bazie, tylko służy do sprawdzania poprawności typów.
+
+:::
+
+:::tip Schemat (mongoose.Schema)
+- to szablon dokumentów w kolekcji (określa strukturę danych w MongoDB i mówi, jakie pola powinny znaleźć się dokumencie
+- wskazuje, jakie pola będą przechowywane i jakie mają typy.
+- w przeciwieństwie do interfejsu, `Schema` wpływa na bazę danych – decyduje, jakie dane będą zapisywane.
+- używamy, gdy chcemy określić, jakie dane są przechowywane w bazie
+
+:::
+
+:::tip Model
+- to interfejs do bazy danych
+- to on pozwala na zapisywanie, pobieranie i aktualizowanie dokumentów.
+- łączy schemat i interfejs, umożliwiając operacje na MongoDB
+- używamy, gdy chcemy wykonywać *CRUD* na bazie danych
+
+:::
+
+## Metafora pieczenie ciastek
+Pojęcie | W metaforze ciastek | W Mongoose/TypeScript
+--- | --- | --- |
+Interface (TS) | Szablon-wyciskarka (foremka) na ciastko – określa kształt, rozmiar i to, co musi się znaleźć w środku (np. dziurki, wzorki). | Definiuje w kodzie TypeScript kształt obiektu: jakie pola (np. name: string, age: number) i typy mają mieć dane w aplikacji.
+Schema (Mongoose) | Przepis – lista składników (mąka, cukier, jajka), ich ilości i reguły (np. ciasto nie może mieć więcej niż 30% cukru). | Mongoose Schema wymusza w bazie: jakie pola, jakie typy, jakie walidacje (wymagane, unikalne, domyślne wartości) mają mieć dokumenty MongoDB.
+Model (Mongoose) | Piekarz i jego linia produkcyjna – bierze foremki i przepis, produkuje naprawdę pachnące ciastka, przechowuje je w pudełkach i wydaje klientowi. | Mongoose Model to klasa, którą używasz w kodzie do tworzenia, czytania, modyfikowania i usuwania dokumentów w kolekcji. „Wie”, jak walidować według Schemy i zwracać obiekty zgodne z Interface.
+
+
+# Nowy plik `/models/Task.ts`
+```typescript
+import mongoose, { Document } from "mongoose";
+
+export interface Task extends Document {
+    title: string;
+    description: string;
+    completed: boolean;
+}
+
+const TaskSchema = new mongoose.Schema({
+title: {type: String, required: true},
+description: {type: String, required: true},
+completed: {type: Boolean, default: false},
+})
+
+export default mongoose.model<Task>('Task', TaskSchema);
+```
+# Wyjaśnienie do pliku `Task.ts`
+`Document` typ z *Mongoose*, który reprezentuje dokument MongoDB w TypeScript
+
+`Task extends Document` -
+- `Task` rozszerza(dziedziczy po) `Document`, więc TypeScript wie, że jest to dokument MongoDB.
+- teraz TypeScript podpowiada nam, że właściwości obiektu muszą być określonego typu (np. title musi być string)
+- używamy, gdy chcemy mieć podpowiedzi i bezpieczeństwo typów w kodzie
+- dzięki temu dziedziczeniu `Task`
+    - ma właściwość `_id`
+    - ma dostęp do metod Mongoose:
+        - **instancyjnych** (wywoływanych na obiekcie np. task.save()
+            - `save()` - zapis dokumentu do bazy
+            - `deleteOne()` - usuwa dokument z bazy
+            - `updateOne()` - aktualizuje jeden dokument
+            - `toObject()` - konwersja do zwykłego obiektu
+            - `toJSON()` - konwersja do JSON
+            - ...
+
+      - **statyczne** (wywoływane na modelu, działają na całej kolekcji)
+            - `find()`
+            - `findById(id)`
+            - `findOne({})`
+            - `findByIdAndUpdate(id, {})`
+            - `findByIdAndDelete(id)`
+            - ...
+
+`TaskSchema` - schemat MongoDB, który mówi bazie danych, jakie pola mają mieć dokumenty
+
+`export default mongoose.model<Task>('Task', TaskSchema);` - exportujemy model `Task`, który bazuje na `TaskSchema`:
+- `'Task'`  - nazwa kolekcji w MongoDB (w bazie pojawi się jako kolekcja `tasks`, bo Mongo dodaje "s" na końcu
+- `<Task>`  - model używa interfejsu, co pozwala na lepsze autouzupełniania i typowanie w edytorze
+
+c.d.n. -> Routes
+
+

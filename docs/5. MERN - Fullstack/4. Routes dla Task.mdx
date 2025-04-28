@@ -1,0 +1,180 @@
+---
+title: Routes dla Tasks
+---
+Zdefiniujemy ścieżki, pod którymi będziemy odpytywać bazę danych - zgodnie z zasadami RestAPI:
+- `get` pod `/`
+- `post` pod `/`
+
+## `routes/taskRoutes.ts`
+
+```typescript
+
+
+import express, {Request, Response} from "express";
+import TaskModel , {Task} from "../models/Task";
+
+const router = express.Router();
+
+router.get("/", async (req: Request, res: Response) => {
+    try{
+        const tasks: Array<Task> = await TaskModel.find();
+        res.json(tasks);
+    } catch(err){
+        res.status(500).json({error: `Nie udało się pobrać zadań ${err}`});
+    }
+})
+
+router.post("/", async(req: Request, res: Response) => {
+    try{
+        const {title, description} = req.body;
+        const newTask: Task | null = new TaskModel({title, description});
+        await newTask.save();
+        res.status(201).json({message: `Dodano nowe zadanie: ${newTask}`});
+
+    }catch(err){
+        res.status(500).json({error: "Nie udało się dodać zadania ", err});
+    }
+})
+
+export default router;
+
+```
+## Podłączamy routes do definicji Express
+## `app.ts`
+```typescript
+//...
+
+import taskRoutes from "./routes/taskRoutes";
+//...
+
+
+
+//....
+app.use(express.static(path.join(__dirname, "../public")));
+app.use("/tasks", taskRoutes)
+
+
+//...
+```
+## Testujemy `/tests/tasks-requests.http`
+Webstorm ma wbudowanego klienta do testowania endpointów RestApi.
+Zamiast tego wbudowanego narzędzia można używać aplikacji *Postman*.
+```http request
+
+
+### GET request to example server
+GET http://localhost:5000
+Content-Type: application/json
+###
+
+
+### GET request to example server
+GET http://localhost:5000/tasks
+
+###
+### POST request to example server
+POST http://localhost:5000/tasks
+Content-Type: application/json
+
+{
+  "title": "12344nowe zadanie",
+  "description": "zrób to , a tamtego nie"
+}
+###
+POST http://localhost:5000/tasks
+Content-Type: application/json
+
+{
+  "title": "nauczyć się expressa",
+  "description": "od dzisiaj siadam i uczę się expressa - każdego dnia"
+}
+###
+###  POST with Error
+POST http://localhost:5000/tasks
+Content-Type: application/json
+
+{
+  "title": "nauczyć się expressa"
+}
+###
+
+
+```
+
+---
+
+# Dodajemy metodę `put`
+
+### Dodajemy do `taskRoutes.ts`
+```typescript
+router.put("/:id", async (req:Request, res: Response) => {
+    try{
+        const {id} = req.params;
+        console.log(id);
+        const updatedTask: Task|null = await TaskModel.findByIdAndUpdate(id, req.body, {new:true})
+        if(!updatedTask){
+            res.status(404).json({error: "Nie znaleziono zadania"})
+            return;
+        }
+        res.json({message: `zaktualizowano zadanie`, task: updatedTask});
+    }catch(err){
+        res.status(500).json({ error: 'Nie udało się zaktualizować zadania' });
+    }
+})
+
+```
+### Testujemy
+```http request
+
+
+### PUT "67d735db2b79664d210c9214" - to id dopasuje do własnej bazy danych
+PUT http://localhost:5000/tasks/67d735db2b79664d210c9214
+Content-Type: application/json
+
+{
+  "title": "UPDATE tytuł"
+}
+
+###
+
+
+
+```
+
+---
+
+# Dodajemy metodę `delete`
+### Dodajemy do `taskRoutes.ts`
+```typescript
+router.delete("/:id", async(req: Request, res: Response) => {
+    try{
+        const {id} = req.params;
+        const deletedTask = await TaskModel.findByIdAndDelete(id);
+        if(!deletedTask){
+            res.status(404).json({error: "Nie znaleziono zadania"})
+            return
+        }
+        res.json({message: `Usunięto zadanie: ${deletedTask}`});
+    }catch(err){
+        const error = err instanceof Error ? err : new Error("Nieznany błąd")
+        res.status(500).json({error:`Nie usdało się usunąć zanadania ${error.message}`});
+    }
+})
+```
+### Testujemy
+```http request
+### Delete 67d735db2b79664d210c9214
+DELETE http://localhost:5000/tasks/67d735db2b79664d210c9214
+Content-Type: application/json
+
+###
+```
+
+
+
+
+
+
+
+
+

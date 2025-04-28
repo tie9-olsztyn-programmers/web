@@ -1,0 +1,75 @@
+---
+title: Połączenie MongoDB-ExpressTS
+---
+
+# Jak podłączyć MongoDB do Express?
+
+Aby podłączyć *MongoDB* z *Express*, użyjemy biblioteki `mongoose`.
+:::tip Mongoose
+Mongoose to ODM (*Object-Document Mapping*), czyli sposób na łatwiejsze zarządzanie danymi w MongoDB.
+
+:::
+
+## Instalacja biblioteki `mongoose` i jej typów
+`npm install mongoose`
+`npm install @types/mongoose --save-dev`
+
+## Konfiguracja połączenia `src/database.ts`
+Utwórz plik w `src/database.ts`
+
+```typescript
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config(); // wczytujemy dane z .env
+
+const MONGODB_URI = process.env.MONGO_URI as string; // pobieramy adres do bazy i rzutujemy go na string
+console.log(MONGODB_URI);
+
+const connectDB = async (): Promise<void> =>{
+    try{
+        await mongoose.connect(MONGODB_URI);
+        console.log("Połączono z MongoDB")
+    }catch(err: unknown){
+        if(err instanceof Error) {
+            console.error("Błąd połączenia z MongoDB ", err)
+
+        }else{
+            console.error("nieznany błąd ", err)
+        }
+        process.exit(1);
+    }
+}
+
+export default connectDB ;
+
+```
+
+## Zmiany w pliku `app.ts`
+na początku tego pliku dodajemy
+```typescript
+import connectDB from "./database";
+
+//connect jest funkcją asynchroniczną
+// więc uruchomimy ją z obsługą obietnicy, którą zwraca
+(async () =>{
+  try{
+    await connectDB()
+    console.log("Connected to DB...")
+  }catch(e: unknown){
+    if(e instanceof Error) {
+      console.error(`błąd połączenie z MongoDB ${e}`)
+
+    }else{
+      console.log(`nie znany błąd połączenia `, e)
+    }
+    process.exit(1)
+  }
+})()
+
+
+// Załaduj zmienne środowiskowe z .env
+...
+
+
+```

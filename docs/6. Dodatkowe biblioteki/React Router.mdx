@@ -1,0 +1,149 @@
+---
+title: React Router
+---
+
+# React Router
+
+https://reactrouter.com/
+React Router: https://www.youtube.com
+
+:::tip React Router
+- to biblioteka do zarządzania nawigacją w aplikacjach React.
+- pozwala na tworzenie aplikacji typu *Single Page Application* (*SPA*), gdzie zmiana widoku nie powoduje przeładowania strony.
+- dzięki *React Router* użytkownicy mogą nawigować między stronami w React za pomocą komponentów takich jak:
+    - `BrowserRouter` – obsługuje routing w przeglądarce.
+    - `Routes` – kontener dla wszystkich tras.
+    - `Route` – definiuje poszczególne ścieżki.
+    - `Link` – zastępuje `<a href="...">`, zapewniając płynne przejścia.
+    - `useNavigate` – programowe przekierowania.
+
+:::
+
+# Przykład
+- utwórz projekt w Webstorm (*Vite*+*React*+*TypeScript*)
+- doinstaluj `npm install react-router-dom`
+
+# Cała aplikacja sterowana `React Router`
+zmieniamy plik `main.tsx`
+```typescript
+//...
+import {BrowserRouter} from "react-router-dom";
+
+
+createRoot(document.getElementById('root')!).render(
+ <StrictMode>
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>
+
+ </StrictMode>,
+)
+
+
+```
+`<BrowserRouter>`
+- dostarcza kontekst routingu do całej aplikacji. Dzięki temu:
+    - komponenty takie jak `<Route>`, `<Link>`, `useNavigate()`, `useLocation()`, `useParams()` itp. działają poprawnie,
+    - *React Router* wie, jaka jest aktualna ścieżka w przeglądarce i co powinien wyświetlić.
+    - metaforycznie - gdyby aplikacja była wielkim biurowcem z wieloma pokojami (stronami):
+        - `BrowserRouter` to jak zarządca budynku z systemem GPS:
+            - zna każdy pokój (URL),
+            - wie jak tam dotrzeć
+            - i co ma się wyświetlić.
+        - gdy użytkownik wpisze `/about`, `BrowserRouter` mówi: „Aha, to pokój z napisem 'O nas', pokażmy komponent About”.
+
+---
+
+# Tworzymy strony/komponenty
+- utwórz folder `/src/pages`
+    - `pages/` – komponenty-strony To główne widoki Twojej aplikacji.
+    - Każda strona (czyli trasa w routerze, np. `/`, `/about`, `/contact`) ma swój komponent w `pages/`.
+    - Są one powiązane z URL-em przez React Router.
+    - Zwykle składają się z innych komponentów (np. navbar, formularze, listy itd.).
+    - Przykład: `Home.tsx`, `Login.tsx`, `ProductDetails.tsx`
+- wewnątrz tego folderu zrób trzy komponenty
+    - `About.jsx`
+    - `Contact.jsx`
+    - `Home.jsx`
+
+`About.jsx`
+```typescript jsx
+const About: React.FC = () => {
+
+    return (
+       <div>
+           <h2>About</h2>
+           <p>Lorem ipsum lorem ipsum</p>
+           <p>Ipsum Lorem</p>
+       </div>
+    )
+}
+
+export default About
+```
+
+`Contact.jsx`
+```typescript jsx
+const Contact: React.FC = () => {
+    return (
+        <div>
+            <h3>COntact</h3>
+            <p>ul. Pokątna 333</p>
+            <p> Stary Olsztyn </p>
+            <p>11-111</p>
+        </div>
+    )
+}
+
+export default Contact
+```
+
+
+`Home.jsx`
+```typescript jsx
+const Home: React.FC = () => {
+
+    return (
+        <h2> Strona Główna </h2>
+    )
+}
+
+export default Home
+```
+
+# Tworzymy komponenty wielokrotnego użytku
+- utwórz folder `/res/components` - będą w nim komponenty wielokrotnego użytku
+    - To mniejsze fragmenty UI, które mogą być używane w wielu miejscach.
+    - Nie są związane z konkretną trasą.
+    - Pomagają tworzyć złożone strony z powtarzalnych „klocków”.
+    - Przykład: `Navbar.tsx`, `Button.tsx`, `Card.tsx`, `Loader.tsx`
+- wewnątrz tego folderu zrób plik `NavBar.tsx`
+```typescript jsx
+const NavBar: React.FC = () =>{
+
+    return(
+    <nav>
+        <ul>
+            <li> <Link to="/">Home</Link></li>
+            <li> <Link to="/about">About</Link></li>
+            <li> <Link to="/contact">Contact</Link></li>
+        </ul>
+    </nav>
+
+    )
+}
+
+export default NavBar;
+
+
+```
+
+
+
+
+
+
+
+
+
+

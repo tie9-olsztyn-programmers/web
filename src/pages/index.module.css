@@ -9,11 +9,11 @@
     position: relative;
     overflow: hidden;
     background: linear-gradient(
-            135deg,
-            #1e1e1e 10%, /* głębszy ExpressJS */
-            #0066cc 35%, /* mocniejszy TypeScript */
-            #28a745 65%, /* żywszy MongoDB */
-            #00d8ff 90% /* neonowy React */
+            140deg,
+            #1e1e1e 5%, /*  ExpressJS */
+            #0066cc 25%, /* TypeScript */
+            #28a745 75%, /* MongoDB */
+            #00d8ff 85% /* React */
     );
     /*   color: #F7DF1E; !* <-- JavaScript yellow for text *!
        text-shadow: 1px 1px 4px #00000088;}*/
