@@ -1,0 +1,139 @@
+---
+title: Typy danych
+---
+
+
+# Typy danych na przykładach
+- **tworzymy** plik `dataType.ts`
+- **komplikujemy** plik `tsc dataType.ts`
+- **uruchomienie** `node dataType.js`
+
+## Pilnowanie typu
+- określenie typu zmiennej `let nazwaZmiennej : <typDanych> = daneOdpowiedniegoTypu`
+- `:` dwukropek wprowadze typ danych
+  - przed znakiem `:` piszemy nazwę zmiennej
+  - po znaku `:` piszemy typ danych
+
+### Typ znakowy i typ liczbowy
+```typescript jsx
+let username: string = "Alice" ; // teraz zmienna username musi być stringiem
+let age: number = 25 ; // teraz age musi być liczbą
+
+// Błąd w czasie kompilacji:
+//username = 123; // Typ 'number' nie może być przypisany do typu 'string'
+```
+
+### Typ unii
+- `|` ten znak pozwala łączyć różne typy danych w typ unii
+- `string | number`  - zmienna będzie mogła przyjmować stringi lub liczby
+```typescript jsx
+let id: string | number;
+id = "123"; // OK
+id = 123; // OK
+//id = true; // Typ 'boolean' nie jest dozwolony
+```
+
+### Typ lista `T[]` lub `Array<T>`
+- jeżeli zmienna ma przechowywać listę elementów, to możemy używać dwóch równorzędnych zapisów
+  - `T[]` (np. lista liczb `number[]`) lub
+  - `Array<T>` (np. lista liczb `Array<number>`)
+```typescript jsx
+let numbers: number[] = [1, 2, 3];
+let num1: Array<number> = [1,2,3]
+
+let strings: Array<string> = ["Alice", "Bob"];
+let strings1: string[] = ["ala", "bob"]
+
+console.log(num1)
+console.log(strings1)
+```
+
+
+### Typ obiekt
+```typescript jsx
+let user: { name: string; age: number } = { name: "Alice", age: 25 };
+console.log(user)
+```
+
+### Interface
+- interfejsy pozwalają na definiowanie "kształtu" obiektów
+- interfejsy określają nowe typy danych
+- Interfejs w TypeScript to jak wykrawacz do ciastek – określa kształt (nazwy właściwości i metod),
+a ty możesz użyć dowolnego „ciasta” (implementacji), by zawsze uzyskać ciasteczka w tym samym wzorze.
+```typescript jsx
+interface User {
+    name: string;
+    age: number;
+}
+
+let gameUser: User = { name: "Alice", age: 25 };
+console.log(gameUser)
+```
+
+### Typowanie funkcji
+- w TypeScript typowanie funkcji polega na opisaniu typów jej parametrów oraz typu zwracanego.
+- dzięki temu kompilator może sprawdzić,
+    - czy wywołujesz funkcję z odpowiednimi argumentami i
+    - czy korzystasz z jej wyniku prawidłowo
+
+#### Funkcja klasyczna
+```typescript jsx
+function add(a: number, b: number): number {
+    return a + b;
+}
+console.log(add(2,3))
+```
+wyjaśnienie:
+- `a: number, b: number` – oba parametry muszą być liczbami.
+- po dwukropku po nawiasie zamykającym `): number` — typ zwracany to number.
+
+#### Funkcja anonimowa
+`const mnożenie = (a: number, b: number): number => a * b;`
+- `(a: number, b: number): number` sygnatura funkcji
+- `a*b` implementacja funkcji
+
+#### Funkcja z parametrem opcjonalnym `?`
+```typescript jsx
+function sayHello(name: string, title?: string): string {
+
+  return !title ? `Hello, ${name}!` : `Hello, ${title} ${name}!`;
+}
+
+sayHello("Anna");            // Witaj, Anna!
+sayHello("Anna", "Pani");    // Witaj, Pani Anna!
+```
+
+#### Funkcja z parametrem domyślnym `=`
+```typescript jsx
+const power = (base: number, exp: number = 2): number => base ** exp;
+
+console.log(power(3)) ; // 9 (exp = 2)
+console.log(power(2,3) ; // 8 (exp = 3
+```
+#### Funkcje generyczne `<T>`
+- funkcja generyczna to taka, która zamiast konkretnego typu operuje na typie parametrycznym `<T>`
+- dzięki temu może przyjmować i zwracać wartości różnych typów, zachowując pełną typizację
+- funkcja generyczna jest jak wielosystemowy pilot — steruje różnymi urządzeniami (typami) tym samym przyciskiem
+
+```typescript jsx
+function identity<T>(value: T): T {
+  return value;
+}
+
+const a = identity<number>(777);               // a: number
+const b = identity<string>("To taki tekst");   // b: string
+const c = identity(true);                      // TS wywnioskuje <T> = boolean
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

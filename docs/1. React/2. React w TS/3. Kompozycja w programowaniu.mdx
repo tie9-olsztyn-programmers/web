@@ -1,0 +1,222 @@
+---
+title: Kompozycja w React
+---
+
+----
+Utwórz projekt:
+- Vite
+- React
+- TypeScript
+
+w Webstorm
+
+---
+
+# Co to jest kompozycja w programowaniu?
+Kompozycja w programowaniu to **podejście do budowania większych struktur poprzez łączenie mniejszych, niezależnych jednostek**.
+Jest to alternatywa dla dziedziczenia w programowaniu obiektowym.
+
+## Kluczowe zasady kompozycji:
+- **reużywalność** – mniejsze moduły można łatwo ponownie wykorzystać
+- **modularność** – kod jest podzielony na mniejsze, łatwiejsze do zarządzania części
+- **łatwiejsze testowanie** – mniejsze komponenty są łatwiejsze do testowania
+
+## Kompozycja vs Dziedziczenie
+- w kodzie z dziedziczeniem mamy sztywne powiązanie między klasami.
+- w kompozycji mamy swobodę w łączeniu funkcji i obiektów.
+
+## Przykład
+### Dziedziczenie
+```javascript
+class Vehicle {
+    drive() {
+    console.log("Pojazd jedzie...");
+ }
+}
+
+
+class Car extends Vehicle {
+    honk() {
+        console.log("Samochód trąbi: Beep beep!");
+    }
+}
+
+class Bike extends Vehicle {
+    ringBell() {
+        console.log("Rower dzwoni: Drrring!");
+    }
+ }
+
+
+
+
+const car = new Car();
+car.drive(); // "Pojazd jedzie..."
+car.honk(); // "Samochód trąbi: Beep beep!"
+
+const bike = new Bike();
+bike.drive(); // "Pojazd jedzie..."
+bike.ringBell(); // "Rower dzwoni: Drrring!"
+```
+### Kompozycja
+:::tip Małe przypomnienie operator *spread* `...`
+przypomnienie: operator spread (`...`) kopiuje właściwości z jednego obiektu do drugiego.
+
+:::
+
+```javascript
+/ Pojedyncze funkcje (moduły), które można dodać do pojazdu
+
+const canDrive = {
+    drive: () => console.log("Pojazd jedzie...")
+};
+
+const canHonk = {
+    honk: () => console.log("Samochód trąbi: Beep beep!")
+};
+
+const canRingBell = {
+    ringBell: () => console.log("Rower dzwoni: Drrring!")
+};
+
+
+const car = { ...canDrive, ...canHonk };
+const bike = { ...canDrive, ...canRingBell };
+
+car.drive(); // "Pojazd jedzie..."
+car.honk(); // "Samochód trąbi: Beep beep!"
+
+bike.drive(); // "Pojazd jedzie..."
+bike.ringBell(); // "Rower dzwoni: Drrring!"
+```
+**Działa to tak**:
+
+1️. Tworzy nowy obiekt `{}`.
+
+2️. Kopiuje do niego wszystkie właściwości z `canDrive`.
+
+3️. Kopiuje wszystkie właściwości z `canHonk`.
+
+4️. Jeśli klucze się powtarzają, to nadpisuje wcześniejsze wartości.
+
+
+---
+
+# Kompozycja komponentów w React
+Kompozycja w React polega na budowaniu:
+- złożonych interfejsów
+- poprzez łączenie mniejszych, niezależnych komponentów.
+
+Zamiast używać dziedziczenia (jak w OOP), React zaleca używanie kompozycji.
+
+## Kompozycja za pomocą `props.children`
+Pozwala komponentowi być kontenerem dla innych komponentów.
+
+:::note `React.ReactNode`:
+- typ uniwersalny,
+- obejmuje wszystkie przypadki użycia komponentówdzieci w React, dzięki czemu unikasz niespodziewanych błędów w aplikacji,
+- to typ dedykowany do reprezentowania wszystkiego, co może być renderowane przez React.
+- to domyślny typ dla `children`
+
+
+:::
+
+:::note `React.FC` (*Functional Component*)
+- to typ generyczny dla komponentów funkcyjnych w React,
+- określa, że komponent to funkcja zwracająca JSX.
+- automatycznie dodaje `children` do `props`
+
+:::
+
+:::tip `FC` vs `ReactNode`
+- `React.FC` jest dla komponentów.
+- `ReactNode` jest dla wartości renderowanych w JSX (np. children).
+
+
+:::
+
+### Przykład 1 `Card.ts`
+#### Utwórz plik `Card.tsx`
+```javascript
+import React from "react";
+
+interface CardProps{
+    children: React.ReactNode // Dowolny JSX lub wartość dopuszczalna w JSX
+}
+
+const Card: React.FC<CardProps> = ({ children }) => {
+    return (
+        <div style={{border:"1px solid gray", padding: "10px", borderRadius:"10px"}}>
+            {children}
+        </div>
+    )
+}
+
+export default Card
+```
+- `Card` to komponent, który otacza dowolne dzieci (`children`) i dodaje stylizację.
+- `Card` może być używany w różnych miejscach do opakowania innych elementów.
+
+
+#### Użycie `Card` w `App.tsx`
+```jsx
+ <Card>
+    <h1>TO jest H1 z nowej Card</h1>
+    <h2>To jest h2</h2>
+    <h3>Ten h3 jest też opakowana w Card</h3>
+    <h5>to jest h5</h5>
+    <p>A to paragraf</p>
+ </Card>
+
+ <Card>
+    <h3>To jest nowy Card h3</h3>
+    <Card>
+        <h5>To Card wewnątrz Card</h5>
+        <p>Lorem ipsum</p>
+        <p>Lorem ipsum</p>
+    </Card>
+    <h3>To jest h3</h3>
+    <p> A to jakiś paragraf w drugim Card</p>
+    <p>A to paragraf też</p>
+    <p>No i jeszcze jeden paragraf</p>
+ </Card>
+```
+
+### Przykład 2. `Modal.tsx` - detykowane właściwości `props`
+Gdy chcemy, aby komponent miał dedykowane miejsce na różne części:
+#### Nowy plik `Modal.tsx`
+```javascript
+import React from "react";
+
+interface ModalProps {
+    header: React.ReactNode;
+    body: React.ReactNode;
+    footer: React.ReactNode;
+}
+
+const Modal: React.FC<ModalProps> = ({header, body, footer}) => {
+    return (
+        <div style={{border: "2px solid black", padding: "20px", width: "300px"}}>
+            <div>{header}</div>
+            <div>{body}</div>
+            <div>{footer}</div>
+        </div>
+    )
+}
+
+export default Modal;
+```
+#### Użycie `Modal` w `App.tsx`
+```jsx
+ <Modal
+    header={<h2>To jest ważny tytuł</h2>}
+    body={<p> to jest jakaś zawartość </p>}
+    footer={<button>Zamknij to</button>}
+ />
+```
+
+
+
+
+
+

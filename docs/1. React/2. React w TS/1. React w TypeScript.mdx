@@ -1,0 +1,81 @@
+---
+title: Komunikacja Rodzic->Dziecko
+---
+
+---
+# Komponent rodzic vs komponent dziecko
+- **komponent rodzica**: wyższy w hierarchii, który zarządza danymi i przekazuje je dalej przez propsy do komponentów potomnych.
+- **komponent dziecka**: zagnieżdżony wewnątrz rodzica, odbiera dane przez propsy i może reportować zdarzenia z powrotem do rodzica.
+
+
+---
+
+# Pierwszy komponent
+- komponent w React to funkcja zwracająca JSX
+- tworzymy projekt *Webstrom* > *Vite* > *React* > plus **TypeScript**
+
+## `App.tsx`
+```typescript jsx
+
+import './App.css'
+import Hello from "./Hello.tsx";
+
+function App() {
+
+  return (
+    <>
+     <Hello name={"Harry Potter"} />
+    </>
+  )
+}
+
+export default App
+```
+
+## `Hello.tsx`
+```typescript jsx
+interface HelloProps{
+    name: string;
+}
+
+const Hello = (props: HelloProps) =>{
+    return <h1>Hello, {props.name} in TS! </h1>
+}
+
+export default Hello
+```
+- użyto `interface`, aby określić typ propsa
+- komponent `App` przesyła do komponentu `Hello` string zapisany pod nazwą `name`
+
+### Destrukturyzacja propsa - sposób 1
+```typescript jsx
+interface HelloProps{
+    name: string;
+}
+
+const Hello = (props: HelloProps) =>{
+    const { name } = props;
+    return <h1>Hello, {name} in TS! </h1>
+}
+
+export default Hello
+```
+
+### Destrukturyzacja propsa - sposób 2
+```typescript jsx
+interface HelloProps{
+    name: string;
+}
+
+const Hello = ({name}: HelloProps) =>{
+
+    return <h1>Hello, {name} in TS! </h1>
+}
+
+export default Hello
+```
+
+
+
+
+

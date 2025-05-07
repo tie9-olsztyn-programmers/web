@@ -4,3 +4,86 @@ title: Tailwindcss
 
 # Tailwindcss
 https://tailwindcss.com/
+## Definicja
+:::tip Czym jest Tailwind CSS?
+- *Tailwind CSS* to *utility-first framework CSS*,
+- zamiast gotowych komponentów (np. przycisków czy kart) dostarcza setki małych klas – „utility classes” (np. p-4, text-center, bg-blue-500),
+- te małe klasy łączysz w JSX/HTML, by zbudować dowolny interfejs.
+- dzięki temu masz pełną kontrolę nad stylem i eliminujesz nadmiar nieużywanego CSS
+
+    :::note „Utility-first”
+    - to podejście do CSS, w którym zamiast tworzyć duże, semantyczne klasy opisujące komponenty (np. `.btn-primary`, `.card` czy `.alert-warning`),
+    - dostajesz zestaw drobnych, jednofunkcyjnych klas (zwanych *utility classes*), które łączysz bezpośrednio w znaczniki HTML/JSX, aby zbudować właściwy wygląd.
+
+    :::
+
+:::
+
+
+## Instalacja
+`npm install -D tailwindcss@latest @tailwindcss/postcss@latest postcss@latest autoprefixer@latest`
+
+- `-D` to skrót dla `--save-dev`
+- `@tailwindcss/postcss` to plugin, który tłumaczy Tailwind na CSS w procesie PostCSS.
+- `postcss` to kompilator CSS:
+    - pozwala przetwarzać pliki CSS przez zestaw wtyczek (pluginów)
+    - działa jak *pipeline*: bierze "surowy" CSS, przepuszcza przez pluginy, zwraca zmodyfikowany CSS
+    - niezbędny do integracji z Tailwind CSS
+- `autoprefixer` to jedna z wtyczek do PostCSS:
+    - automatycznie dodaje prefiksy (np. `-webkit`, `-moz-`) do właściwości CSS
+
+
+## Inicjalizacja Tailwind CSS
+`npx tailwindcss init -p`
+- `-p` genruje też `postcss.cnfig.js` obok `tailwind.config.js`
+- powstaną dwa pliki:
+    - `tailwind.config.js` - konfiguracja Tailwind CSS
+    - `postcss.cnfig.js` - plik CSS z wbudowanymi klasami Tailwind CSS
+
+jeżeli nie wygenrował, to piszemy ręcznie:
+`postcss.config.js`
+```javascript
+export default {
+    plugins: {
+        '@tailwindcss/postcss': {},
+        autoprefixer: {},
+    },
+}
+```
+
+`tailwind.config.js`
+```javascript
+export default {
+    content: [
+        "./index.html",
+        "./src/**/*.{js,ts,jsx,tsx}",
+    ],
+    theme: {
+        extend: {},
+    },
+    plugins: [],
+}
+
+```
+
+do pliku `src/index.css` dodajemy:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
