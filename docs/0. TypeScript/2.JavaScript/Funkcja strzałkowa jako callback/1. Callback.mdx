@@ -1,0 +1,50 @@
+---
+title: Callback
+---
+
+# Callback – wyjaśnienie metaforyczne
+:::info Callback
+- to jak zostawienie komuś instrukcji: "Jak skończysz swoje zadanie, zrób dla mnie jeszcze TO."
+- Ty nie musisz czekać – ktoś inny poinformuje Cię lub wykona to, co chciałeś, kiedy będzie gotowy.
+
+:::
+
+
+
+## 1. Telefon do znajomego
+- Wyobraź sobie, że dzwonisz do znajomego i prosisz:
+- "Jak dotrzesz na miejsce, zadzwoń do mnie."
+- Nie wiesz, kiedy znajomy dotrze, ale dałeś mu swój numer – i gdy on już dojdzie, zadzwoni do Ciebie, czyli wykona Twój “callback”.
+
+## 2. Zamawiasz pizzę
+- Zamawiasz pizzę przez telefon.
+- Podajesz swój numer i prosisz:
+- "Jak pizza będzie gotowa, zadzwoń do mnie."
+- Nie siedzisz w pizzerii i nie czekasz – możesz robić coś innego, a kiedy będzie gotowa, ktoś zadzwoni (callback).
+
+# 3. Programistycznie (kodowo):
+- W programowaniu callback to funkcja, którą przekazujesz innemu kodowi do wykonania w odpowiednim momencie.
+```javascript
+function powiedzCzesc(imie, callback) {
+  console.log("Cześć, " + imie + "!");
+  callback();
+}
+
+let myCallback = () => console.log("Miło cię widzieć") ;
+
+powiedzCzesc("Ola", myCallback);
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

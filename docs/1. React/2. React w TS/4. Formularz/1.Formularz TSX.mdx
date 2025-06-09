@@ -1,0 +1,118 @@
+---
+title: Formularz TSX
+---
+
+# Nowy projekt w React
+- generator *Vite*
+- *templates* *React*
+- plus *TypeScript*
+
+
+# `App.tsx` jako formularz
+
+## Dodajemy komponent `form`
+Zmieniamy zawartość pliku `App.tsx` na:
+
+```typescript jsx
+import './App.css'
+import type {FormEvent} from "react";
+
+function App() {
+
+    function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+        console.log(event);
+    }
+
+
+  return (
+    <>
+         <form onSubmit={handleSubmit}>
+
+             <button type="submit" >Submit</button>
+         </form>
+    </>
+  )
+}
+
+export default App
+
+```
+:::note znacznik `<form>`
+- to wbudowany komponent do tworzenia formularza
+- ma wbudowaną właściwość `onSubmit`, która jako swoją wartość przyjmuje nazwę funkcji, która ma być wywołana, gdy formularz zostanie zatwierdzony (w naszym przypadku jest to funkcja `handleSubmit`)
+
+
+:::
+
+:::note znacznik `<button>`
+- wbudowany komponent do tworzenia przycisku
+- określiliśmy jego typ jako "submit", czyli naciśnięcie go wywoła funkcję `handleSubmit`
+
+:::
+
+:::note funkcja `handleSubmit`
+- jest wywoływana, gdy użytkownik naciśnie klawisz określony jako `submit`
+- React wyśle do tej funkcji specjalny obiekt, który nazwaliśmy sobie `event`, ale jego typ to właśnie `React.FormEvent<HTMLFormElement>`
+- `event.preventDefault()` - używamy tego specjalnego obiektu, aby zatrzymać domyślne zachowanie formularza, którym jest zresetowanie wszystkich zmiennych i ponowne wczytanie strony
+
+:::
+
+## Dodajemy komponent `input`
+```typescript jsx
+import './App.css'
+import type {ChangeEvent, FormEvent} from "react";
+
+function App() {
+
+    function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+        console.log(event);
+    }
+
+    function handleTextInputChange(e: ChangeEvent<HTMLInputElement>){
+       console.log(e)
+       console.log(e.target)
+       console.log(e.target.value) //tu będzie przechowywana wartość wprowadzona do pola input
+    }
+
+  return (
+    <>
+         <form onSubmit={handleSubmit}>
+            <input
+                type={"text"}
+                value = "to jest init value"
+                onChange={handleTextInputChange}
+                placeholder={"Wprowadź jakiś tekst"}
+            />
+
+             <button type="submit" >Submit</button>
+         </form>
+    </>
+  )
+}
+
+export default App
+```
+:::note znacznik `<input>`
+- `type` - zdefiniowano typ jako tekstowy
+- `value` - przypisano początkową wartość "to jest init wartość"
+- `onChange` - atrybut, który nasłuchuje dowolnych zmian w komponencie input,
+    - jeżeli zmiana wystąpi (np. wpisano literkę "a"), to uruchamiana jest funkcja `handleTextInputChange`
+        - funkcja ta dostaje od React specjalny obiekt obsługujący zdarzenie zmiany
+        - ten obiekt nazwaliśmy `e`
+        - typ obiektu to `React.ChangeEvent<HTMLInputElement>`
+:::
+W konsoli pokazujemy:
+- obiekt `e`,
+- wartość jego atrybutu `e.target` oraz
+- wartość tego atrybutu `e.target.value`
+
+---
+Do formularza dodamy hook `useState` -> następna strona
+
+
+
+
+
+

@@ -1,0 +1,222 @@
+---
+title: ECMAScript
+---
+:::info ECMAScript
+- ECMAScript to specyfikacja (czyli szczegółowy opis standardu) języka programowania, na którym opiera się JavaScript.
+- To właśnie ECMAScript określa, jakie funkcje, składnia i zachowania powinien mieć język, żeby działał poprawnie we wszystkich środowiskach (np. przeglądarkach, Node.js).
+
+:::
+
+**JavaScript to implementacja standardu ECMAScript**.
+
+## Kto tworzy ECMAScript?
+- Specyfikację ECMAScript rozwija organizacja ECMA International (grupa roboczaTC38).
+- Co roku wydają nową wersję specyfikacji.
+
+## Dlaczego nie mówi się po prostu "JavaScript"?
+- JavaScript to nazwa handlowa wymyślona przez Netscape.
+- ECMAScript to oficjalny standard, który może być implementowany także w innych językach, np.
+    - JScript (Microsoft),
+    - ActionScript (Adobe Flash).
+
+## Wersje ECMAScript
+### ECMAScript 4 (ES5, 2009)
+- `Array.forEach`, `map`, `filter`, `reduce`
+- `Object.create`
+```javascript
+// Object.create Tworzy nowy obiekt, ustawiając wskazany obiekt jako prototyp.
+
+const person = {
+  sayHello() {
+    console.log("Hello, I'm " + this.name);
+  }
+};
+
+// Tworzymy nowy obiekt na bazie prototypu 'person'
+const student = Object.create(person);
+student.name = "Anna";
+student.sayHello(); // Hello, I'm Anna
+
+// Sprawdźmy, czy 'person' jest prototypem student
+console.log(Object.getPrototypeOf(student) === person); // true
+```
+
+- `JSON.parse` i `JSON.stringify`
+- `"use strict"`
+
+
+### ECMAScript 5 (ES6, 2015)
+Największa rewolucja w historii JS.
+- nowe deklaracje zmiennych: `let`, `const`
+- Arrow functions:
+```javascript
+const sum = (a, b) => a + b;
+```
+- Klasy:
+```javascript
+class User {
+    constructor(name) {
+        this.name = name;
+    }
+}
+```
+- Template strings:
+```javascript
+`Cześć, ${name}!`
+```
+- Destrukturyzacja:
+```javascript
+const {id, name} = user;
+```
+- Parametry domyślne w funkcjach
+- `Spread`/`rest`:
+```javascript
+const arr = [...otherArr];
+function fn(...args) {}
+```
+- Import/export (moduły ES5):
+```javascript
+import x from './file.js'
+export default y;
+```
+- Promisy (Promise)
+- `Map` -  to nowoczesna struktura, która przechowuje pary klucz-wartość, gdzie kluczami mogą być dowolne typy (nie tylko stringi); to taki słownik.
+```javascript
+const map = new Map(); // tworzymy nowy obiekt typu Map
+
+map.set('name', 'Piotr');
+map.set(122, 'Numer');
+map.set({ x: 0 }, 'Obiekt');
+
+console.log(map.get('name')); // Piotr
+console.log(map.size); // 2
+
+// Iterowanie po Map
+for (const [key, value] of map) {
+  console.log(key, value);
+}
+````
+
+- `Set` - Set przechowuje unikalne wartości dowolnego typu.
+```javascript
+const set = new Set();
+
+set.add(1);
+set.add(2);
+set.add(2); // Duplikat, nie zostanie dodany
+set.add('Ala');
+
+console.log(set.has(2)); // true
+console.log(set.size); // 3
+
+// Iterowanie po Set
+for (const value of set) {
+  console.log(value);
+}
+
+```
+
+
+...
+
+### ECMAScript 7 (ES2017)
+`Async`/`await`
+```javascript
+async function test() {
+    await fetchData();
+}
+
+```
+- `Object.entries` , `Object.values` (z 2005 `Object.keys`)
+    - to metody, które bardzo ułatwiają pracę z obiektami w JavaScript,
+    - pozwalają one wygodnie pobrać wartości lub pary klucz-wartość z obiektu i często są wykorzystywane przy iteracjach.
+```javascript
+const user = {
+  name: 'Kuba',
+  age: 23,
+  isActive: true
+};
+
+// pobieranie samych wartości
+const values = Object.values(user);
+console.log(values); // ['Kuba', 23, true]
+
+
+// pobieranie właściwość, wartość i zamykanie ich w [ ]
+const entries = Object.entries(user);
+console.log(entries);
+// [ ['name', 'Kuba'], ['age', 23], ['isActive', true] ]
+
+// Iterowanie po entries:
+for (const [key, value] of Object.entries(user)) {
+  console.log(`${key}: ${value}`);
+}
+// Wyjście:
+// name: Kuba
+// age: 23
+// isActive: true
+
+// DODANO już w 2005 - pobieranie samych właściwości
+const keys = Object.keys(user);
+console.log(keys); // ['name', 'age', 'isActive']
+```
+- inne
+
+
+### ECMAScript 9 (ES2018)
+Rest/spread dla obiektów:
+```javascript
+const obj2 = {...obj1};
+```
+
+### ECMAScript 10 (ES2019)
+Array.prototype.flat, flatMap
+
+- `Object.fromEntries`
+    - Tworzy nowy obiekt na podstawie tablicy par `[klucz, wartość]`.
+    - Najczęściej używa się jej, kiedy masz tablicę dwuelementowych tablic (par), np. po przekształceniach na `Object.entries()` lub `Map`.
+```javascript
+const entries = [
+  ['name', 'Ania'],
+  ['age', 22],
+  ['isActive', true]
+];
+
+const user = Object.fromEntries(entries);
+
+console.log(user);
+// { name: 'Ania', age: 22, isActive: true }
+
+```
+
+np. przekształcenie z `Map` na obiekt
+```javascript
+const map = new Map([
+  ['a', 1],
+  ['b', 2]
+]);
+
+console.log(map) ; // Map(2) {a: 1, b: 2}
+const obj = Object.fromEntries(map);
+
+console.log(obj); // { a: 1, b: 2 }
+```
+- String.prototype.trimStart, trimEnd
+```javascript
+const tekst = "   Hello, World!   ";
+
+console.log(tekst.trimStart()); // "Hello, World!   "
+console.log(tekst.trimEnd());   // "   Hello, World!"
+console.log(tekst.trim());      // "Hello, World!"   (usuwa z obu stron)
+```
+- i inne
+
+
+
+### I kolejne lata przynoszą kolejne funkcjonalności
+
+
+
+
+
+
