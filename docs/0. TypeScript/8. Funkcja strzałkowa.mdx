@@ -1,0 +1,122 @@
+---
+title: Funkcja strzałkowa
+---
+
+
+
+## Metafora funkcji w ogóle
+- funkcja w programowaniu jest jak robot kuchenny, który ma wczytany przepis kulinarny, czyli "wie" co musi zrobić po kolei
+- parametry funkcji/robota to miejsca na składniki opisane w przepisie, np. „Ile mąki?”, „Ile jajek?”
+    – są to puste pojemniki na składniki w instrukcji.
+- argumenty to konkretne składniki wrzucane do tych pojemników, gdy naprawdę używasz robota.
+- Obrazowo:
+    - Parametry są jak napisy na słoikach: „TUTAJ WRZUĆ MĄKĘ”, „TUTAJ WŁÓŻ JAJKA”.
+    - Argumenty to faktyczna mąka i jajka wrzucone do słoików przy gotowaniu.
+- Jak to działa?
+    - Gdy chcesz upiec ciasto, bierzesz robota (funkcję),
+    - wrzucasz składniki (argumenty),
+    - naciskasz „start” (wywołujesz funkcję),
+    - po chwili wyjmujesz gotowe ciasto (wynik).
+    - Ten sam robot (ta sama funkcja) może upiec różne ciasta, jeśli dostarczysz inne składniki!
+
+
+
+# Funkcja strzałkowa
+
+- Funkcja strzałkowa (ang. *arrow function*) to specjalny, skrócony zapis funkcji w JavaScript i TypeScript, który wykorzystuje tzw. "strzałkę" (`=>`).
+- Funkcje strzałkowe są bardziej zwięzłe niż klasyczne deklaracje funkcji i często używa się ich do krótkich operacji, np. w *callbackach*, mapowaniu tablic, itp.
+
+
+## Przykład ogólny
+```ts
+/ Zwykła funkcja
+function suma(a: number, b: number): number {
+  return a + b;
+}
+
+// Funkcja strzałkowa
+const suma = (a: number, b: number): number => a + b;
+```
+
+# Funkcja strzałkowa z jednym parametrem
+```ts
+// Funkcja z jednym parametrem
+const square = (x: number): number => x * x; // to co postrzałce jest zwracane
+
+// ta sama funkcja ale z `{ }`,
+// jeżeli chcesz, aby funkcja coś zwracała (np. liczbę)
+// musisz dodać `return`
+const square2 = (x: number): number => {
+    // jakiś dodatkowy kod
+    return x * x;
+}
+
+console.log(square(4)); // 16
+
+```
+# Funkcja strzałkowa z więcej niż jednym parametrem
+```ts
+const add = (a: number, b: number): number => a + b;
+
+// ta sama funkcja ale z `{ }`,
+// jeżeli chcesz, aby funkcja coś zwracała (np. liczbę)
+// musisz dodać `return`
+const add2 = (a: number, b: number): number => {
+    // jakiś dodatkowy kod
+    return a + b;
+}
+
+console.log(add(3, 4)); // 7
+
+```
+
+
+# Funkcja zwracająca obiekt
+
+### Typ zwracany zdefiniowany wewnątrz funkcji
+```ts
+const createPerson = (name: string, age: number): {name: string, age: number} => (
+    { name: name,  age: age,}
+);
+
+console.log(createPerson("Bolek", 8)); // { name: "Bolek", age: 8 }
+
+```
+`(name: string, age: number): {name: string, age: number}` :
+- wewnątrz nawiasów `( )` są zdefiniowane parametry funkcji
+- nawias `{ }` występujący po znaku `:` jest typem zwracanym przez funkcję
+- ` => ({ name: name,  age: age,})` po strzałce jest zwracany obiekt, więc zmknęliśmy go w zwykłe nawiasy, bo inaczej kompilator uznałby, że otworzyliśmy ciało funkcji strzałkowej
+    - ten sam kod, ale z ciałem funkcji strzałkowej musiałby zawierać słowo return
+    - ` => { return { name: name,  age: age,} } `
+
+
+### Typ zwracany zdefiniowany przy użyciu słowa kluczowego `type`
+```ts
+// Typ dla zwracanego obiektu
+type Person = { name: string; age: number };
+
+const createPerson = (name: string, age: number): Person => ({
+  name: name,
+  age: age,
+});
+
+console.log(createPerson("Bolek", 8)); // { name: "Bolek", age: 8 }
+```
+
+
+# Funkcja zwracająca tablice/listę liczb `number[]`
+```ts
+// zwróć uwagę, że nazwa funkcji/metody
+// powinna wyrażać czynność
+const makeArray = (a: number, b: number): number[] => [a, b];
+
+console.log(makeArray(1, 2)); // [1, 2]
+```
+- lista stringów `string[]`
+- lista booleanów `boolean[]`
+- ...
+
+
+
+
+

@@ -1,0 +1,52 @@
+---
+title: Co to jest TypeScript?
+---
+# Opis
+- TypeScript to język programowania opracowany przez firmę Microsoft, który rozszerza JavaScript o statyczne typowanie i inne zaawansowane funkcje.
+- TypeScript jest **nadzbiorem JavaScript**, co oznacza, że każdy poprawny kod JavaScript jest też poprawnym kodem TypeScript,
+- https://www.typescriptlang.org/
+
+
+# Najważniejsze cechy TypeScript:
+- Typowanie – możesz określać typy zmiennych, funkcji, obiektów itp., co pozwala na wcześniejsze wykrywanie błędów (już podczas pisania kodu).
+- Rozszerzenie JavaScript – wszystkie nowoczesne funkcje JavaScript są dostępne, a dodatkowo TypeScript oferuje rzeczy jak interfejsy, typy złożone, klasy, enumeracje.
+- Kompilacja do JavaScript – kod TypeScript kompiluje się (transpiluje) do czystego JavaScript, który można uruchamiać w przeglądarce lub w Node.js.
+- Wsparcie dla nowoczesnych narzędzi – lepsze podpowiedzi w edytorach, refaktoryzacja, autouzupełnianie, dokumentacja, sprawdzanie typów.
+
+# Przykład
+
+JavaScript:
+```js
+function add(a, b) {
+    return a + b;
+}
+```
+
+TypeScript:
+```ts
+function add(a: number, b: number): number {
+    return a + b;
+}
+```
+# Pierwszy program w TS *Hello World*
+- utwórz plik `hello.ts` (rozszerzenie jest `.ts`, a nie `.js` ) i zapis w nim `console.log("Hello World") ;`
+- przeglądarka "nie rozumie" TS,
+- Node "nie rozumie" TS,
+- trzeba zainstalować typescripta na komputerze:
+```bash
+$ npm i -g typescript
+$ tsc --version
+Version 5.8.3
+```
+`tsc` - to kompilator, czyli program, który odczytuje plik `.ts` i zamienia go w `.js`
+
+- kompilujemy plik `hello.ts`, czyli w konsoli wydajemy instrukcję `tsc hello.ts`
+- powstanie nowy plik `hello.js`, a on może być uruchomiony przez NodeJS, czyli `node hello.js`
+```bash
+$ tsc hello.ts
+$ node hello.js
+Hello World
+```
+
+
+

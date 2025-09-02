@@ -1,0 +1,122 @@
+---
+title: Zmienne i stałe
+---
+
+# Variable Declarations
+W TypeScript (tak jak w nowoczesnym JavaScript) masz do dyspozycji trzy główne sposoby deklarowania zmiennych i stałych:
+- `let` – zmienna, którą można zmieniać,
+- `const` – stała, której nie można zmienić po przypisaniu,
+- `var` – stara metoda, której raczej się nie używa w nowym kodzie (ze względu na pułapki zasięgu).
+
+# Keyword `let`
+```ts
+let message: string = "Hello";
+message = "Hi!"; // OK – można zmieniać wartość
+// message = 43 ; // nie można zmienić typu danych
+
+console.log(message) ;
+```
+`let message:string` - po znaku `:` piszemy typ danych przechowywanych przez zmienną
+
+
+
+# Keyword `const`
+```ts
+const pi: number = 3.14159;
+// pi = 3; // Błąd!
+//  Nie można zmienić wartości stałej
+
+// pi = "liczba pi" ; // Błąd!
+// nie można zmieniać typu danych
+```
+`const pi: number` - deklarujemy, że `pi` będzie stałą, która przechowuje numerycznych typ danych
+
+
+# Other examples
+```ts
+let age: number = 25;
+const userName: string = "Jan";
+let isActive: boolean = true; // typ boolowski: true, false
+
+let fruits: string[] = ["apple", "banana"]; // typ to lista, której elementami mogą być WYŁĄCZNIE stringi
+const point: { x: number, y: number } = { x: 5, y: 10 }; // typem jest obiekt o właściwości `x` oraz właściwości `y`
+
+```
+
+---
+
+# Constant (`const`) holding an object
+- pusty obiekt w TS `{ }`
+- obiekt z właściwością `name` to `{name:"Tom"}`
+- `const boy = {name: "Tom" }` zmienna boy przechowuje referencję do obiektu
+
+:::info Referencja jako adres do mieszkania
+Wyobraź sobie, że masz kartkę z adresem mieszkania:
+- Kartka = zmienna
+- Mieszkanie = obiekt (np. osoba, lista itd.)
+- Adres na kartce = referencja (czyli „wskazówka”, gdzie w pamięci znajduje się to mieszkanie/obiekt)
+
+
+Jak to działa?
+- Jeśli masz adres mieszkania, możesz iść tam i zmieniać, co jest w środku (przestawić meble, pomalować ściany) — zmieniasz właściwości obiektu.
+- Ale adres na kartce się nie zmienia, dopóki nie dostaniesz nowej kartki z innym adresem (czyli nie przypiszesz nowego obiektu).
+
+
+Z `const`
+Jeśli kartka z adresem jest „stała” (const):
+- nie możesz jej wyrzucić i napisać na niej innego adresu, ale
+- możesz chodzić pod ten adres i zmieniać, co jest w mieszkaniu.
+
+
+Z `let`
+Jeśli kartka jest „zmienna” (let),
+- możesz zarówno zmieniać, co jest w mieszkaniu, jak i
+- zamienić kartkę na nową z innym adresem (czyli przypisać inny obiekt).
+
+:::
+
+```ts
+const boy: { name: string; age: number } = { name: "Bolek", age: 8 };
+
+// Możesz zmieniać właściwości obiektu:
+boy.age = 9;        // OK!
+boy.name = "Bolek Junior"; // OK!
+
+// Ale nie możesz przypisać innego obiektu:
+// boy = { name: "Lolek", age: 7 }; // Błąd!
+```
+
+
+
+
+# Constant (`const`) holding a list
+```ts
+const boys: string[] = ["Bolek", "Lolek"];
+
+// Możesz zmieniać zawartość tablicy:
+boys.push("Tola");   // OK!
+boys[0] = "Bolek Junior"; // OK!
+
+// Ale nie możesz przypisać nowej tablicy:
+boys = ["Ania", "Olek"]; // Błąd!
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
