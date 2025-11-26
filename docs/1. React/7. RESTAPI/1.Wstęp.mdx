@@ -1,0 +1,115 @@
+---
+title: REST API
+---
+
+# API (Application Programming Interface):
+Interfejs programistyczny aplikacji
+- **Zestaw reguł i narzędzi**, które pozwalają różnym programom ze sobą rozmawiać. (np. aplikacja pogodowa pobiera dane z serwera pogodowego dzięki API).
+- **Most** między programami - API działa jak tłumacz (jeden program mówi w swoim języku, drugi w innym, a API sprawia, że się rozumieją).
+- **Umowa** (kontrakt) między klientem a serwerem - API określa co można zapytać i co się dostanie w odpowiedzi.
+(np. jeśli wyślesz zapytanie o miasto → dostaniesz prognozę pogody).
+- *8Biblioteka funkcji** - W programowaniu API to też zbiór funkcji/metod, które ktoś udostępnia, by ułatwić pisanie własnych programów.
+
+
+
+# REST API Representational State Transfer API
+- to **sposób komunikacji** między systemami komputerowymi (np. frontend i backend) za pomocą protokołu HTTP
+- REST API pozwala aplikacjom wymieniać dane w czytelny i standaryzowany sposób.
+
+
+Kluczowe cechy REST API
+- Bazuje na protokole HTTP (używa metod takich jak GET, POST, PUT, DELETE).
+- Wykorzystuje JSON lub XML (najczęściej JSON) do przesyłania danych.
+- Stateless (bezstanowe) – Serwer nie przechowuje informacji o stanie klienta między żądaniami.
+- Używa unikalnych URL-i (endpointów) do określania zasobów (/users, /products, /orders).
+
+
+:::note Rest Api w restauracji
+Wyobraź sobie restaurację:
+- **Menu** to dokumentacja API. Pokazuje:
+    - dostępne dania (funkcje),
+    - niezbędne składniki (parametry)
+    - danie będące rezultatem zamówienia (odpowiedź).
+- **Kelner**  to API. Przekazuje:
+    - twoje zamówienie (żądanie) do kuchni (serwera)
+    - przynosi ci jedzenie (odpowiedź).
+- **Kuchnia** to serwer, gdzie faktycznie przygotowuje się dane.
+
+
+Test API to tak naprawdę sprawdzenie, czy cała ta komunikacja działa poprawnie.
+
+
+----
+**Przykład**
+- Zamawiasz „spaghetti” (wysyłasz żądanie GET /dania/spaghetti).
+- Kelner przynosi ci pizzę zamiast spaghetti → błąd w API.
+- Zamawiasz „cola” (POST /napoje), a kelner mówi „nie znam takiego napoju” → brak zasobu.
+- Prosisz o „sok pomarańczowy” z dodatkiem lodu, a dostajesz gorący sok → źle obsłużone parametry.
+
+
+Testowanie API polega na sprawdzeniu:
+- Czy odpowiedzi są poprawne (np. zwracają właściwe dane)?
+- Czy statusy HTTP są odpowiednie (200 – OK, 404 – brak, 500 – błąd serwera)?
+- Czy API działa szybko i niezawodnie?
+
+
+:::
+
+
+# API vs REST API
+
+
+## API
+- Ogólnie: *Application Programming Interface* – interfejs, czyli zasady komunikacji między programami.
+- Może być dowolny rodzaj:
+    - biblioteka w języku programowania (np. API Pythona do obsługi plików),
+    - interfejs systemowy (np. Windows API),
+    - API internetowe (np. SOAP, GraphQL, REST).
+    - To pojęcie bardzo szerokie.
+
+
+## REST API
+- To konkretny typ API, który działa na podstawie zasady REST (Representational State Transfer).
+- Najczęściej używany do komunikacji przez HTTP.
+- Ma jasne zasady:
+- używa adresów URL do zasobów (np. /users/5 → użytkownik o ID 5),
+- używa metod HTTP do obsługi *CRUD* (Create, Read, Update, Delete),
+    - GET (pobierz),
+    - POST (dodaj),
+    - PUT/PATCH (zaktualizuj),
+    - DELETE (usuń),
+- zwraca dane najczęściej w JSON (czytelny dla ludzi i maszyn).
+
+
+- API → to szerokie pojęcie – jak słowo „pojazd”.
+- REST API → to konkretny typ pojazdu – np. samochód osobowy.
+
+Czyli każde REST API jest API, ale nie każde API jest REST API.
+
+
+
+# Przykładowe darmowe API
+
+- Ricky and Morty: https://rickandmortyapi.com/
+- kraje: https://restcountries.com/
+- pogoda: https://openweathermap.org/
+- nasa: https://api.nasa.gov/
+- psy: https://thedogapi.com/
+- koty: https://thecatapi.com/
+- Pokemony: https://pokeapi.co/
+- liczby: http://numbersapi.com/
+- kursy walut: https://exchangerate.host/
+
+
+
+
+
+
+
+
+
+
+
+
+
+

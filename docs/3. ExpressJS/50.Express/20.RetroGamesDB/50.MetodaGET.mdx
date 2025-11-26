@@ -1,0 +1,215 @@
+---
+title: Metoda GET
+---
+
+# Metoda GET
+
+## Czym jest metoda GET w ExpressJS?
+- Metoda GET to sposób pobierania danych z serwera.
+- Gdy przeglądarka (lub klient HTTP) wysyła żądanie GET, mówi do serwera:
+    - „Hej, pokaż mi te dane, ale niczego nie zmieniaj po swojej stronie.
+
+:::tip Metafora
+Wyobraź sobie, że ExpressJS to restauracja:🍽️
+- Klient przychodzi i pyta o menu:
+    - nie chce niczego zamawiać, tylko zobaczyć, co jest dostępne.
+    - to jest `GET`
+- Gdy klient składa zamówienie:
+    - czyli przesyła dane, np. imię, adres, zamówienie
+    - to jest `POST`.
+- Gdy usuwa rezerwację - to jest  `DELETE`.
+- Gdy aktualizuje zamówienie - to jest `PUT` lub `PATCH`.
+
+
+:::
+
+## Endpoint `/games` z metodą `GET`
+### Pobieramy wszystkie gry
+Dopiszmy do naszego expressa endpoint `/games`:
+```ts
+//...
+app.get("/", (req:Request, res:Response) => {
+    res.send("RetroGames APU. Use/games to see the games");
+})
+
+app.get("/games", (req: Request, res: Response) => {
+    res.json(games);
+});
+
+app.listen...
+```
+
+Sformułujmy i wyślijmy zapytanie:
+```http request
+### zapytanie o gry
+GET {{baseUrl}}/games
+Accept: application/json
+
+```
+
+### Pobieranie danych np. o jednej grze
+### `route parameter` - parametr trasy
+:::info *route parameter*
+Parametr trasy to
+- nazwany segment URL,
+- pozwala na dynamiczne przechwytywanie wartości z adresu żądania.
+- jest definiowany za pomocą dwukropka `:` przed nazwą parametru w ścieżce trasy,
+- przechwycona wartość trafia do obiektu `req.params` w funkcji obsługi żądania.
+
+:::
+
+
+```ts
+app.get("/games/:id", (req: Request, res: Response) => {
+    const game = games.find(g => g.id === Number(req.params.id));
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    res.json(game);
+});
+```
+i zapytanie:
+```http request
+### pytamy o grę z indeksem 3
+GET {{baseUrl}}/games/3
+Accept: application/json
+```
+
+
+:::danger Ważne
+Express wartość zapisuje w `req.params`
+- dzięki temu możesz dynamicznie reagować na różne adresy,
+- np. `/games/1` (`id=1`), `/games/2` (`id=2`), itd.
+
+:::
+
+-----
+***Dodatkowe przykłady dla `route parameter`***
+```ts
+app.get("/house/:name",(req: Request, res: Response) => {
+    console.log(`req.params.name: ${req.params.name}`)
+    res.send(req.params)
+})
+
+app.get("/house/:name/room/:number",(req: Request, res: Response) => {
+   const {name, number} = req.params;
+   console.log(`req.params: ${name}, ${number}`)
+   res.send(req.params)
+})
+```
+
+```http request
+### test route param
+GET {{baseUrl}}/house/mojDomek
+Accept: application/json
+
+### test route param
+GET {{baseUrl}}/house/mojDomek/room/33
+Accept: application/json
+```
+
+------
+
+
+### Filtrowanie
+### `query parameter` - parametr zapytania
+
+:::info Co to są parametry zapytania (`query parameters`)
+- To dodatkowe informacje przekazywane w adresie URL po znaku `?`,
+- Służą np. do
+    - filtrowania,
+    - wyszukiwania,
+    - sortowania
+    - ...
+
+:::
+
+#### Przykład
+`GET /games?year=1984&platform=Atari`
+
+```
+? – zaczyna część parametrów zapytania
+year=1984 – pierwszy parametr (klucz = wartość)
+& – łączy kolejne parametry
+platform=Atari – drugi parametr
+```
+
+#### Jak odczytać?
+:::danger Ważne
+Express automatycznie umieszcza parametry zapytania w obiekcie
+👉 `req.query`
+
+:::
+
+#### Wybierzemy gry na Atarii wydane przed rokiem 1984
+:::tip Typ danych w `req.query.platform`
+- `string`
+- `string[]`
+- `undefined`
+
+Możemy zagwarantować, że nasz `platform` to `string` przez
+`typeof platform === 'string'`
+
+:::
+
+Do istniejącej  `app.get('/games' ...` dodajemy:
+```ts
+app.get("/games", (req: Request, res: Response) => {
+    const { year, platform } = req.query;
+
+    // zwraca wszystkie gry, jeżeli nie podano year lub platform
+    if(!year || !platform) return res.json(games)
+
+   const filteredGames = games.filter(g => {
+        if (year && g.year > Number(year))  return false
+
+        if(platform){
+            if (typeof platform === "string"){
+                const queryPlatform = platform.toLowerCase();
+                const gamePlatform = g.platform.toLowerCase();
+                if(!gamePlatform.includes(queryPlatform)) return false;
+            }
+        }
+        return true
+    });
+
+    res.json(filteredGames)
+})
+```
+
+```http request
+### filtrujemy gry po roku i platformie
+GET {{baseUrl}}/games/?year=1984&platform=Atari
+Accept: application/json
+
+```
+
+---------
+### Różnica między rodzajami danych w Express
+
+| Typ danych       | Gdzie występuje           | Przykład URL / dane           | Jak pobrać w Express |
+|------------------|---------------------------|-------------------------------|----------------------|
+| **Route param**  | W ścieżce adresu (URL)    | `/games/5`                    | `req.params.id`      |
+| **Query param**  | Po znaku `?` w adresie    | `/games?year=1984&platform=Atari` | `req.query.year`     |
+| **Body param**   | W treści żądania (np. POST) | `{ "title": "Pong" }`         | `req.body.title`     |
+
+
+
+:::tip
+**Opis:**
+- *Route param* — używany do pobierania konkretnego zasobu (np. gry o danym `id`).
+- *Query param* — służy do filtrowania lub wyszukiwania danych.
+- *Body param* — wykorzystywany przy przesyłaniu danych do serwera (np. przy `POST` lub `PUT`).
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+

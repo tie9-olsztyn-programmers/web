@@ -1,0 +1,96 @@
+---
+title: Metoda `DELETE`
+---
+
+
+# Metoda `DELETE`
+## Podstawowe pojęcia
+:::note Co to jest metoda `DELETE`?
+Metoda `DELETE` służy do usuwania istniejącego zasobu na serwerze.
+
+Żądanie zawiera `ID` zasobu w URL (np. `/games/123`).
+Serwer znajduje i usuwa element, a potem potwierdza sukces (kod `200`/`204`).
+
+:::tip Metafora:
+Serwer to biblioteka z książkami.
+- `GET`     = „Pokaż książkę”.
+- `POST`    = „Dodaj nową książkę”.
+- `PUT`     = „Zaktualizuj opis książki”.
+- `DELETE`  = „Spal tę książkę” – znika na zawsze!
+
+:::
+
+:::tip Co robi `isNaN()`
+- `isNaN()` (skrót od is *Not a Number*),
+- sprawdza, czy przekazana wartość nie jest liczbą (`NaN` — `Not-a-Number`),
+- zwraca wartość logiczną (true / false).
+
+Przykłady:
+```ts
+isNaN(10);        // false  → to jest liczba
+isNaN("10");      // false  → tekst "10" da się zamienić na liczbę
+isNaN("abc");     // true   → nie da się zamienić na liczbę
+isNaN(undefined); // true   → nie jest liczbą
+isNaN(NaN);       // true   → oczywiście ;)
+
+```
+
+:::
+
+## Definicja trasy z `DELETE`
+```ts
+app.delete("/games/:id", (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+
+        // Walidacja ID
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ message: "Invalid ID value — please provide a positive integer." });
+        }
+
+        const index = games.findIndex(g => g.id === id);
+        if (index === -1) {
+            return res.status(404).json({ message: "Game not found" });
+        }
+
+        // Usuń grę
+        const deletedGame = games.splice(index, 1)[0];
+
+
+        res.json({
+            message: "Game deleted successfully!",
+            deleted: deletedGame
+        });
+    } catch (error) {
+        console.error("Error deleting the game: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+```
+
+## Zapytania klienta
+```http request
+
+# sprawdzamy przed skasowaniem
+### get na grze id=4
+GET {{baseUrl}}/games/4
+Accept: application/json
+
+
+
+# { id: 4, title: "River Raid", year: 1982, platform: "Atari 800XL", genre: "Shooter"},
+### Delete - kasowanie gry o id = 4
+DELETE {{baseUrl}}/games/4
+Accept: application/json
+
+
+# sprawdzamy czy skasowano
+### get na grze id=4
+GET {{baseUrl}}/games/4
+Accept: application/json
+
+
+
+
+```

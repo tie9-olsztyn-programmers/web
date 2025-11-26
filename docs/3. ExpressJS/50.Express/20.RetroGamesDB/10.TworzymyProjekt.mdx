@@ -1,0 +1,103 @@
+---
+title: Tworzymy projekt
+---
+
+# Tworzymy projekt RetroGamesDB
+## Instalacja podstawowych paczek
+```
+mkdir express_intro   // utworzy folder
+cd express_intro      // przechodzimy do folderu
+npm init -y           // tworzy package.json
+npm install express   // instalacja expressa
+npm i -D typescript ts-node nodemon @types/node @types/express // instalacja typescripta i potrzebnych paczek
+npx tsc --init        // tworzy plik tsconfig.json
+```
+Podmieniamy `tscondig.json` na
+```json
+{
+  "compilerOptions":
+    {
+      "target": "es2016",
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "outDir": "dist",
+      "rootDir": "src"
+       },
+  "include": ["src"]
+}
+```
+
+## Struktura projektu
+### Tworzymy foldery
+Najważniejszy `src`, a wewnątrz niego:
+- `routes`
+- `models`
+- `data`
+
+
+Podczas budowania aplikacji **Express + TypeScript** porządkujemy kod w osobnych folderach,
+aby projekt był czytelny i łatwy w rozbudowie.
+
+| **Folder** | **Zawartość** | **Opis** |
+|-------------|----------------|-----------|
+| **`src/`** | główny plik aplikacji (`app.ts`), konfiguracja serwera, middleware | To punkt startowy aplikacji. Tutaj tworzymy serwer Express i łączymy wszystkie moduły. |
+| **`routes/`** | pliki z definicjami ścieżek API (np. `games.ts`) | Każdy plik opisuje zestaw endpointów — czyli adresów URL obsługiwanych przez nasz serwer. |
+| **`models/`** | definicje typów i interfejsów (np. `Game`, `User`) | Opisują strukturę danych, z którymi pracuje aplikacja. W przyszłości mogą zawierać też modele baz danych. |
+| **`data/`** | przykładowe dane w pamięci (np. `gamesData.ts`) | Tymczasowe źródło danych do testów przed połączeniem z prawdziwą bazą danych (np. MongoDB). |
+
+---
+
+**Dzięki temu:**
+- kod jest uporządkowany tematycznie,
+- łatwo dodać nowe moduły,
+- każdy plik ma jasno określoną odpowiedzialność (tzw. *separation of concerns*).
+
+:::tip *Separation of Concerns*
+- Każda część programu powinna być odpowiedzialna tylko za jedno konkretne zadanie.
+- Przykłady:
+    - `routes/` – odpowiadają tylko za ścieżki HTTP (interfejs API),
+    - `controllers/` – odpowiadają za logikę przetwarzania danych,
+    - `models/` – definiują strukturę danych,
+    - `services/` – komunikują się z bazą danych lub innymi źródłami danych.
+:::
+
+### Tworzymy pliki
+- `scr/app.ts`
+- `src/routes/games.ts`
+- `src/models/game.ts`
+- `src/data/gamesData.ts`
+
+### Konfigurujemy skrypty w `package.json`
+```json
+"scripts": {
+  "start": "node dist/app.js",  //uruchamianie skompilowanej aplikacji
+  "build": "tsc",               // kompilacja typescripta
+  "dev": "nodemon src/app.ts",  // uruchamianie aplikacji w trybie dev
+  "clean": "rm -rf dist"        // usuwanie folderu dist
+}
+```
+
+## Budujemy pierwszy Express + TypeScript
+Do pliku `src/app.ts` dodajemy:
+```ts
+import express from 'express';
+
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("RetroGames APU. Use/games to see the games");
+})
+
+app.listen(3000, () => console.log("" +
+    "Server is running on port 3000"));
+
+```
+
+Otwórz przeglądarlą i wpisz `localhost:3000`.
+Powinieneś zobaczyć napis `"RetroGames APU. Use/games to see the games"`
+
+
+

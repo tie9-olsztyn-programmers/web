@@ -1,0 +1,139 @@
+---
+title: Co to jest TypeScript?
+---
+# Opis
+- TypeScript to język programowania opracowany przez firmę Microsoft, który rozszerza JavaScript o statyczne typowanie i inne zaawansowane funkcje.
+- TypeScript jest **nadzbiorem JavaScript**, co oznacza, że każdy poprawny kod JavaScript jest też poprawnym kodem TypeScript,
+- https://www.typescriptlang.org/
+
+
+# Najważniejsze cechy TypeScript:
+- Typowanie – możesz określać typy zmiennych, funkcji, obiektów itp., co pozwala na wcześniejsze wykrywanie błędów (już podczas pisania kodu).
+- Rozszerzenie JavaScript – wszystkie nowoczesne funkcje JavaScript są dostępne, a dodatkowo TypeScript oferuje rzeczy jak interfejsy, typy złożone, klasy, enumeracje.
+- Kompilacja do JavaScript – kod TypeScript kompiluje się (transpiluje) do czystego JavaScript, który można uruchamiać w przeglądarce lub w Node.js.
+- Wsparcie dla nowoczesnych narzędzi – lepsze podpowiedzi w edytorach, refaktoryzacja, autouzupełnianie, dokumentacja, sprawdzanie typów.
+
+# Przykład
+
+JavaScript:
+```js
+function add(a, b) {
+    return a + b;
+}
+```
+
+TypeScript:
+```ts
+function add(a: number, b: number): number {
+    return a + b;
+}
+```
+# Pierwszy program w TS *Hello World*
+- utwórz plik `hello.ts` (rozszerzenie jest `.ts`, a nie `.js` ) i zapis w nim `console.log("Hello World") ;`
+- przeglądarka "nie rozumie" TS,
+- Node "nie rozumie" TS,
+- trzeba zainstalować typescripta na komputerze:
+```bash
+$ npm i -g typescript
+$ tsc --version
+Version 5.8.3
+```
+`tsc` - to kompilator, czyli program, który odczytuje plik `.ts` i zamienia go w `.js`
+
+- kompilujemy plik `hello.ts`, czyli w konsoli wydajemy instrukcję `tsc hello.ts`
+- powstanie nowy plik `hello.js`, a on może być uruchomiony przez NodeJS, czyli `node hello.js`
+```bash
+$ tsc hello.ts
+$ node hello.js
+Hello World
+```
+# `ts-node`
+- `ts-node` to narzędzie, które pozwala uruchamiać pliki TypeScript bez wcześniejszej kompilacji do JavaScript.
+- Normalnie w TypeScript piszesz kod w plikach `.ts`
+    - Żeby go uruchomić w Node.js, musisz najpierw użyć kompilatora `tsc`, który zamienia `.ts` → `.js`.
+    - Dopiero wtedy możesz odpalić kod w Node.js (`node app.js`).
+- `ts-node` skraca ten proces:
+    - Łączy w sobie kompilator TypeScript (tsc) i Node.js runtime.
+    - Dzięki temu możesz od razu pisać i uruchamiać .ts jak zwykły skrypt.
+- instalacja: `npm install -g ts-node`
+- użycie: `ts-node app.ts`
+
+:::danger Albo `tsc` albo `ts-node`
+- gdy rozwijasz aplikację, używaj `ts-node`
+- gdy przekazujesz aplikację do produkcji, to kompilujesz ją do `.js`, czyli używasz `tsc`
+- mieszanie metody `tsc` z `ts-node` w czasie dewelopmentu może generować niespodziewane skutki, bo na przykład
+już skompilowany `.js` będzie blokował działanie `ts-node`
+
+
+# TypeScript w WebStorm
+- do pracy z typescriptem będziemy używać WebStorm
+- *New Project* -> *TypeScript* (nic więcej nie zaznaczamy)
+
+
+Konfiguracja JavaScript w WebStorm:
+`package.json`
+```json
+{
+  "name": "tstest0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}
+```
+
+
+**wyjaśnienie**
+- `"main": "dist/index.js"`
+    - Określa główny plik wejściowy pakietu (po zbudowaniu).
+    - W Twoim projekcie po kompilacji TypeScript → JS zakładamy, że wyjściowy plik to `dist/index.js`
+- `"scripts": { "build": "tsc" }`
+    - Skrypty, które możesz odpalić przez `npm run ....`
+    - `npm run build` uruchomi kompilator TypeScript (`tsc`).
+    - Możesz tu dodać np. `"start": "ts-node src/index.ts"` albo `"dev": "nodemon src/index.ts"`.
+
+
+Konfiguracja TypeScript w WebStorm:
+`tsconfig.ts`
+```json
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
+```
+
+**wyjaśnienie**
+- `"target": "es2016"` Określa, do jakiej wersji JavaScriptu TypeScript ma kompilować kod.
+(es2016 = ECMAScript 2016 Node i przeglądarki to rozumieją).
+- `"module": "commonjs"` Mówi, w jakim systemie modułów mają być generowane pliki JS.
+(commonjs to klasyczny system modułów używany w Node.js (`require`, `module.exports`)).
+- `"strict": true` włącza pełny zestaw rygorystycznych opcji typów w TypeScript.
+Dzięki temu kompilator sprawdza:
+    - czy wszystkie zmienne mają typ,
+    - czy nie używasz `null`/`undefined` bez sprawdzenia,
+    - czy wszystkie gałęzie w funkcjach coś zwracają.
+- `"outDir": "dist"` Określa folder, do którego TypeScript wrzuci skompilowane pliki `.js`.
+- `"include": ["src"]` Mówi, które katalogi/pliki TS ma kompilować.
+Tutaj tylko `src/`, czyli cała aplikacja powinna być pisana w tym folderze.
+Dzięki temu TS nie kompiluje np. plików testowych czy buildowych spoza src.
+
+
+
+
+
+

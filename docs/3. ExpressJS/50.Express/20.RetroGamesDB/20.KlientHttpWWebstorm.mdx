@@ -1,0 +1,127 @@
+---
+title: Klient http w Webstorm
+----
+
+
+## Wbudowany klient HTTP w WebStorm
+
+**Nazwa:** *HTTP Client*
+**Typ:** wbudowane narzędzie w edytorze **WebStorm** (oraz innych IDE JetBrains, np. IntelliJ IDEA, PyCharm).
+**Pliki:** używa plików z rozszerzeniem `.http` lub `.rest`.
+
+---
+
+## Do czego służy?
+
+HTTP Client służy do **testowania i debugowania API bez opuszczania edytora**.
+Pozwala wysyłać żądania HTTP (np. `GET`, `POST`, `PUT`, `PATCH`, `DELETE`) bezpośrednio z projektu i zobaczyć odpowiedź serwera.
+
+Działa podobnie jak Postman lub Thunder Client — ale jest **zintegrowany z IDE**.
+
+---
+
+## Co potrafi?
+
+| Funkcja | Opis |
+|----------|------|
+| **Wysyłanie zapytań HTTP** | Wysyła dowolne żądania (np. do lokalnego serwera Express). |
+| **Obsługa plików `.http`** | Każdy plik może zawierać wiele zapytań oddzielonych `###`. |
+| **Podgląd odpowiedzi** | Wyświetla status, nagłówki i ciało odpowiedzi (JSON, HTML, tekst). |
+| **Zmienne i środowiska** | Można tworzyć zmienne, np. `@baseUrl = http://localhost:3000`. |
+| **Historia zapytań** | Zachowuje wysłane requesty w `.idea/httpRequests`. |
+| **Testowanie API krok po kroku** | Idealne do nauki i pracy z REST API w Express, Django, Spring itp. |
+
+---
+
+## Przykład użycia
+
+```http
+@baseUrl = http://localhost:3000/api/v1/games
+
+### Pobierz wszystkie gry
+GET {{baseUrl}}
+
+### Pobierz wszystkie gry (pełen zapi)
+GET http://localhost:3000/
+Accept: application/json    //Używamy Accept - "Takie dane klient chce OTRZYMAĆ"
+
+
+### Dodaj nową grę
+POST {{baseUrl}}
+Content-Type: application/json // Używamy Content-type - "Takie dane klient WYSYŁA"
+
+{
+  "title": "Doom",
+  "year": 1993,
+  "platform": "PC",
+  "genre": "Shooter"
+}
+```
+
+
+:::tip 🧾 `Content-Type` vs `Accept`
+
+| **Nagłówek** | **Kiedy używać** | **Co oznacza** | **Przykład** |
+|---------------|------------------|----------------|---------------|
+| `Content-Type` | Gdy **wysyłasz dane** do serwera (np. `POST`, `PUT`, `PATCH`) | Informuje serwer, **w jakim formacie** są dane przesyłane przez klienta. | `Content-Type: application/json` |
+| `Accept` | Gdy **pobierasz dane** z serwera (np. `GET`) | Informuje serwer, **w jakim formacie** klient chce otrzymać odpowiedź. | `Accept: application/json` |
+
+💡 **Zapamiętaj:**
+- `Content-Type` → „Takie dane wysyłam.”
+- `Accept` → „Takie dane chcę otrzymać.”
+:::
+
+## Gdzie i jak utworzyć plik `.http`
+### *Gdzie*
+- Obok folderu `src` zrób folder `requests`.
+- W tym nowym folderze umieścimy pliki `.http`.
+
+### *Jak*
+- na folderze `requests` prawy klawisz *New > File*
+- plik nazwiemy `games-request.http`
+- zapiszmy w nim treść:
+```http request
+@baseUrl = http://localhost:3000/
+
+### pelne zapytanie
+GET http://localhost:3000
+Accept: application/json
+
+### zapytanie skrócone
+GET {{baseUrl}}
+Accept: application/json
+
+###
+```
+
+
+## Syntaktyka pliku `.http`
+Plik `.http` może zawierać jedno lub wiele zapytań.
+Każde zapytanie składa się z 3 części:
+```
+[METHOD] [URL]
+[HEADERS]
+
+[BODY]
+```
+:::tip Składnia plików `.http` (HTTP Client w WebStorm)
+
+| **Element** | **Przykład składni** | **Opis** |
+|--------------|----------------------|-----------|
+| **Metoda + adres URL** | `GET http://localhost:3000/api/v1/games` | Pierwsza linia zapytania – określa rodzaj operacji (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) i adres zasobu. |
+| **Nagłówki (Headers)** | `Content-Type: application/json` <br/> `Accept: application/json` | Opcjonalne linie pod adresem URL – definiują typ danych wysyłanych i oczekiwanych w odpowiedzi. |
+| **Body (treść zapytania)** | ```json<br>{ "title": "Doom", "year": 1993 }``` | Zawartość wysyłana w metodach `POST`, `PUT`, `PATCH`. Od nagłówków oddzielona **pustą linią**. |
+| **Komentarze i nagłówki sekcji** | `# komentarz` <br/> `### Nazwa zapytania` | Ułatwiają organizację i opis poszczególnych requestów. |
+| **Zmienne** | `@baseUrl = http://localhost:3000/api/v1/games` <br/> `GET {{baseUrl}}` | Umożliwiają wielokrotne użycie wartości, np. adresu serwera. |
+| **Separator zapytań** | `###` | Oddziela kolejne zapytania w jednym pliku `.http`. |
+
+**Wskazówki:**
+- Każde zapytanie można uruchomić osobno klikając klawisz "play" (`>`) obok linii z metodą HTTP.
+- Odpowiedź pojawia się w panelu **HTTP Response**.
+- Można mieć wiele zapytań w jednym pliku i uruchamiać je sekwencyjnie.
+:::
+
+
+
+
+

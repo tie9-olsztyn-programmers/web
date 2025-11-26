@@ -1,0 +1,101 @@
+---
+title: Pobieranie danych z konsoli
+----
+
+# Jak pobrać dane z konsoli?
+Do pobieranie danych z konsoli wykorzystamy `process.argv`
+
+
+## `slice()`
+- metodę `slice()` wywołujemy na obiecie lista
+- przyjmuje dwa argumenty:
+    - start
+    - end
+- zwraca nową tablicę z elementami od start do end
+
+```typescript
+
+let tab = [10,20,30,40,60,70,80,90,100]
+console.log(tab.slice(2)) // [ 30, 40,  60, 70, 80, 90, 100 ]
+console.log(tab.slice(2,5)) // [ 30, 40, 60 ]
+console.log(tab)
+```
+
+```bash
+wynik
+[
+  30, 40,  60, 70,
+  80, 90, 100
+]
+[ 30, 40, 60 ]
+[
+  10, 20, 30,  40, 60,
+  70, 80, 90, 100
+]
+```
+
+## Metoda `slice()` z obiektem `process.argv`
+Pominiemy dwa pierwsze elementy.
+```typescript
+const args = process.argv.slice(2);
+console.log(args);
+```
+
+- plik wywołamy `ts-node src/index.ts zrobcos 123`
+- dostaniemy `[ 'zrobcos', '123' ]`
+
+## Konsolowy kalkulator
+
+```typescript
+
+
+const args = process.argv.slice(2);
+const a: number = Number(args[0]);
+const b: number = Number(args[2]);
+const operation: string = args[1];
+
+
+let result: number;
+
+switch (operation) {
+    case '+':
+        result = a + b;
+        break;
+    case '-':
+        result = a - b;
+        break;
+    case '*':
+        result = a * b;
+        break;
+    case '/':
+        result = a / b;
+        break;
+    default:
+        throw new Error('Invalid operation');
+
+}
+
+console.log(`${a} ${operation} ${b} = ${result}`)
+
+```
+
+
+- aby sprawdzić dodawania `ts-node src/index.ts 10 + 20`
+- aby sprawdzić odejmownie `ts-node src/index.ts 10 - 20`
+- aby sprawdzić mnożenie `$ ts-node src/index.ts 21 "*" 125`
+    - `*` w powłoce bash to znak specjalny, więc musisz użyć `"*"`,
+    - aby był zwykłym znakiem
+- itd.,
+    - czyli jedno działanie, na jedno wywołanie programu
+
+
+
+
+
+
+
+
+
+
+
+

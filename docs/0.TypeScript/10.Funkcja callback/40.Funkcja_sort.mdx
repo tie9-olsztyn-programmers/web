@@ -1,0 +1,71 @@
+---
+title: Funkcja `sort()`
+---
+
+
+# Metafora `sort()`:
+Wyobraź sobie, że
+- ustawiasz ludzi w kolejce wg wzrostu.
+- bierzesz dwóch i porównujesz - kto niższy,
+    - ten pierwszy?,
+    - ten drugi?
+- Robisz to dla całej grupy - na końcu wszyscy stoją posortowani.
+
+## sortowanie po stringach
+```ts
+const fruits: string[] = ["banana", "apple", "cherry"];
+fruits.sort();
+console.log(fruits);
+// ["apple", "banana", "cherry"]
+```
+
+
+
+## sortowanie po liczbach
+```ts
+const numbers = [5, 1, 10, 3];
+
+const asc = numbers.sort((a, b) => a - b);   // [1, 3, 5, 10]
+const desc = numbers.sort((a, b) => b - a);  // [10, 5, 3, 1]
+
+console.log(asc);
+console.log(desc);
+```
+
+:::important Jak działa komparator?
+- Weźmy `numbers.sort((a, b) => a - b)`:
+
+- Jeśli `a = 2`, `b = 5`:
+    - `a - b = -3` wynik ujemny, więc `2` idzie przed `5`.
+
+- Jeśli `a = 10`, `b = 3`:
+    - `a - b = 7` wynik dodatni, więc `10` idzie po `3`
+
+- Jeśli a = 4, b = 4:
+    - `a - b = 0` kolejność zostaje taka sama.
+
+:::
+
+
+
+## Sortowanie po obiektach
+
+```ts
+type User = { name: string; age: number };
+
+const users: User[] = [
+  { name: "Alice", age: 30 },
+  { name: "Bob", age: 20 },
+  { name: "Charlie", age: 25 }
+];
+
+const sortedByAge = users.sort((a, b) => a.age - b.age);
+
+console.log(sortedByAge);
+// [
+//   { name: "Bob", age: 20 },
+//   { name: "Charlie", age: 25 },
+//   { name: "Alice", age: 30 }
+// ]
+
+```

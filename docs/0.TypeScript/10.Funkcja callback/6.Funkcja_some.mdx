@@ -1,0 +1,48 @@
+---
+title: Funkcja `some()`
+---
+
+# Metafora dla `some()`
+Wyobraź sobie, że jesteś nauczycielem i pytasz całą klasę:
+- „Czy ktoś z was ma dziś pracę domową?”
+- Jeśli chociaż jedna osoba podniesie rękę, to odpowiadasz: „Tak, ktoś ma” (zwraca `true`)
+- Jeśli nikt nie podniesie ręki, to odpowiadasz: „Nie, nikt nie ma” (zwraca `false`).
+
+To dokładnie robi `some()`: sprawdza, czy choć jeden element w tablicy spełnia warunek.
+
+
+Przykład
+
+Sprawdzamy, czy przynajmniej jeden użytkownik jest administratorem:
+```ts
+type User = {
+  id: number;
+  name: string;
+  role: "user" | "admin";
+};
+
+const users: User[] = [
+  { id: 1, name: "Alice", role: "user" },
+  { id: 2, name: "Bob", role: "user" },
+  { id: 3, name: "Charlie", role: "admin" }
+];
+
+const hasAdmin = users.some(user => user.role === "admin");
+
+console.log(hasAdmin); // true
+```
+
+Jak to działa?
+- `some()` idzie po elementach jeden po drugim.
+- Sprawdza warunek `user.role === "admin"`.
+- Zatrzymuje się od razu, gdy znajdzie pierwszego admina.
+- Zwraca `true`, jeśli ktoś spełnia warunek, albo `false`, jeśli nikt.
+
+
+
+
+
+
+
+
+

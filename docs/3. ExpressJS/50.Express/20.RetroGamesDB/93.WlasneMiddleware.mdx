@@ -1,0 +1,171 @@
+---
+title: Tworzymy `middleware`y
+---
+
+# Tworzymy `middleware`y
+Dalej pracujemy z aplikacją *RetroGamesDB*.
+
+Utworzymy trzy `middleware`'y:
+- prosty logger
+- `GameValidator`
+- `QueryDebugger`
+
+## Prosty logger
+Do pliku `app.ts` dodajemy:
+```ts
+app.use(express.json());
+
+// prosty logger
+app.use((req,res,next) =>{
+    console.log(`Path: ${req.path}, Method: ${req.method}`)
+    next()
+})
+
+app.use("/games", gamesRouter)
+```
+
+## `GameValidator`
+:::tip Gdzie "trzymać" *middleware*'y w projekcie?
+Funkcje *middleware* powinny być:
+- trzymane w oddzielnym pliku,
+- w folderze `middlewares`.
+:::
+
+
+Utwórzmy folder `middlewares` w `src`, a w nim plik `GameValidator.ts`.
+
+
+Nasz *middleware` będzie:
+- sprawdzał, czy w `body` znajdują się wszystkie kluczowe pola gry.
+- zwracał czytelny komunikat błędu, jeśli czegoś brakuje.
+- chronił *backend* przed „śmieciowymi” `request`ami.
+
+Przypomnijmy sobie model gry:
+```ts
+interface Game {
+    id: number;
+    title: string;
+    year: number;
+    platform: string;
+    genre: string;
+}
+```
+Jeżeli w `request` będzie brakowało któregoś z tych pól,
+`GameValidator` zatrzyma próbę dodania nowej gry.
+
+`GameValidator.kt`
+```ts
+import { Request, Response, NextFunction } from "express";
+
+export function validateGame(req: Request, res: Response, next: NextFunction) {
+    if (!['POST', 'PUT'].includes(req.method)) return next();
+
+    const { title, year, platform, genre } = req.body;
+    const errors: string[] = [];
+
+    if (!title) errors.push("title is required");
+    if (!year) errors.push("year is required");
+    if (!platform) errors.push("platform is required");
+    if (!genre) errors.push("genre is required");
+
+    if (year !== undefined && (typeof year !== 'number' || !Number.isInteger(year))) {
+        errors.push("year must be an integer");
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ errors });
+    }
+
+    next();
+}
+
+```
+
+Użyjemy naszej funkcji w `app.ts`:
+```ts
+app.use(express.json());
+app.use(validateGame);
+
+```
+
+:::tip Pamiętaj
+Walidator użyty przez routerem!
+Express przetwarza `middleware`y (i `router`y) w takiej kolejności, w jakiej je dodałeś.
+Jeżeli walidator będzie użyty po routerze, to nigdy się nie wykona.
+```ts
+app.use(validateGame)
+app.use("/games", gamesRouter)
+```
+
+:::
+
+## `QueryDebugger`
+
+Zadaniem tego `middleware`a będzie wypisywanie w konsoli
+wszystkich użytych *query paramy* (np. `?platform=ps2&year=2000`).
+
+W folderze `middlewares` tworzymy plik `QueryDebugger.ts`:
+```ts
+import { Request, Response, NextFunction } from "express";
+
+export function queryDebugger(req: Request, res: Response, next: NextFunction) {
+    if (req.method !== 'GET') return next();
+
+    const now = new Date().toISOString();
+    const { originalUrl, query } = req; //originalUrl = path + query string (wszystko po nazwie hosta)
+
+    console.log(`\nQUERY DEBUG | ${now}`);
+    console.log(`GET ${originalUrl}`);
+
+    if (Object.keys(query).length === 0) {
+        console.log('(query pusty)');
+    } else {
+        console.table(query);
+    }
+    console.log('-'.repeat(60));
+
+    next();
+}
+```
+
+Użyjemy naszej funkcji w pliku `app.js`
+```ts
+//..
+app.use(validateGame)
+app.use(queryDebugger)
+app.use("/games", gamesRouter)
+//..
+```
+
+Jednak te `middleware`y dotyczą wyłącznie gier, więc
+powinniśmy napisać `app.use("/games", queryDebugger)`.
+
+Skoro dotyczą tylko *endpointu* `/games`, to powinniśmy je przenieść do pliku `gamesRouter.ts`.
+
+Usuńmy je z `app.ts`.
+
+Dopiszmy je w naszym `gamesRouter.ts`:
+```ts
+//...
+import {queryDebugger} from "../middlewares/QueryDebugger";
+import {validateGame} from "../middlewares/GameValidator";
+
+const router = Router();
+
+// middleware tylko dla gier
+router.use(queryDebugger);
+router.use(validateGame);
+
+//...
+```
+
+
+
+
+
+
+
+
+
+
+

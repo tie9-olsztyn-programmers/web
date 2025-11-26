@@ -1,0 +1,113 @@
+---
+title: Pierwsza aplikacja
+---
+
+Utwórz nowy projekt
+- Otwórz WebStorm → New Project.
+- Wybierz *Empty Project*.
+- Nadaj nazwę folderu.
+
+
+- w konsoli wpisz `npm init` (To utworzy plik package.json z domyślnymi ustawieniami).
+- zainstaluj TypeScript `npm install --save-dev typescript ts-node @types/node`:
+    - `typescript` kompilator TS.
+    - `ts-node` pozwala uruchamiać `.ts` bez ręcznej kompilacji.
+    - `@types/node` typy dla Node.js (np. `fs`, `path`).
+
+
+- tworzymy plik konfiguracyjny dla TS:
+    - `npx tsc --init`
+    - w pliku `tsconfig.json` odkomentuj `"outDir": "./dist"`,
+
+- utwórz plik `index.ts`
+```ts
+const message: string = "Hello TypeScript!";
+console.log(message);
+```
+
+- uruchomienie bez kompilacji `npx ts-node index.ts`
+- uruchomienie z kompilacją:
+    - `npx tsc` (utworzy plik `index.js`)
+    - `node dist/index.js` (uruchomienie
+
+
+
+---------------------
+Ten sam projekt w przyspieszonej wersji:
+ *New Project* -> *TypeScript* (nic więcej nie zaznaczamy)
+
+
+
+Konfiguracja JavaScript w WebStorm:
+`package.json`
+```json
+{
+  "name": "tstest0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}
+```
+
+**wyjaśnienie**
+- `"main": "dist/index.js"`
+  - Określa główny plik wejściowy pakietu (po zbudowaniu).
+  - W Twoim projekcie po kompilacji TypeScript → JS zakładamy, że wyjściowy plik to `dist/index.js`
+- `"scripts": { "build": "tsc" }`
+  - Skrypty, które możesz odpalić przez `npm run ....`
+  - `npm run build` uruchomi kompilator TypeScript (`tsc`).
+  - Możesz tu dodać np. `"start": "ts-node src/index.ts"` albo `"dev": "nodemon src/index.ts"`.
+
+
+Konfiguracja TypeScript w WebStorm:
+`tsconfig.ts`
+```json
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
+```
+
+**wyjaśnienie**
+- `"target": "es2016"` Określa, do jakiej wersji JavaScriptu TypeScript ma kompilować kod.
+(es2016 = ECMAScript 2016 Node i przeglądarki to rozumieją).
+- `"module": "commonjs"` Mówi, w jakim systemie modułów mają być generowane pliki JS.
+(commonjs to klasyczny system modułów używany w Node.js (`require`, `module.exports`)).
+- `"strict": true` włącza pełny zestaw rygorystycznych opcji typów w TypeScript.
+Dzięki temu kompilator sprawdza:
+  - czy wszystkie zmienne mają typ,
+  - czy nie używasz `null`/`undefined` bez sprawdzenia,
+  - czy wszystkie gałęzie w funkcjach coś zwracają.
+- `"outDir": "dist"` Określa folder, do którego TypeScript wrzuci skompilowane pliki `.js`.
+- `"include": ["src"]` Mówi, które katalogi/pliki TS ma kompilować.
+Tutaj tylko `src/`, czyli cała aplikacja powinna być pisana w tym folderze.
+Dzięki temu TS nie kompiluje np. plików testowych czy buildowych spoza src.
+
+
+
+W pliku `src/index.ts` wpisz:
+```ts
+const message: string = "Hello TypeScript!";
+console.log(message);
+```
+
+
+
+
+

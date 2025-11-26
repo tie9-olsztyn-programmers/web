@@ -1,0 +1,36 @@
+
+„Archiwa Jedi”
+
+
+Ogólny opis:
+- utworzyć modularną aplikację TypeScriptową (min. 3 moduły),
+- wykorzystać fs, path do pracy z plikami i folderami,
+- użyć process.argv do obsługi komend,
+- operować na danych w JSON (dodawanie, odczyt, usuwanie, wyszukiwanie),
+
+Struktura projektu:
+- w folderze `src/`:
+    - `index.ts` do obsługi komend z terminala
+    - `archiveManager.ts` do zarządzania logiką pracy z plikami
+    - `dataGenerator.ts` do generowania losowych postaci/planów
+    - `utils.ts` funkcje pomocnicze (np. format daty)
+- folderze `data/`:
+    - `archives.json` plik z danymi w formacie JSON
+
+Funkcjonalności
+W Archiwach Jedi przechowujemy dane o istotach, planetach i statkach.
+Użytkownik może (potrzebujesz poprawnej konfiguracji `package.json` z `npm start`):
+    - dodać nowy rekord
+        - `npm start add "Luck Skywalker" "Human" "Tatooine"`,
+        - do nowego elementu dopisywanywany jest czas dodania i id
+    - wyświetlić wszystkie informacje (`npm start list`),
+    - wyszukać po nazwie (`npm start find Naboo`),
+    - usunąć po ID (`npm start delete 123`),
+    - wygenerować losową postać z pomocą „Mocy” (`npm start random`).
+
+przykładowe
+```bash
+$npm start list
+Archiwa Jedi:
+[1725] Leia Organa (Human) – Naboo [2025-10-07 10:25:59]
+```

@@ -1,0 +1,113 @@
+---
+title: Aplikacja sklepik z JSON
+---
+
+# Aplikacja sklepik z JSON
+- Korzystamy z aplikacji napisanej w poprzednim rozdziale.
+- Wprowadzimy pobieranie danych z pliku JSON.
+
+## JSON - przypomnienie
+
+### `JSON` (JavaScript Object Notation):
+- to lekki format wymiany danych,
+- jest łatwy do odczytania i zapisu zarówno przez ludzi, jak i maszyny,
+- jest często używany do przesyłania danych między serwerem a klientem w aplikacjach internetowych.
+- jest niezależny od języka programowania,
+
+### Struktura JSON
+- JEST zbudowany z par klucz-wartość (klucz jest zawsze `string`iem)
+- OBSŁUGUJE zagnieżdżone struktury, takie jak tablice i obiekty.
+```json
+{
+  "name": "Jan Kowalski",
+  "age": 30,
+  "married": true,
+  "children": ["Ania", "Bartek"],
+  "address": {
+    "city": "Warszawa",
+    "zip": "00-001"
+  }
+}
+```
+
+### Typy danych w JSON
+JSON obsługuje tylko określone typy danych:
+- Ciągi znaków (*strings*) - muszą być zapisane w cudzysłowach: `"tekst"`.
+- Liczby (*numbers*) - mogą być całkowite lub zmiennoprzecinkowe: `42`, `3.14`.
+- Wartości logiczne (*boolean*) - `true` lub `false`.
+- Tablice (*arrays*) - zbiór uporządkowanych wartości: `["a", "b", "c"]`.
+- Obiekty (*objects*) - zbiór par klucz-wartość: `{"key": "value"}`.
+- *Null* - specjalna wartość oznaczająca brak danych: `null`.
+
+### Zastosowanie JSON w praktyce
+- **Wymiana** danych w API: Wiele interfejsów API (np. REST) używa JSON do przesyłania danych między serwerem a klientem.
+- **Przechowywanie** danych: JSON jest czasami wykorzystywany jako lekki format do zapisywania danych w plikach (np. pliki .json), konfiguracji czy bazach danych (np. MongoDB).
+- **Serializacja**: JSON jest używany do konwertowania obiektów w językach programowania na format tekstowy, który można przesyłać między systemami.
+
+### Jak wygląda praca z JSON w JavaScript
+W JavaScript można łatwo pracować z JSON za pomocą dwóch wbudowanych metod:
+- `JSON.stringify()` – zamienia obiekt JavaScript na ciąg JSON (serializacja).
+- `JSON.parse()` – zamienia ciąg JSON na obiekt JavaScript (deserializacja).
+
+
+------
+- Wróćmy do Aplikacji Sklepik z poprzedniej lekcji.
+- z pliku `app.ts` usuń fragment w którym tworzyłeś obiekty z produktami:
+```ts
+   const bigCoffee: Product = {
+        id: 1, name: "Big Coffe" , price: 10.40, description:"Duża czarna kawa dla odważnych"
+    }
+    const chocolateCake: Product = {
+        id:2, name:"Choclate Cake", price:8.70, description:"Wielkie ciacho z czekoladą"
+    }
+```
+
+- stwórz nowy plik `products.json`, w którym umieścimy usunięte dane w postaci danych JSON (lista produktów):
+```json
+[
+  {
+    "id": 1, "name": "Big Coffe" , "price": 10.40, "description":"Duża czarna kawa dla odważnych"
+  },
+  {
+    "id":2, "name":"Choclate Cake", "price":8.70, "description":"Wielkie ciacho z czekoladą"
+  }
+]
+```
+
+- wróćmy do pliku `app.ts`
+    - zaimportujemy moduł `fs` (*File System* to odczytywania plików)
+    - odczytamy zawartość pliku `.json` i zamienimy go na strukturę (listę) TS,
+    - obiekty z uzyskanych danych dołączymy do koszyka
+
+`app.ts`
+```ts
+import {Cart} from './cart';
+import {readFileSync} from "fs" // wbudowany moduł do pracy z plikami
+import {Product} from './product'
+
+function runApp(){
+    console.log('Hello World')
+    const cart = new Cart()
+
+    const rawData = readFileSync('./products.json', 'utf8') // odczytujemy dane z pliku
+    const products: Product[] = JSON.parse(rawData) // dane zamieniamy na listę obiektów TS
+
+    products.forEach(product => cart.add(product)) // dodajemy produkty do koszyka
+
+
+    console.log(cart.getTotal())
+    console.log(cart.getAllItems().map(item => `${item.name} - ${item.price} - ${item.description}`))
+
+}
+
+export default runApp
+```
+
+- całość nie zadziała z powodu modułu `fs`, którego kompiltor nie rozpoznaje:
+    - Node.js sam w sobie zna moduły takie jak `fs`, `path`, `http`, bo są wbudowane w jego runtime.
+    - TypeScript to tylko kompilator → on nie uruchamia kodu, tylko sprawdza typy i zamienia .ts → .js.
+    - Sam TypeScript nie zna modułów Node.js — bo Node to środowisko uruchomieniowe, a TS to tylko narzędzie do sprawdzania typów.
+    - Aby kompilotr rozpoznawał wbudowane w NodeJS moduły trzeba doinstalować `npm install --save-dev @types/node`
+    - po tej instalacji wszystko powinno zadziałać
+
+

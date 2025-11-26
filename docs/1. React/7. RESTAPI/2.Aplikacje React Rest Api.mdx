@@ -1,0 +1,47 @@
+---
+title: Star Wars - Aplikacja React Rest Api
+---
+
+
+# Utworzenie projektu
+
+- otwórz Webstorm
+- wybierz nowy projekt:
+    - Vite
+    - React
+    - TypeScript
+- sprawdź, czy projekt uruchamia się (musisz doinstalować biblioteki `npm install`)
+
+# Pobieranie danych z API
+
+## Zmiany w pliku `App.tsx`
+```tsx
+import './App.css'
+
+const BASE = 'https://swapi.info/api/'
+
+function App() {
+
+    const fetchDataFromSwapi = async () => {
+        const data: Response = await  fetch(`${BASE}people/1`)
+        console.log(data)
+    }
+
+  return (
+    <>
+      <h1>Star Wars Rest Api</h1>
+      <button onClick={fetchDataFromSwapi}>Fetch data from swapi.info</button>
+
+    </>
+  )
+}
+
+export default App
+```
+
+- `fetchDataFromSwapi` to funkcja asynchroniczna (to jak zamawianie wielu dań w Macu)
+- `await` sprawia, że program "otwiera" dodatkową ścieżkę działania, w które oczekuje na pobranie danych, ale główna ścieżka jest wykonywana dalej (asynchroniczność)
+- wbudowana funkcja `fetch` nie zwraca danych JSON (sic!), ale obiekt typu `Promise` / Obietnica
+- w zmienne `data` przechowywany jest obiekt typu `Promise` (to jak numer zamówienia w Macu, jeszcze nie jedzenie, ale obietnica, że będzie za jakiś czas)
+
+

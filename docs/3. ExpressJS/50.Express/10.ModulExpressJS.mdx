@@ -1,0 +1,290 @@
+---
+title: Moduł `express`
+
+---
+
+# Moduł `express`
+
+:::tip Metafora na początek
+Wyobraź sobie:
+- `Node.js`     to silnik samochodu (umożliwia jazdę, ale nic poza tym),
+- `ExpressJS`   to cały samochód z kierownicą, deską rozdzielczą i hamulcem.
+    - Nie musisz znać każdego elementu silnika, by ruszyć w drogę.
+
+:::
+
+## Co to jest ExpressJS?
+- ExpressJS to framework dla Node.js, który upraszcza tworzenie serwerów HTTP i aplikacji webowych.
+- Sam Node.js daje tylko surowe narzędzia (`http.createServer`), a Express dodaje:
+    - routing (np. `/users`, `/login`, `/api/products`),
+    - obsługę żądań i odpowiedzi w prosty sposób,
+    - `middleware` (np. logowanie, autoryzacja, parsowanie JSON-a),
+    - integrację z szablonami HTML,
+    - obsługę błędów,
+    - `REST API` w kilku linijkach kodu.
+
+
+Przykładowe alternatywne frameworki
+- *Fastify* (https://fastify.dev/)
+    - nowszy,
+    - szybszy niż Express,
+    - ma podobne API, ale lepszą wydajność.
+- *NestJS* (https://nestjs.com/)
+    - duży framework oparty na TypeScript i wzorowany na Angularze
+    - idealny do większych aplikacji.
+- *Koa* (https://koajs.com/)
+    - twórcy Expressa stworzyli Koa
+    - bardziej nowoczesny, oparty na `async`/`await`.
+
+:::info Node bez Expressa
+```ts
+import http from "http";
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Hello from pure Node.js!");
+});
+
+server.listen(3000, () => console.log("Server running on port 3000"));
+```
+
+:::
+
+:::note Node z Expressem
+```ts
+import express from "express";
+const app = express();
+
+app.get("/", (req, res) => res.send("Hello from Expre   ss!"));
+app.get("/users", (req, res) => res.send("User list"));
+
+app.listen(3000, () => console.log("Server running on port 3000"));
+```
+
+:::
+
+## Jak utworzyć aplikację ExpressJS w TS?
+
+### Ręczne tworzenie projektu
+```bash
+mkdir express_intro   // utworzy folder
+cd express_intro      // przechodzimy do folderu
+npm init -y           // tworzy package.json
+npm install express   // instalacja expressa
+npm i -D typescript ts-node nodemon @types/node @types/express // instalacja typescripta i potrzebnych paczek
+npx tsc --init        // tworzy plik tsconfig.json
+```
+
+### Uproszczenie `tsconfig`
+Zawartość pliku `tsconfig.ts` skasuj, a w to miejsce wklej poniższy kod:
+```json
+{
+  "compilerOptions":
+    {
+      "target": "es2016",
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "outDir": "dist",
+      "rootDir": "src"
+       },
+  "include": ["src"]
+}
+```
+
+### Rozbudowanie struktury projektu
+```
+project/
+├── src/
+│   └── index.ts
+├── dist/
+│   └── index.js   (automatycznie generowany)
+├── ...
+└── tsconfig.json
+
+```
+
+- utwórz folder `src`
+- wewnątrz folderu `src` zrób plik `index.ts`
+- w tym pliku napisz `console.log("Welcome TS Express")`
+- folder `dir` jest generowany automatycznie
+
+### Dopisanie skryptów uruchomieniowych
+W pliku `package.json` dopiszmy:
+```json
+scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts"
+  },
+```
+
+:::note `nodemon`
+- to narzędzie do automatycznego restartowania serwera Node.js,
+    gdy wykryje, że jakiś plik w projekcie się zmienił.
+
+Jak działa nodemon w tle:
+- Nadzoruje zmiany plików (tzw. file watcher).
+- Gdy coś się zmieni — zabija aktualny proces i uruchamia nowy.
+
+
+`nodemon --exec ts-node src/index.ts`
+„Uruchom `ts-node src/index.ts`, a kiedy zmieni się jakiś plik `.ts`,
+ zrestartuj ten proces automatycznie.”
+- `--exec` mówi, jakiego programu użyć do uruchomienia kodu,
+
+:::
+
+:::tip Nodemon - pochodzenie nazwy
+- **Node**
+    – od platformy Node.js,
+    - ponieważ nodemon jest narzędziem stworzone do pracy z aplikacjami opartymi na Node.js.
+- **Daemon**
+    – to termin w świecie oprogramowania oznaczający proces działający w tle, który monitoruje różne zdarzenia lub zmiany.
+    - Nazwa pochodzi od greckiego słowa "δαίμων" (daímōn), które oznacza „ducha” lub „niewidzialną siłę”.
+
+Czyli razem: `nodemon`
+- to coś w rodzaju "demona" (procesu w tle), który:
+    - monitoruje zmiany w plikach Twojej aplikacji Node.js i
+    - automatycznie restartuje serwer.
+
+:::
+
+### `src/index.ts`
+
+```ts
+// bezproblemowy import bo w tsconfig mamy
+//  "esModuleInterop": true,
+// typy Request, Response z paczki @types/express
+import express, {Request, Response} from 'express'
+
+const app = express() // instancja aplikacji Express
+const PORT = 3000
+
+
+// rejestracja trasy GET na `/`
+app.get("/", (req:Request, res:Response) => {
+    //`send` wysyła treść i kończy odpowiedź (ustawia status 200)
+    res.send("Hello from Express and TypeScript")
+    //res.send("Witam z Expressa z TypeScriptem")
+
+})
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
+})
+```
+- odkomentuj drugi `res.send` i sprawdź, co sie dzieje
+- zakomentuj pierwszy `res.send` i sprawdź, co się dzieje
+
+
+:::note `const app = express()`
+- tworzy obiekt aplikacji, który jest odpowiedzialny za obsługę żądań HTTP,
+- to obiekt serwer framworku Express
+- to serwer http "na sterydach"
+
+:::
+
+
+
+:::note `app.get('/', (req, res) => ...`
+- Trasa HTTP GET: Definiujemy trasę typu GET dla głównego endpointu "/".
+- Gdy użytkownik odwiedzi adres `http://localhost:3000` (czyli główny adres serwera), serwer odpowie wiadomością "Hello from ES6 and Express"
+- `req` (*request*):
+    - To obiekt reprezentujący żądanie HTTP.
+    - Zawiera informacje takie jak nagłówki, parametry żądania, treść itp.
+- `res` (*response*):
+    - To obiekt odpowiedzi HTTP, który służy do wysyłania odpowiedzi do klienta.
+    - W tym przypadku używamy metody `res.send()`, aby wysłać tekst "Hello from ES6 and Express!" do przeglądarki lub innego klienta
+
+:::
+
+:::tip `send()`
+- Wysyła odpowiedź HTTP do klienta.
+- Automatycznie ustawia odpowiednie nagłówki (np. Content-Type).
+- Może obsługiwać różne typy danych (tekst, HTML, JSON).
+- Kończy odpowiedź po jej wysłaniu.
+
+
+:::
+
+
+### Wysyłamy różne typy danych
+```ts
+import express, {Request, Response} from 'express'
+
+const app =express()
+const PORT = 3000
+
+app.get("/", (req:Request, res:Response) => {
+    res.send("Hello from Express and TypeScript")
+
+//    res.send("Witam z Expressa z TypeScriptem")
+})
+
+app.get("/mix", (req: Request, res:Response) => {
+    res.send("Hello!");             // Content-Type: text/html
+});
+
+app.get("/num",(req: Request, res:Response) => {
+    res.send(42);                   // Content-Type: text/html
+});
+
+app.get("/obj", (req: Request, res:Response) => {
+    res.send({ name: "Alic" });      // Content-Type: application/json
+});
+
+app.get("/json", (req: Request, res:Response) => {
+    res.json({ name: "Alic" });      // Content-Type: application/json
+});
+
+app.get("/list", (req: Request, res:Response) => {
+    res.json([10,20,30]);            // Content-Type: application/json
+});
+
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
+})
+
+```
+
+:::note `Content-Type`
+- To nagłówek HTTP, który mówi:
+    - „Hej, w tej odpowiedzi (albo żądaniu) znajduje się taki typ danych”.
+    - Czyli `Content-Type` etykieta mówiąca, co jest w środku paczki.
+- pojawia się:
+    - w żądaniach
+    - w odpowiedziach
+
+| Etykieta (`Content-Type`) | Co jest w środku |
+|----------------------------|------------------|
+| `text/plain` | zwykły tekst |
+| `text/html` | kod HTML |
+| `application/json` | dane w formacie JSON |
+| `image/png` | obrazek PNG |
+| `audio/mpeg` | plik MP3 |
+| `application/pdf` | dokument PDF |
+
+
+
+
+:::
+
+:::tip `send()` vs `json`
+- `res.send()`
+    - wysyła dane dowolnego typu, automatycznie rozpoznaje typ
+    - uniwersalna
+- `res.json()`
+    - wysyła dane w formacie JSON z odpowiednim nagłówkiem
+    - rekomendowana do API
+
+:::
+
+
+
+
+
+

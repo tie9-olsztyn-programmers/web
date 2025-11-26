@@ -1,0 +1,23 @@
+---
+title: Export domyślny
+---
+- kontynuujemy projekt zrobiony w poprzednim kroku
+- utwórzmy nowy plik `src/logger.ts`
+```ts
+export default function log(message: string): void {
+  const time = new Date().toISOString();
+  console.log(`[${time}] ${message}`);
+}
+```
+
+- w pliku `index.ts`:
+```ts
+import logger from './logger';
+
+logger("Hello from the edge of the galaxy!")
+```
+
+
+
+
+

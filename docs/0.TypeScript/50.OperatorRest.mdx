@@ -1,0 +1,95 @@
+---
+title: Operator "zbierania" *rest* `...`
+---
+
+# Operator "zbierania" *rest* `...`
+
+
+:::info `...` rest
+- Umożliwia przechwycenie dowolnej liczby argumentów lub właściwości i
+- zapisanie ich jako tablicy albo obiektu.
+
+- Rest to torba podróżna, do której wrzucasz wszystko, czego nie chcesz trzymać osobno.
+
+:::
+
+## Funkcje o zmiennej liczbie augmentów
+```ts
+function sum(...numbers: number[]) {
+  return numbers.reduce((acc, n) => acc + n, 0);
+}
+
+console.log(sum(2, 3));        // 5
+console.log(sum(1, 2, 3, 4));  // 10
+```
+
+## Destrukturyzacja tablicy z zachowaniem reszty elementów
+```ts
+const colors = ['red', 'green', 'blue', 'yellow'];
+const [first, second, ...others] = colors;
+
+console.log(first);   // red
+console.log(second);  // green
+console.log(others);  // ['blue', 'yellow']
+```
+
+## Destrukturyzacja obiektu z zachowanie pozostałych właściwości
+```ts
+const user = { name: 'Anna', age: 25, city: 'Warsaw', country: 'Poland' };
+const { name, ...details } = user;
+
+console.log(name);    // 'Anna'
+console.log(details); // { age: 25, city: 'Warsaw', country: 'Poland' }
+```
+
+## Funkcja filtrująca dane (przy dowolnej ilości argumentów)
+```ts
+function filterByLength(min: number, ...words: string[]) {
+  return words.filter(w => w.length >= min);
+}
+
+console.log(filterByLength(4, 'sun', 'moon', 'stars', 'sky'));
+// ['moon', 'stars']
+```
+
+## Rest w typach funkcyjnych
+```ts
+type MultiplyFn = (...values: number[]) => number;
+
+const multiply: MultiplyFn = (...values) =>
+  values.reduce((acc, n) => acc * n, 1);
+
+console.log(multiply(2, 3, 4)); // 24
+```
+
+---
+# *Rest* razem z *spread*
+```ts
+const student = { name: 'Kasia', grade: 5, school: 'TIE Olsztyn' };
+const { grade, ...rest } = student;
+const updated = { ...rest, grade: 6 };
+
+console.log(updated);
+// { name: 'Kasia', school: 'TIE Olsztyn', grade: 6 }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

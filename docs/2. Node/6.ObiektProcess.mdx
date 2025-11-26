@@ -1,0 +1,58 @@
+---
+title: Obiekt process
+---
+# Obiekt process
+:::note Czym jest process?
+- W Node.js każda aplikacja działa jako proces systemowy.
+- Obiekt process to globalny obiekt, który reprezentuje aktualnie uruchomiony proces Node.js.
+- Dzięki niemu możemy np.:
+    - odczytać argumenty startowe (`process.argv`),
+    - sprawdzić zmienne środowiskowe (`process.env`),
+    - zakończyć program (`process.exit()`),
+    - odczytać standardowe wejście/wyjście (`process.stdin`, `process.stdout`).
+
+:::
+
+```typescript
+console.log(process)
+```
+- *Webstorm* będzie zgłaszał błędy, ponieważ nie zainstalowaliśmy typów dla TS
+- `npm i --save-dev @types/node`
+
+:::note Co to jest process.argv
+- `argv` to *arguments vector* (tablica argumentów).
+- Jest to tablica `string[]`, która zawiera:
+    - `[0]` ścieżkę do Node.js,
+    - `[1]` ścieżkę do uruchamianego pliku,
+    - `[2]` wszystkie argumenty podane przez użytkownika.
+
+:::
+```typescript
+console.log(process.argv)
+```
+
+```bash
+$ ts-node src/index.ts
+
+/*przykładowy wynik
+[
+  '/usr/bin/ts-node',
+  '/home/js/WebstormProjects/my-process-console/src/index.ts'
+]
+*/
+
+```
+
+```bash
+
+$ ts-node src/index.ts to jest coś 1234
+/*przykładowy wynik
+[
+  '/usr/bin/ts-node',
+  '/home/js/WebstormProjects/my-process-console/src/index.ts',
+  'to',
+  'jest',
+  'coś',
+  '1234'
+]
+```

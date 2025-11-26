@@ -1,0 +1,52 @@
+---
+title: Export obiektu
+---
+
+# Export obiektu
+- w naszym projekcie z poprzedniej lekcji zrób nowy plik `src/phone.ts`
+```ts
+function callByName(name: string): string {
+    return `I'm calling ${name}!`;
+}
+
+function callByNumber(number: number): string {
+    return `I'm calling ${number}!`;
+}
+
+function stop(): string {
+    return `I'v stopped!!`;
+}
+
+const findPerson = (name: string) => `I'm looking for ${name}!`;
+
+
+export const phone = {
+    callByName,
+    callByNumber,
+    stop,
+    findPerson
+};
+
+ ```
+
+- wyczyśćmy `index.ts` i wpiszy nowy kod
+```ts
+// importujemy obiekt phone z modułu phone
+import {phone} from "./phone"
+
+// do funkcji dostajemy się przez zaimportowany obiekt phone
+console.log(phone.callByName("Kamil"))
+console.log(phone.callByNumber(123456789))
+console.log(phone.findPerson("Zygfryd"))
+console.log(phone.stop())
+
+/*WYNIK
+I'm calling Kamil!
+I'm calling 123456789!
+I'm looking for Zygfryd!
+I'v stopped!!
+
+ */
+```
+
+

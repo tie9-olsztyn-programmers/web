@@ -1,0 +1,44 @@
+---
+title: Wprowadzenie do ExpressJS
+---
+# Trzy główne tematy
+## Moduł `event`
+Node.js ma wbudowany moduł o nazwie `event`:
+- umożliwia pracę ze zdarzeniami,
+    - obsługa zdarzeń jest realizowana na podstawie wzorca projektowego **Observer** (obserwator):
+        - jeden obiekt emituje zdarzenia,
+        - a inne mogą nasłuchiwać tych zdarzeń i na nie reagować.
+    - Kluczową klasą w tym module jest `EventEmitter`.
+
+:::tip Wzorzec projektowy (ang. *design pattern*)
+- sprawdzony i udokumentowany sposób rozwiązania powtarzalnych problemów programistycznych.
+- to nie jest konkretna implementacja kodu, lecz bardziej ogólna koncepcja, którą można zaadaptować do specyficznych potrzeb.
+- wzorce projektowe pomagają programistom tworzyć bardziej elastyczne, skalowalne i łatwiejsze do utrzymania oprogramowanie.
+- główne kategorie :
+    - **kreacyjne**  tworzenie obiektów (np. Singleton)
+    - **strukturalne** struktura klas i obiektów (np. Adapter)
+    - **behawioralne** komunikacja i interakcja między obiektami (np. Obserwator)
+
+:::
+
+:::note Wzorzec projektowy *observer*
+- to behawioralny wzorzec projektowy (komunikacja i interakcja między obiektami)
+- definiuje zależność "jeden-do-wielu":
+    - jeden obiekt (podmiot) ma wielu obserwatorów
+    - podmiot zmienia stan, to wszyscy obserwatorzy są powiadamiani i mogą odpowiednio zareagować
+- podmiot przechowuje listę obiektów obserwatorów i zapewnia metody do dodawania i usuwania obserwatorów
+- obserwator posiada metodę aktualizującą stan na podstawie informacji od podmiotu
+- gdy podmiot zmienia swój stan, wywołuje metodę aktualizacji dla każdego zarejestrowanego obserwatora, informując go o zmianie.
+
+:::
+
+## Moduł http
+
+
+
+## Moduł express
+
+
+
+
+

@@ -1,0 +1,49 @@
+---
+title: Funkcja `every()`
+---
+
+# Metafora funkcji `every()`
+Wyobraź sobie nauczyciela, który sprawdza klasę i pyta:
+- „Czy wszyscy oddali pracę domową?”
+- Jeśli każdy uczeń odpowie „tak”, wynik to `true`.
+- Jeśli choć jeden nie oddał, to wynik to `false`.
+
+To właśnie robi `every()`: sprawdza, czy wszystkie elementy tablicy spełniają warunek.
+
+```ts
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+};
+
+const products: Product[] = [
+  { id: 1, name: "Laptop", price: 2500 },
+  { id: 2, name: "Mouse", price: 80 },
+  { id: 3, name: "Keyboard", price: 0 } // błąd: brak ceny
+];
+
+const allHaveValidPrice = products.every(p => p.price > 0);
+
+console.log(allHaveValidPrice); // false
+```
+
+Jak to działa?
+- `every()` sprawdza każdy element tablicy.
+- Jeśli znajdzie choć jeden, który nie spełnia warunku, zatrzymuje się i zwraca `false`.
+- Zwraca `true` tylko wtedy, gdy wszyscy przeszli test.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

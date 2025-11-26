@@ -1,0 +1,197 @@
+---
+title: Routes
+---
+
+Na razie wszystkie trasy mieliśmi zdefiniowane w jednym pliku `app.ts`.
+
+Taki podejście jest wbrew zasadzie *separation of concerns*.
+
+Wszystkie ścieżki przeniesiemy do pliku `routes.ts`, który będzie odpowiadał wyłącznie za trasy.
+
+
+:::note Co to jest `Router`
+- `Router` w Expressie to miniwersja aplikacji Express,
+czyli „mini serwer w serwerze”.
+- Można w nim definiować własne ścieżki (`GET`, `POST`, `DELETE` itd.)
+dokładnie tak samo, jak w `app`, ale w mniejszej, wydzielonej części.
+
+
+:::
+
+:::tip ️ `app.ts` jako budynek, a `router` jako dział
+
+W dużej aplikacji Express wszystkie ścieżki w jednym pliku stają się trudne do utrzymania.
+Dlatego wprowadzamy **routery** — osobne moduły z własnymi ścieżkami.
+
+💡 **Metafora:**
+- `app.ts` to **główne wejście do budynku** (całego serwera),
+- a każdy plik w folderze `routes/` to **osobny dział w tym budynku**
+(np. dział gier, dział użytkowników, dział wyników).
+
+:::
+
+### Definicja tras w pliku `routes/games.ts`
+- z `app.ts` wycinamy wszystkie trasy z endpontem `/games`
+- przenosimy je do pliku `routes/games.ts`
+- w tym nowym pliku nie mam serwera Express, więc `app` trzeba zastąpić przez `Router()`
+- oczywiście niezbędne są wszystkie importy
+
+`games.ts`
+```ts
+import express, {Request, Response} from "express";
+
+import {games} from "../data/gamesData";
+import {Game} from "../models/game";
+
+const router = express.Router();
+
+
+router.get("/games", (req: Request, res: Response) => {
+    const { year, platform } = req.query;
+
+    // zwraca wszystkie gry, jeżeli nie podano year lub platform
+    if(!year || !platform) return res.json(games)
+
+   const filteredGames = games.filter(g => {
+        if (year && g.year > Number(year))  return false
+
+        if(platform){
+            if (typeof platform === "string"){
+                const queryPlatform = platform.toLowerCase();
+                const gamePlatform = g.platform.toLowerCase();
+                if(!gamePlatform.includes(queryPlatform)) return false;
+            }
+        }
+        return true
+    });
+
+    res.json(filteredGames)
+})
+
+
+
+router.get("/:id", (req: Request, res: Response) => {
+    const game = games.find(g => g.id === Number(req.params.id));
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    res.json(game);
+});
+
+
+
+router.post("/", (req: Request, res: Response) => {
+    console.log(req.body) // w konsoli podglądamy wartość po działąniu express.json()
+    try{
+        const {title, year, platform, genre} = req.body;
+
+
+        if (!title || !year || !platform || !genre) {
+            return res.status(400).json({message: "Missing required fields"});
+        }
+
+        const newGame: Game = {
+            id: Date.now(),
+            title,
+            year,
+            platform,
+            genre,
+        };
+
+        games.push(newGame); // dodajemy do naszej listy jakby bazy danych
+        res.status(201).json(newGame); // zwracamy nowy obiekt z kodem 201
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({message: error.message});
+        }else{
+            console.error(error);
+        }
+
+    }
+
+})
+
+router.put("/:id", (req, res) => {
+    try {
+        const id = Number(req.params.id); // parsowanie id: string -> id: int
+        const index = games.findIndex(g => g.id === id); // zwraca index albo -1
+        if (index === -1) return res.status(404).send("Game not found");
+
+        games[index] = { id, ...req.body }; // nadpisujemy obiekt gry pozostawiamy id bez zmian
+        res.json(games[index]);
+    } catch (error) {
+        console.error("Error updating the game", error); // Log do konsoli
+        res.status(500).json({ message: "Internal server error" }); // Odpowiedź dla klienta
+    }
+});
+
+router.patch("/:id", (req, res) => {
+    try{
+        const id = Number(req.params.id);
+        const game = games.find(g => g.id === id);
+        if (!game) return res.status(404).send("Game not found");
+
+        Object.assign(game, req.body); // aktualizacja tylko podanych pól
+        res.json(game);
+    }catch(error){
+        console.error(error)
+    }
+});
+
+
+router.delete("/:id", (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+
+        // Walidacja ID
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ message: "Invalid ID value — please provide a positive integer." });
+        }
+
+        const index = games.findIndex(g => g.id === id);
+        if (index === -1) {
+            return res.status(404).json({ message: "Game not found" });
+        }
+
+        // Usuń grę
+        const deletedGame = games.splice(index, 1)[0];
+
+
+        res.json({
+            message: "Game deleted successfully!",
+            deleted: deletedGame
+        });
+    } catch (error) {
+        console.error("Error deleting the game: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
+export default router;
+```
+
+
+
+
+### Użycie `router` w głównym pliku `app.ts`
+```ts
+import express, {Request, Response} from 'express';
+import {games} from "./data/gamesData";
+import {Game} from "./models/game";
+import gamesRouter from "./routes/games";
+import router from "./routes/games";
+
+const app = express();
+
+app.use(express.json());
+app.use("/games", gamesRouter) // router jako middleware
+//....
+
+```
+
+
+
+
+
+
+
+

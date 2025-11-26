@@ -1,0 +1,145 @@
+---
+title: Template Strings
+---
+
+# Template stringi
+
+- JS/TS (znane też jako szablony stringów) zostały wprowadzone w ES6
+- są bardziej zaawansowaną i elastyczną wersją zwykłych stringów.
+- umożliwiają one:
+    - interpolację wartości,
+    - wielowierszowe teksty
+    - bardziej zaawansowane operacje na stringach.
+
+## Interpolacja zmiennych
+
+Template stringi pozwalają na interpolację (wstawianie)
+- zmiennych
+- wyrażeń
+bez konieczności używania znaków plus (`+`) do konkatenacji.
+Zamiast tego używasz znaku dolara `$` i nawiasów klamrowych `{}` wewnątrz `string`a.
+
+```ts
+
+const name: string = 'John';
+const age:number = 30;
+
+const message = `My name is ${name} and I am ${age} years old.`;
+console.log(message); // My name is John and I am 30 years old.
+
+```
+
+## Interpolacja wyrażeń
+
+Możesz wstawiać nie tylko zmienne, ale również wyrażenia, które będą obliczane bezpośrednio w `string`u.
+
+```ts
+
+const a = 5;
+const b = 10;
+
+const sumMessage = `The sum of ${a} and ${b} is ${a + b}.`;
+console.log(sumMessage); // The sum of 5 and 10 is 15.
+```
+
+## Wielowierszowe teksty (multiline strings)
+
+Template stringi pozwalają na tworzenie wielowierszowych tekstów bez potrzeby używania specjalnych sekwencji znaków jak \n.
+
+Możesz po prostu wprowadzać nową linię wprost w kodzie.
+```ts
+const poem = `Twinkle, twinkle, little star,
+How I wonder what you are!
+Up above the world so high,
+Like a diamond in the sky.`;
+
+
+console.log(poem);
+// Twinkle, twinkle, little star,
+// How I wonder what you are!
+// Up above the world so high,
+// Like a diamond in the sky.
+```
+
+## Dynamiczne wywołania funkcji w template stringach
+
+Wewnątrz `${ }` możesz także wywoływać funkcje i używać ich wyników.
+```ts
+const getGreeting = () => 'Hello';
+const name = 'Alice';
+
+const message = `${getGreeting()}, ${name}!`;
+console.log(message); // Hello, Alice!
+```
+
+## Szablony stringów z obiektami
+
+Możesz także interpolować właściwości obiektów bezpośrednio w stringu.
+```ts
+const person = { firstName: 'John', lastName: 'Doe' };
+
+const greeting = `Hello, ${person.firstName} ${person.lastName}!`;
+console.log(greeting); // Hello, John Doe!
+```
+
+## Zachowanie backticków w wyrażeniach
+
+Jeśli chcesz użyć backticka (```) wewnątrz template stringa, musisz go poprzedzić backslashem (`\`).
+```ts
+const message = `This is a backtick: \``;
+
+console.log(message); // This is a backtick:
+```
+
+## Operacje matematyczne i logiczne
+
+W template stringach możesz również wykonywać operacje matematyczne, logiczne oraz korzystać z ternary operator.
+```ts
+const a = 10;
+const b = 20;
+
+const result = `${a} + ${b} = ${a + b}`;
+console.log(result); // 10 + 20 = 30
+
+const isAdult = (age) => age >= 18 ? 'an adult' : 'a minor';
+const age = 16;
+const message = `The person is ${isAdult(age)}.`;
+
+console.log(message); // The person is a minor.
+
+
+```
+
+## Użycie String.raw
+
+Specjalna funkcja `String.raw`
+- umożliwia dostęp do surowych wartości template stringa,
+- pozwala na wyświetlanie znaków specjalnych bez ich interpretowania.
+
+```ts
+const path = String.raw`C:\Users\John\Documents`;
+console.log(path); // C:\Users\John\Documents
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

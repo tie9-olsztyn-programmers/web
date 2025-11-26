@@ -1,0 +1,87 @@
+---
+title: Metoda POST
+---
+
+# Metoda POST
+## Definicja
+Co to jest metoda POST
+- Metoda POST służy do wysyłania danych z klienta (np. przeglądarki, aplikacji) do serwera.
+- Najczęściej używa się jej, gdy chcemy dodać nowy zasób (np. nową grę, użytkownika, komentarz).
+
+:::tip **Metafora***:
+Wyobraź sobie, że:
+- serwer Express to biuro przyjęć zamówień w restauracji
+- `GET` przychodzisz i mówisz: „Pokaż mi menu.”
+- `POST` mówisz: „Oto moje zamówienie — zapisz je w systemie.”
+- Czyli: `POST` = „Wyślij dane do serwera, żeby coś nowego powstało lub zostało zapisane.”
+:::
+
+
+## Middleware `app.use(express.json())` w działaniu POST
+Załóżmy, że `client` wysyła `request` z metodą `POST`.
+Pod *endpoint* `/games` metodą `POST` są przesyłane dane w formacie JSON:
+(Dodajmy ten kod do naszego pliku `.http`.)
+```http request
+POST /games
+Content-Type: application/json
+
+{
+  "title": "Doom",
+  "year": 1993,
+  "platform": "PC",
+  "genre": "Shooter"
+}
+```
+
+W naszej aplikacji mamy uruchomionego middleware: `app.use(express.json());`
+Pełni on funkcję tłumacza między siecią a naszą aplikacją.
+Działa on w następujący sposób:
+1. Odbiera surowe dane JSON z ciała żądania (ciąg znaków).
+2. Sprawdza, czy nagłówek to `Content-Type = application/json`.
+    - Jeśli tak — automatycznie parsuje (konwertuje) JSON na obiekt JavaScript.
+    - Wstawia ten obiekt do właściwości `req.body`.
+3. Przekazuje żądanie dalej (`next()`), już z gotowymi danymi.
+
+
+## Dopiszmy metodę `POST` do naszego endpointu `/games`
+W pliku `app.ts`:
+```ts
+app.post("/games", (req: Request, res: Response) => {
+    console.log(req.body) // w konsoli podglądamy wartość po działąniu express.json()
+   try{
+        const {title, year, platform, genre} = req.body;
+
+
+        if (!title || !year || !platform || !genre) {
+            return res.status(400).json({message: "Missing required fields"});
+        }
+
+        const newGame: Game = {
+            id: Date.now(),
+            title,
+            year,
+            platform,
+            genre,
+        };
+
+        games.push(newGame); // dodajemy do naszej listy jakby bazy danych
+        res.status(201).json(newGame); // zwracamy nowy obiekt z kodem 201
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({message: error.message});
+        }else{
+            console.error(error);
+        }
+
+    }
+
+})
+```
+Ponieważ zapytanie do serwera z metodą `POST` już napisaliśmy, wyślijmy je i sprawdźmy,
+czy wszystko działa.
+
+
+
+
+
+

@@ -1,0 +1,37 @@
+---
+title: Dodajemy dane
+----
+
+# Dodajemy dane
+
+## Struktura danych
+`game.ts`
+```ts
+export interface Game {
+    id: number;
+    title: string;
+    year: number;
+    platform: string;
+    genre: string;
+}
+
+```
+
+## Lista gier
+`gamesData.ts`
+```ts
+import { Game } from "../models/game";
+
+export let games: Game[] = [
+    { id: 1, title: "Super Mario Bros.", year: 1985, platform: "NES", genre: "Platform" },
+    { id: 2, title: "Pong", year: 1972, platform: "Arcade",  genre: "Sport" },
+    { id: 3, title: "Boulder Dash", year: 1984, platform: "Atari 800XL", genre: "Action" },
+    { id: 4, title: "River Raid", year: 1982, platform: "Atari 800XL", genre: "Shooter"},
+    { id: 5, title: "Asteroids", year: 1979, platform: "Arcade", genre: "Shooter"},
+    { id: 6, title: "Space Invaders", year: 1978, platform: "Arcade", genre: "Shooter"},
+    { id: 7, title: "Sabre Wulf", year: 1984, platform: "ZX Spectrum",genre: "Adventure"},
+    { id: 8, title: "Impossible Mission", year: 1984, platform: "Commodore 64", genre: "Adventure"},
+]
+```
+
+

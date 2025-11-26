@@ -1,0 +1,229 @@
+---
+title: Wyświetlanie danych na stronie
+---
+
+kontynuacja poprzedniej lekcji
+
+# Tworzenie komponentu `Card`
+
+- dodajemy nowy komponent w folderze `src` plik `Card.tsx` (TypeScript JSX)
+- tworzymy prosty komponent i podłączamy go no głównego `App.tsx`
+`Card.tsx`
+```tsx
+const Card = () => {
+
+    return (
+        <>
+            <h3>Star Wars Vehicles</h3>
+        </>
+    )
+}
+
+export default Card;
+```
+
+`App.tsx` - zmianny
+```tsx
+//...
+import Card from "./Card.tsx";
+//...
+
+  return (
+    <>
+      <h1>Star Wars Rest Api</h1>
+      <button onClick={fetchDataFromSwapi}>Fetch data from swapi.info</button>
+        <br />
+        <br />
+
+        <Card />
+    </>
+
+```
+
+- dDane będą pobierane z https://swapi.info/api/vehicles
+- zawierają one listę obiektów
+```json
+[
+	{
+		"name": "Sand Crawler",
+		"model": "Digger Crawler",
+		"manufacturer": "Corellia Mining Corporation",
+		"cost_in_credits": "150000",
+		"length": "36.8 ",
+		"max_atmosphering_speed": "30",
+		"crew": "46",
+		"passengers": "30",
+		"cargo_capacity": "50000",
+		"consumables": "2 months",
+		"vehicle_class": "wheeled",
+		"pilots": [],
+		"films": [
+			"https://swapi.info/api/films/1",
+			"https://swapi.info/api/films/5"
+		],
+		"created": "2014-12-10T15:36:25.724000Z",
+		"edited": "2014-12-20T21:30:21.661000Z",
+		"url": "https://swapi.info/api/vehicles/4"
+	},
+	{
+		"name": "T-16 sk...
+```
+- będziemy pobierać `name`, `model`, `passengers`
+
+
+# Dodanie typu Propsa w `Card` (plus prosta ramka)
+
+```tsx
+
+interface CardProps {
+    name: string;
+    model: string;
+    passengers: string
+}
+
+const Card = ({name, model, passengers}: CardProps) => {
+
+    return (
+        <div  style={{ border: "1px solid #ccc", padding: "5px",
+                       borderRadius: "8px", margin: "5px" }}>
+            <h3>Star Wars Vehicles</h3>
+            <h4>Name: {name}</h4>
+            <h5>Model: {model} </h5>
+            <h6>Passengers: {passengers} </h6>
+        </div>
+    )
+}
+
+export default Card;
+```
+
+
+**testujemy** w `App.tsx`
+```tsx
+ return (
+    <>
+      <h1>Star Wars Rest Api</h1>
+      <button onClick={fetchDataFromSwapi}>Fetch data from swapi.info</button>
+        <br />
+        <br />
+
+        <Card name="X-Wing" model="T-65 X-wing" passengers="1234" />
+    </>
+
+```
+
+# Pobietanie listy obiektów w `App.tsx`
+
+```tsx
+//...
+   function getAllVehicles(){
+        fetch(`${BASE}vehicles`)
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.log(error))
+    }
+
+    useEffect(() => {
+        getAllVehicles()
+    }, [])
+
+  return (
+
+//...
+```
+
+# Dodajemy hooki `useState` i `useEffect`
+
+## `useState` jest jak pudełko
+- masz w pokoju magiczne pudełko
+- wkładasz tam jakąś wartość (np. liczbę, tekst, tablicę)/ rzecz (np. zdjęcie psa).
+- masz też pilot do zmieniania tego, co jest w pudełku.
+- w pokoju masz ramkę do wyświetlania zdjęć,
+- za każdym razem, gdy coś zmienisz w pudełku (np. zmienisz zdjęcie), React przemeblowuje pokój (odświeża komponent), żeby wszystko zgadzało się z nowym stanem.
+
+## `useEffect` jest jak czujnik
+- `useEffect` reaguje, gdy wydarzy się coś konkretnego (np. zmieni się liczba w pudełku, ktoś wejdzie do pokoju, minie czas).
+- wtedy uruchamia dodatkową akcję (np. fetch danych, zapis do logów, timer).
+- np. gdy wchodzisz do pokoju, ma być wyświetlone w ramce aktualne zdjęcie, które przechowujesz w magicznym pudełku
+
+
+## Zmiany w `App.tsx`
+```tsx
+// ...
+// określamy typ danych zwracanych przez API
+type Vehicle = {
+    name: string;
+    model: string;
+    passengers: string;
+    url: string;
+};
+
+//...
+
+```tsx
+function App() {
+    // tworzymy zmienną przechowującą listę obiektów
+    // , które zawierają informacje o poszczególnych pojazdach
+    const [vehicles, setVehicles] = useState<Vehicle[]>([])
+
+    // ...
+
+    // pobieramy dane z API
+
+    function getAllVehicles(){
+        fetch(\`${BASE}vehicles\`)
+            .then(response => response.json())
+            .then(data => setVehicles(data))
+            .catch(error => console.log(error))
+    }
+
+    useEffect(() => {
+        getAllVehicles()
+    }, [])
+
+
+  return (
+    <>
+      <h1>Star Wars Rest Api</h1>
+      <button onClick={fetchDataFromSwapi}>Fetch data from swapi.info</button>
+        <br />
+        <br />
+
+
+        <div style={{display:"grid", gap: "12px"}}>
+            {
+                vehicles.map((v) => (
+                    <Card
+                        key = {v.url}
+                        name={v.name}
+                        model={v.model}
+                        passengers={v.passengers}
+                    />
+                ))
+            }
+        </div>
+    </>
+  )
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

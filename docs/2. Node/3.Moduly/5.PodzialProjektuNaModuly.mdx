@@ -1,0 +1,89 @@
+---
+title: Podział projektu na moduły
+---
+
+
+
+# Aplikacja sklepik
+
+W folderze `src` umieścimy nowe pliki obok `index.ts`
+
+`product.ts`
+```ts
+// typ danych dla produktów w sklepie
+export type Product = {
+    id: number
+    name: string,
+    price: number,
+    description: string,
+};
+```
+
+
+`cart.ts`
+```ts
+// klasa definiująca koszyk zakupowy
+import {Product} from './product'
+
+export class Cart{
+    private items: Product[] = []
+
+    add(product: Product):void {
+        this.items.push(product)
+    }
+
+    getTotal():number{
+        return this.items.reduce(
+            (total:number, item:Product): number => total + item.price, 0)
+    }
+
+    getAllItems():Product[]{
+        return this.items
+    }
+
+}
+```
+
+`app.ts`
+```ts
+// logika aplikacji
+import {Cart} from './cart';
+import {Product} from './product';
+
+function runApp(){
+    const cart = new Cart()
+
+    const bigCoffee: Product = {
+        id: 1, name: "Big Coffe" , price: 10.40, description:"Duża czarna kawa dla odważnych"
+    }
+    const chocolateCake: Product = {
+        id:2, name:"Choclate Cake", price:8.70, description:"Wielkie ciacho z czekoladą"
+    }
+
+    cart.add(bigCoffee)
+    cart.add(chocolateCake)
+
+    console.log(cart.getTotal())
+    console.log(cart.getAllItems().map(item => `${item.name} - ${item.price} - ${item.description}`))
+}
+
+export default runApp
+
+```
+
+`index.ts`
+```ts
+// entrypoint naszej aplikacji
+import runApp from "./app"
+
+runApp()
+
+/*WYNIK
+19.1
+[
+  'Big Coffe - 10.4 - Duża czarna kawa dla odważnych',
+  'Choclate Cake - 8.7 - Wielkie ciacho z czekoladą'
+]
+
+ */
+```

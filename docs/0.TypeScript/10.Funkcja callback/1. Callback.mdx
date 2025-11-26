@@ -24,6 +24,8 @@ title: Callback
 
 # 3. Programistycznie (kodowo):
 - W programowaniu callback to funkcja, którą przekazujesz innemu kodowi do wykonania w odpowiednim momencie.
+
+**wersja w JS**
 ```javascript
 function powiedzCzesc(imie, callback) {
   console.log("Cześć, " + imie + "!");
@@ -35,7 +37,18 @@ let myCallback = () => console.log("Miło cię widzieć") ;
 powiedzCzesc("Ola", myCallback);
 ```
 
+**wersja w TS**
+```typescript
+function powiedzCzesc(imie: string, callback: () => void): void {
+  console.log("Cześć, " + imie + "!");
+  callback();
+}
 
+let myCallback = (): void => console.log("Miło cię widzieć");
+
+powiedzCzesc("Ola", myCallback);
+
+```
 
 
 

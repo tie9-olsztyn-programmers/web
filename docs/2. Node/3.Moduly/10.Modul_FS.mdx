@@ -1,0 +1,299 @@
+---
+title: Moduł fs - File System
+---
+
+# Moduł `fs`
+
+## Definicja
+- `fs` (*file system*) pozwala na operacje na plikach i katalogach.
+- Istnieją dwie wersje większości metod:
+    - synchroniczne (`readFileSync`, `writeFileSync`) - one blokują program,
+    - asynchroniczne (`readFile`, `writeFile`) - one korzystają z `callbacków` / `Promise`.
+
+
+## Przygotowanie projektu
+- utwórz nowy projekt TS (`New` -> `New Project`)
+- doinstaluj zależności `npm i`
+- dopiszmy do `package.json` instrukcje `start` i `dev`
+```json
+ "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+```
+- sprawdź działanie programu przez:
+    - `npm run dev`
+    - potem `npm run start`
+
+- jak pod koniec poprzedniej lekcji wspominaliśmy, musimy doinstalować typy
+`npm install --save-dev @types/node`
+
+## Odczyt i zapis (nadpisywanie) do pliku
+### Działania synchroniczne
+#### Zapis do pliku
+- w pliku `index.ts` dopiszemy:
+```ts
+import fs from "fs"
+
+console.log("Start")
+
+//plik nieistniejący zostanie utworzony
+fs.writeFileSync("test.txt", "Hello World")
+console.log("zapisano 1")
+
+// zawartość pliku zostanie nadpisana
+fs.writeFileSync("test.txt", "Witaj świecie")
+console.log("zapisano 2")
+
+console.log("End 1")
+
+```
+#### Odczyt z pliku
+- w pliku `index.ts` dopiszemy:
+```ts
+// odczyt z pliku
+const content = fs.readFileSync("test.txt", "utf-8")
+console.log(content)
+
+console.log("End 2")
+
+
+```
+
+### Działania asynchroniczne
+Zakomentuj poprzednią zawartość pliku `index.ts`
+
+#### Zapis z callbackiem
+- w pliku `index.ts` dopiszemy:
+```ts
+import fs from "fs"
+
+console.log("Start")
+fs.writeFile("nowyTest.txt",
+             "dane testowe",
+                  (err) => {
+    if (err) {
+        console.error("błąd zapisu")
+        return
+    }
+    console.log("zapisano plik (async z callbackiem)")
+
+})
+console.log("End")
+
+/* wynik
+Start
+End
+zapisano plik (async z callbackiem)
+*/
+```
+
+#### Zapis z `Promisem`
+- w pliku `index.ts`  zakomentujmy porzedni kod i dopiszmy:
+```ts
+import {promises as fsp} from "fs"
+
+console.log("Start")
+async function saveFile(){
+    try{
+        await fsp.writeFile("test3.txt", "dane testowe")
+        console.log("Plik został zapisany (async/await).")
+    }catch(err){
+        console.error("błąd zapisu: ", err)
+    }
+}
+
+saveFile();
+console.log("End")
+
+```
+
+## Dołączanie danych do pliku - `fs.appendFile()`
+### Wersja z callbackiem
+- w pliku `index.ts` zakomentujmy zawartość i dopiszmy:
+```ts
+import fs from `fs`;
+
+
+fs.appendFile("test.txt", "\ncoś nowego", (err) => {
+    if(err){
+        console.log("Błąd zapisu")
+    }
+    console.log("Dane dopisano do pliku")
+})
+```
+
+### Wersja z Promisem
+- w pliku `index.ts` zakomentujmy zawartość i dopiszmy:
+```ts
+import {promises as fsp} from `fs`;
+
+async function addNote(note:string){
+   const now = new Date()
+    const timestamp = now. toLocaleString("pl-PL")
+    const line = `[[${timestamp}]] ${note}\n`
+
+    try{
+        await fsp.appendFile("notes.txt", line);
+        console.log("Dopisanow do pliku (async/await): ", line.trim())
+    }catch(err){
+        console.error("Błąd dopisawanie: ", err)
+    }
+}
+
+console.log("Start")
+addNote("notatka 1")
+console.log("End 1")
+addNote("notatka 2")
+console.log("End 2")
+
+/*wynik
+Start
+End 1
+End 2
+Dopisanow do pliku (async/await)
+Dopisanow do pliku (async/await)
+*/
+```
+
+## Usuwanie pliku - `unlink`
+
+### Usuwanie - sposób podstawowy
+```typescript
+import {promises as fsp} from "fs";
+
+async function deleteFile(filename: string){
+      try {
+        await fsp.unlink(filename);
+        console.log(`File ${filename} deleted successfully.`);
+    } catch (err: any) {
+        if (err.code === "ENOENT") {
+            console.log("File does not exist, nothing to delete.");
+        } else {
+            console.error("Error deleting file:", err);
+        }
+    }
+}
+
+deleteFile("notes.txt")
+
+```
+
+### Usuwanie - "ładny" sposób
+Poprzedni kod ma podstawowy problem z przechwytywaniem błędu:
+    - `err: any` *de facto* wyłącza sprawdzanie typu,
+    - obiekt `err` mógłby nie mieć właściwości `code`.
+
+```typescript
+import {promises as fsp} from "fs";
+
+function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
+    return e instanceof Error && "code" in e;
+}
+
+async function safeDeleteFile(filename: string) {
+    try {
+        await fsp.unlink(filename);
+        console.log(`File ${filename} deleted successfully.`);
+    } catch (err: unknown) {
+        if (isErrnoException(err) && err.code === "ENOENT") {
+            console.log("File does not exist, nothing to delete.");
+        } else {
+            console.error("Error deleting file:", err);
+        }
+    }
+}
+
+safeDeleteFile("test.txt")
+
+```
+:::tip ENOENT i inne błędy
+- Error NO ENTry – czyli „brak takiego pliku lub katalogu”.
+- `EACCES` brak uprawnień,
+- `EEXIST`  plik/katalog już istnieje (np. przy mkdir),
+- `EBUSY`  zasób zajęty, nie można go ruszyć.
+
+:::
+
+
+:::note Type Guard
+```typescript
+function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
+    return e instanceof Error && "code" in e;
+}
+```
+
+- `e: unknown` deklarujesz, że do funkcji może przyjść cokolwiek.
+- `e is NodeJS.ErrnoException`  to type *predicate* – mówi TypeScriptowi:
+    - „jeśli ta funkcja zwróci `true`, to możesz traktować `e` jako `NodeJS.ErrnoException` w tym bloku”.
+- `instanceof Error` upewniasz się, że to faktycznie obiekt błędu.
+- `"code" in e` sprawdzasz, czy ma właściwość `code` (którą mają systemowe błędy I/O w Node.js, np. `ENOENT`, `EACCES`).
+
+:::
+
+
+------
+## Foldery
+
+### Tworzenie folderu
+```typescript
+import {promises as fsp} from "fs"
+
+const createFolder = async () => {
+    try{
+        await fsp.mkdir("data")
+        console.log("Katalog 'data' utworzony")
+    }catch (err){
+        if(isErrnoException(err) && err.code === "EEXIST"){
+            console.log("Katalog już istnieje")
+        }else {
+            console.log(`Error: ${err}`)
+        }
+    }
+}
+
+
+function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
+    return err instanceof Error && "code" in err;
+}
+
+
+createFolder();
+
+
+
+```
+:::tip Natychmiastowe tworzenie podkatalogów:
+- zamiast `await fsp.mkdir("data")`
+- wpisz `await fsp.mkdir("data/subdir/nested", { recursive: true });`
+
+:::
+
+
+### Usuwanie folderu
+```typescript
+await fsp.rm("data", { recursive: true, force: true });
+console.log("Katalog 'data' usunięty");
+```
+- `recursive: true` rekursywnie usuwa całą zawartość (podkatalogi też),
+- `force: true` nie rzuca błędu, jeśli folder nie istnieje.
+
+### Listowanie plikóœ z folderu
+
+```typescript
+const files = await fsp.readdir(".");
+console.log("Pliki i katalogi w bieżącym folderze:", files);
+
+
+```
+
+
+
+
+
+
+
+
+
+

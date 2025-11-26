@@ -1,0 +1,74 @@
+---
+title: Funkcja `reduce()`
+---
+
+
+# Metafora `reduce()`
+Wyobraź sobie skarbonkę:
+- Masz garść monet (tablica liczb).
+- Wrzucasz je do skarbonki po kolei.
+- Każda moneta dodaje się do sumy w środku.
+- Na końcu masz jedną wartość – całkowitą sumę.
+
+
+```ts
+const prices: number[] = [100, 50, 25];
+
+const total = prices.reduce((acc, price) => acc + price, 0);
+
+console.log(total); // 175
+```
+
+- `acc` to akumulator (początkowo 0).
+- `price` to element tablicy.
+- Wynik `175`.
+
+```
+pierwsza iteracja:
+- `acc` = 0
+- `price` = 100
+- `acc + price` = 100
+- `acc` = 100
+
+druga iteracja:
+- `acc` = 100
+- `price` = 50
+- `acc + price` = 150
+- `acc` = 150
+
+trzecia iteracja:
+- `acc` = 150
+- `price` = 25
+- `acc + price` = 175
+- `acc` = 175
+```
+
+Typowe użycie: suma, średnia, łączenie stringów, budowanie obiektu z tablicy.
+
+## `acc` z inną wartością startową
+
+```ts
+const numbers: number[] = [1, 2, 3];
+const sum = numbers.reduce((acc, n) => acc + n, 100);
+console.log(sum); // 106 (100 + 1 + 2 + 3)
+```
+
+```ts
+const words: string[] = ["Hello", "World"];
+const sentence = words.reduce((acc, word) => acc + " " + word, "Start:");
+console.log(sentence); // "Start: Hello World"
+```
+
+:::note
+- Akumulator nie musi być liczbą.
+- Może być dowolnym typem danych, zależnie od tego, co chcesz uzyskać.
+- Typ akumulatora decyduje o tym, co reduce zwróci.
+
+ogólna struktura
+```ts
+array.reduce((acc, element) => {
+  // operacje
+  return acc;
+}, initialValue);
+```
+:::

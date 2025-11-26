@@ -1,0 +1,149 @@
+---
+title: Klasy w TypeScript
+---
+
+# Klasy w TypeScript
+
+:::note Po co nam klasy w TypeScript?
+Problem, który klasy rozwiązują:
+- Mamy kilka rzeczy tego samego typu (np. wiele potworów, książek, uczniów) i chcemy:
+    - trzymać ich dane w jednym „opakowaniu”,
+    - mieć funkcje, które logicznie do nich należą.
+- Ułatwiają:
+    - organizację kodu,
+    - reużywalność,
+    - modelowanie rzeczywistych bytów (np. klasa Samochod z właściwościami jak `marka` i metodami jak `jedz()`).
+
+:::
+
+## Podstawowa struktura klasy
+```ts
+class Osoba {
+  // Właściwości (pola klasy)
+  imie: string;
+  wiek: number;
+
+  // Konstruktor (wywoływany przy tworzeniu instancji)
+  constructor(imie: string, wiek: number) {
+    this.imie = imie;
+    this.wiek = wiek;
+  }
+
+  // Metoda (funkcja wewnątrz klasy)
+  przedstawSie() {
+    return `Cześć, mam na imię ${this.imie} i mam ${this.wiek} lat.`;
+  }
+}
+
+// Tworzenie instancji (obiektu)
+const osoba1 = new Osoba("Jan", 30);
+console.log(osoba1.przedstawSie());  // Wyjście: "Cześć, mam na imię Jan i mam 30 lat."
+```
+
+## Hermetyzacja - modyfikatory dostępu
+TypeScript dodaje modyfikatory, których nie ma w czystym JavaScript:
+- `public`: dostępne wszędzie (**domyślne**).
+- `private`: dostępne **tylko wewnątrz** klasy.
+- `protected`: dostępne **wewnątrz** klasy i klas **dziedziczących**.
+
+### Przykład z pojazdem
+```ts
+class Pojazd {
+  public marka: string;      // Dostępna wszędzie
+  private predkosc: number;  // Tylko wewnątrz klasy
+  protected typ: string;     // W klasie i dziedziczących
+
+  constructor(marka: string, predkosc: number, typ: string) {
+    this.marka = marka;
+    this.predkosc = predkosc;
+    this.typ = typ;
+  }
+
+  public jedz() {
+    console.log(`Jadę z prędkością ${this.predkosc} km/h.`);
+  }
+}
+
+const auto = new Pojazd("Toyota", 120, "osobowy");
+console.log(auto.marka);     // OK: "Toyota"
+// console.log(auto.predkosc);  // Błąd: private, niedostępne poza klasą
+auto.jedz();
+```
+
+### Przykład z graczem
+```ts
+class Gamer {
+  constructor(
+    public nickname: string,
+    private xp: number = 0
+  ) {}
+
+  gainXp(amount: number): void {
+    this.xp += amount;
+  }
+
+  getInfo(): string {
+    return `${this.nickname} has ${this.xp} XP`;
+  }
+}
+
+const g = new Gamer("RetroHero");
+g.gainXp(50);
+// g.xp = 9999; //błąd: Property 'xp' is private
+console.log(g.getInfo()); // RetroHero has 50 XP
+```
+
+### Właściwość tylko do odczytu - przykład z książką
+```ts
+class Ksiazka {
+  readonly tytul: string;
+
+  constructor(tytul: string) {
+    this.tytul = tytul;
+  }
+}
+
+const ksiazka = new Ksiazka("Harry Potter");
+// ksiazka.tytul = "Inny";  // Błąd: readonly
+```
+
+
+## Klasa abstrakcyjna
+
+:::info `abstract`
+- klasa, której nie można instancjonować bezpośrednio.
+- służy jako baza do dziedziczenia.
+- może mieć metody abstrakcyjne (bez implementacji).
+
+:::
+
+```ts
+abstract class Figura {
+  abstract obliczPole(): number;  // Musi być zaimplementowana w klasie dziedziczącej
+}
+
+class Kolo extends Figura {
+  constructor(private promien: number) {
+    super();
+  }
+
+  obliczPole(): number {
+    return Math.PI * this.promien ** 2;
+  }
+}
+
+const kolo = new Kolo(5);
+console.log(kolo.obliczPole());  // ≈78.54
+// const figura = new Figura();  // Błąd: abstrakcyjna
+```
+
+
+
+
+
+
+
+
+
+
+

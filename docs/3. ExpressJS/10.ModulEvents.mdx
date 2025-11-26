@@ -1,0 +1,237 @@
+---
+title: Moduł `events`
+
+---
+
+# Moduł `events`
+
+## Wprowadzenie
+- Node.js działa asynchronicznie i reaktywnie
+- wiele jego części opiera się na wydarzeniach (`events`)
+- każdy serwer, strumień czy żądanie w Expressie to właśnie `event emitter`
+
+:::note `event` (zdarzenie)
+- to sygnał, że coś się stało - np:
+    - zakończono odczyt pliku,
+    - kliknięto przycisk,
+    - odebrano wiadomość,
+    - ...
+- ktoś zdarzenie nadaje (`emit`), a ktoś inny subskrybuje (`on`).
+- mała metafora `event` jest jak :
+    - batuta dyrygenta podniesiona do góry (rozpoczęcie koncertu)
+    - komenda podczas spektaklu "Kurtyna w górę!"
+    - warczenie psa, aby się do niego nie zbliżać
+
+:::
+
+:::info `EventEmitter`
+- obiekt, który potrafi
+    - **emitować**
+    - **nasłuchiwać** zdarzenia
+- mała metafora - `EventEmitter` jest jak:
+    - dyrygent w orkiestrze ("steruje" pracą muzyków)
+    - reżyser podczas spektaklu
+    - pies (może warczeć, cieszyć się, pilnować - czyli emitować różne zdarzenia)
+
+:::
+
+## Projekt
+- WebStorm
+- New Project -> TypeScript
+- doinstalujemy:
+    - typy: `npm install --save-dev @types/node`
+    - ts-node: `npm install --save-dev ts-node`
+- przechodzimy do folderu `src` przez `cd src`
+- uruchamiamy aplikację `ts-node index.ts`
+
+### Pierwszy przykład - "Widziałem ufo"
+```ts
+import {EventEmitter} from "events";
+
+const emitter = new EventEmitter();
+
+// nasłuchiwanie
+emitter.on("ufo leci", () => {
+    console.log("Chyba widziałem ufo");
+})
+
+// emitowanie (wywołujemy zdarzenie)
+emitter.emit("ufo leci");
+
+
+```
+
+### Drugi przykład - "Widzieli ufo"
+Zdarzenie z parametrami i nasłuchiwaczami
+
+#### Wiele sygnałóœ, jedna reakcja
+
+```ts
+import {EventEmitter} from "events";
+
+const emitter = new EventEmitter();
+
+// nasłuchiwanie
+emitter.on("ufo leci", (name: string) => {
+    console.log(`Chyba widziałem ufo [zgłasza ${name}]`);
+})
+
+// wywołanie zdarzenia
+emitter.emit("ufo leci", "Szymon");
+emitter.emit("ufo leci", "Genowefa");
+emitter.emit("ufo leci", "Molder")
+
+```
+wynik
+```
+Chyba widziałem ufo [zgłasza Szymon]
+Chyba widziałem ufo [zgłasza Genowefa]
+Chyba widziałem ufo [zgłasza Molder]
+```
+
+#### Jeden sygnał, wiele reakcji
+```ts
+import {EventEmitter} from "events";
+
+const emitter = new EventEmitter();
+
+// nasłuchiwanie
+emitter.on("ufo leci", (name: string) => {
+    console.log(`Chyba widziałem ufo [zgłasza ${name}]`);
+})
+
+emitter.on("ufo leci", () => {
+    console.log(`Wyr, brum, wyr`);
+})
+
+emitter.on("ufo leci", () => {
+    console.log(`Wzzzziiii`);
+})
+
+emitter.on("ufo leci", () => {
+    console.log(`SSSssssYYyyy`);
+})
+
+// wywołanie zdarzenia
+emitter.emit("ufo leci", "Mieszko I");
+
+```
+wynik:
+```
+Chyba widziałem ufo [zgłasza Mieszko I]
+Wyr, brum, wyr
+Wzzzziiii
+SSSssssYYyyy
+```
+
+
+#### Tylko jeden świadek ufo - `once`
+```ts
+import {EventEmitter} from "events";
+
+const emitter = new EventEmitter();
+
+// nasłuchiwanie
+emitter.once("ufo leci", (name: string) => {
+    console.log(`Chyba widziałem ufo [zgłasza ${name}]`);
+})
+
+emitter.emit("ufo leci", "Anatolia");
+emitter.emit("ufo leci", "Pomścibor"); // to się nie wykona
+```
+wynik
+```
+Chyba widziałem ufo [zgłasza Anatolia]
+```
+
+#### Usuwanie niewygodnych świadków - `off`
+```typescript
+import {EventEmitter} from "events";
+
+const emitter = new EventEmitter();
+
+const swiadek = (name: string) => {
+console.log(`UFO się pojawiło [ zgłasza ${name}]`)
+}
+
+// nasłuchiwanie
+emitter.on("ufo leci", swiadek);
+
+emitter.emit("ufo leci", "Młodziad");
+
+emitter.off("ufo leci", swiadek);
+
+
+emitter.emit("ufo leci", "Nieluba"); // brak odnotowanego zgłoszenia
+
+```
+
+
+
+## Własny emiter - MissionCtronl
+```typescript
+import {EventEmitter} from "events";
+
+class MissionControl extends EventEmitter{
+    startMission(){
+        console.log("Mission started");
+        this.emit("launch")
+    }
+
+    abortMission(){
+        console.log("Error! Mission aborted")
+        this.emit("abort")
+    }
+}
+
+
+const mission = new MissionControl()
+
+mission.on("launch", () => console.log("Engines started"))
+mission.on("abort", () => console.log("Engines stopped"))
+
+mission.startMission()
+mission.abortMission()
+
+```
+
+## Radio międzygalaktyczne
+- `radio.broadcast()` nadanie sygnału (`emit`),
+- `radio.on("alert")` subskrypcja wiadomości (`on`),
+- `alert` nazwa kanału komunikacyjnego (`event name`).
+
+```typescript
+import {EventEmitter} from "events";
+
+class InterGalacticRadio extends EventEmitter{
+    broadcast(event: string, message: string){
+        console.log(`IRG with message ${message}`);
+        this.emit(event, message);
+    }
+}
+
+const radio = new InterGalacticRadio()
+
+// słuchacze
+radio.on(
+    "alert",
+    (message) => console.log(`Pilot received alert: ${message}`))
+radio.on(
+    "alert",
+    (message)=> console.log(`The planet X34/d rcseived alert: ${message}`))
+
+//nadanie sygnału
+radio.broadcast("alert", "Imperial fleet detected!")
+
+```
+
+
+
+
+
+
+
+
+
+
+

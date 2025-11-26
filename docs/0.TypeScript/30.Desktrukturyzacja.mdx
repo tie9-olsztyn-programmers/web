@@ -1,0 +1,281 @@
+---
+title: Desktrukturyzacja
+---
+
+# Desktrukturyzacja
+
+## Teoria
+:::note Destrukturyzacja
+Destrukturyzacja to sposób “rozpakowania” wartości z
+- obiektów lub
+- tablic
+
+do osobnych zmiennych w prosty i czytelny sposób.
+
+:::
+
+:::tip Metafora
+Wyobraź sobie, że masz paczkę z różnymi przedmiotami (to twój obiekt lub tablica).
+Destrukturyzacja to rozpakowywanie paczki na stole i układanie zawartości do osobnych przegródek z etykietami.
+- Obiekt to paczka z podpisanymi przedmiotami:
+    - „Z paczki person wyjmuję rzeczy o nazwach name i age”
+- Tablica to paczka bez podpisów, więc liczysz:
+    - „Z pudełka colors biorę pierwszy, drugi i trzeci element”
+
+
+:::
+
+## Praktyka
+### Tablica
+```ts
+const numbers: number[] = [10, 20, 30];
+const [a, b, c] = numbers;
+
+console.log(a); // 10
+console.log(b); // 20
+console.log(c); // 30
+```
+
+#### Pomijanie wartości
+
+Możesz pominąć elementy tablicy, jeśli nie chcesz przypisywać ich do zmiennych.
+```ts
+const numbers: number[] = [10, 20, 30];
+const [a, , c] = numbers; // Pomijamy środkowy element
+
+console.log(a); // 10
+console.log(c); // 30
+```
+
+#### Domyślne wartości
+
+Jeśli element w tablicy jest niezdefiniowany, możesz ustawić domyślną wartość.
+
+```ts
+const numbers = [10];
+const [a, b = 20] = numbers;
+
+console.log(a); // 10
+console.log(b); // 20 (domyślna wartość, bo numbers[1] nie istnieje)
+```
+
+#### Destrukturyzacja z operatorem reszty `...`:
+
+Operator `...` pozwala na zgrupowanie pozostałych wartości w nową tablicę.
+```ts
+const numbers = [10, 20, 30, 40];
+const [a, ...rest] = numbers;
+
+console.log(a);    // 10
+console.log(rest); // [20, 30, 40]
+```
+
+## Destrukturyzacja obiektów
+
+Destrukturyzacja obiektów umożliwia wyodrębnianie właściwości obiektu do zmiennych o takiej samej nazwie jak właściwości.
+```ts
+type Person = { personName: string, age: number }
+
+const person: Person = { personName: 'Alice', age: 25 };
+const { personName, age } = person;
+
+console.log(personName); // Alice
+console.log(age);  // 25
+
+```
+
+### Zmiana nazw zmiennych:
+
+Możesz przypisywać wartości do zmiennych o innej nazwie niż właściwości w obiekcie.
+```ts
+type Person = { personName: string, age: number }
+
+const person: Person = { personName: 'Alice', age: 25 };
+const { personName: userName, age: userAge } = person;
+
+console.log(userName); // Alice
+console.log(userAge);  // 25
+```
+
+### Domyślne wartości:
+
+Podobnie jak przy tablicach, możesz ustawić domyślne wartości dla właściwości, które nie istnieją.
+```ts
+type Person = {
+    personName: string;
+    personAge?: number; // znak ? oznacza, że pole jest opcjonalne
+};
+
+const person: Person = { personName: 'Alice' };
+
+const { personName, personAge = 30 } = person;
+
+console.log(personName); // Alice
+console.log(personAge);  // 30 (domyślna wartość)
+```
+
+
+### Destrukturyzacja zagnieżdżonych obiektów:
+
+Możesz destrukturyzować właściwości zagnieżdżone wewnątrz innych obiektów.
+```ts
+type Address = {
+    city: string;
+    zip: string;
+};
+
+type Person = {
+    name: string;
+    address: Address;
+};
+
+const person: Person = {
+    name: "Alice",
+    address: {
+        city: "Wonderland",
+        zip: "12345",
+    },
+};
+
+const { name: personName, address: { city, zip } } = person;
+
+console.log(personName); // Alice
+console.log(city);       // Wonderland
+console.log(zip);        // 12345
+
+```
+
+### Przypisywanie reszty właściwości obiektu:
+
+Podobnie jak przy tablicach, możesz użyć operatora reszty ..., aby zebrać pozostałe właściwości obiektu.
+```ts
+type Person = {
+    name: string;
+    age: number;
+    job: string;
+};
+
+const person: Person = { name: "Alice", age: 25, job: "Engineer" };
+
+const { name: personName, ...rest } = person;
+
+console.log(personName); // Alice
+console.log(rest);       // { age: 25, job: 'Engineer' }
+
+```
+
+### Destrukturyzacja w funkcjach
+
+Destrukturyzacja jest bardzo przydatna w funkcjach, zwłaszcza przy pracy z obiektami jako argumentami funkcji. Pozwala to na bezpośredni dostęp do określonych właściwości.
+
+#### Destrukturyzacja argumentów funkcji:
+
+Zamiast przekazywać cały obiekt do funkcji i potem wyodrębniać właściwości wewnątrz funkcji, możesz destrukturyzować je od razu w deklaracji funkcji.
+```ts
+type Person = {
+    name: string;
+    age: number;
+    job?: string; // opcjonalne, bo funkcja tego nie potrzebuje
+};
+
+function printPerson({ name, age }: Person) {
+    console.log(`Name: ${name}, Age: ${age}`);
+}
+
+const person: Person = { name: "Alice", age: 25, job: "Engineer" };
+
+printPerson(person); // Name: Alice, Age: 25
+```
+
+#### Domyślne wartości w funkcjach:
+
+Możesz również ustawić domyślne wartości dla argumentów funkcji podczas destrukturyzacji.
+```ts
+type Person = {
+    name?: string;
+    age?: number;
+};
+
+function greet({ name = "Stranger", age = 18 }: Person = {}): void {
+    console.log(`Hello, ${name}. You are ${age} years old.`);
+}
+
+greet(); // Hello, Stranger. You are 18 years old.
+greet({ name: "Alice" }); // Hello, Alice. You are 18 years old.
+```
+
+#### Destrukturyzacja zagnieżdżonych argumentów
+
+Funkcje mogą przyjmować bardziej złożone struktury danych i destrukturyzować je.
+
+```ts
+type Address = {
+    city: string;
+    zip: string;
+};
+
+type Person = {
+    name: string;
+    address: Address;
+};
+
+function printAddress({ name, address: { city, zip } }: Person): void {
+    console.log(`${name} lives in ${city}, ZIP code: ${zip}.`);
+}
+
+const person: Person = {
+    name: "Bob",
+    address: {
+        city: "New York",
+        zip: "10001",
+    },
+};
+
+printAddress(person); // Bob lives in New York, ZIP code: 10001.
+```
+
+#### Destrukturyzacja w argumentach funkcji z resztą
+
+Można użyć destrukturyzacji z operatorem reszty również w argumentach funkcji.
+```ts
+type Person = {
+  name: string;
+  age: number;
+  job: string;
+};
+
+function describePerson({ name, ...rest }: Person): void {
+  console.log(name); // Alice
+  console.log(rest); // { age: 25, job: 'Engineer' }
+}
+
+const person: Person = { name: "Alice", age: 25, job: "Engineer" };
+
+describePerson(person);
+
+```
+
+### Destrukturyzacja w pętli
+
+Destrukturyzacja jest także bardzo przydatna w pętlach, szczególnie gdy pracujesz z tablicami obiektów.
+```ts
+type Person = {
+  name: string;
+  age: number;
+};
+
+const people: Person[] = [
+  { name: "Alice", age: 25 },
+  { name: "Bob", age: 30 },
+];
+
+people.forEach(({ name, age }: Person): void => {
+  console.log(`${name} is ${age} years old.`);
+});
+
+// Output:
+// Alice is 25 years old.
+// Bob is 30 years old.
+```
+
+

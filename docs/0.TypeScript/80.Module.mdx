@@ -1,0 +1,112 @@
+---
+title: Moduły w Typescript
+----
+
+# Moduły
+
+:::tip Po co w ogóle moduły?
+Metafora:
+- Wyobraź sobie, że cały projekt to jedna wielka sala lekcyjna z 1500 uczniami – chaos.
+- Moduły to osobne klasy: 1A, 1B, 2C... Każda ma swoje sprawy i tylko czasem coś wymieniają.
+
+W kodzie zamiast jednego pliku z:
+- klasami,
+- funkcjami,
+- stałymi,
+- typami,
+- magicznymi zmiennymi,
+
+robimy wiele plików, każdy od konkretnej odpowiedzialności.
+
+:::danger Co to jest moduł?
+- moduł to plik `.ts`
+- tak plik musi zawierać `import` lub `export`
+
+:::
+
+## Eksport i import
+**Export** to udostępnienie funkcji/zmiennej/klasy do innych plików.
+
+`math.ts`
+```ts
+// math.ts
+export function add(a: number, b: number) {
+    return a + b;
+}
+
+export const PI = 3.14;
+
+```
+
+**Import** to pobranie tego, co zostało wyeksportowane.
+`main.ts`
+```ts
+import { add, PI } from "./math";
+
+console.log(add(2, 3));
+console.log(PI);
+```
+
+## Rodzaje eksportów
+
+### Eksport przez nazwę
+Można eksportować wiele rzeczy z jednego pliku.
+
+`utils.ts`
+```ts
+// utils.ts
+export function hello() { console.log("Hello world!");}
+export function goodbye() { console.log("Goodbye world!");}
+export const version = "1.0.0";
+```
+
+Wówczas importujemy te funkcje:
+`main.ts`
+```ts
+import { hello, goodbye, version } from "./utils";
+```
+
+
+### Eksport domyślny (*default export*)
+Plik może mieć tylko jeden eksport domyślny.
+`calculator.ts`
+```ts
+export default function multiply(a: number, b: number) {
+    return a * b;
+}
+
+export function divide(a: number, b: number) {
+    return a / b;
+}
+
+export const PI = 3.14;
+```
+
+Importujemy
+```ts
+import multiply from "./calculator";
+import {divide, PI} from "./calculator"
+```
+
+## Ścieżki do modułów
+```
+./      ten sam folder
+../     wyżej
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,219 @@
+---
+title: Wzorzec CSR - *Controller-Service-Repository Pattern*
+---
+
+# Wzorzec CSR
+
+:::note Co to jest CSR?
+*Controller-Service-Repository*
+– to popularny wzorzec architektury backendowej,
+- oddziela od siebie:
+    - obsługę HTTP,
+    - logikę biznesową
+    - dostęp do danych.
+:::
+
+W skrócie:
+- *Controller* obsługuje *request*, formułuje *response*,
+- *Service* zawiera logikę aplikacji, operacje na danych
+- *Repository* zajmuje się komunikacją z bazą danych lub plikami.
+
+:::tip CSR metaforycznie
+- `Controller` mówi „co klient chce”,
+- `Service` mówi „jak to zrobić zgodnie z zasadami firmy”,
+- `Repository` mówi tylko „gdzie to leży i jak zapisać”.
+
+bardziej metaforycznie CSR jako Netflix
+- `Controller` aplikacja na telewizorze / strona internetowa
+    - "Klikasz *Odtwórz Stranger Things* i dostajesz film"
+- `Service` Mózg Netflixa
+    - "Wie, że masz konto premium"
+    - "Wie, że już obejrzałeś 3 sezony, że teraz możesz 4"
+    - "Wie, że w Polsce ten serial ma polskie napisy"
+- `Repository` serwery z filmami (Amazon S3, bazy danych)
+    - "Tylko oddaje plik wideo i metadane"
+    - "Nie wie kto ogląda i dlaczego"
+
+:::
+
+
+## Tworzymy `Repository`
+- zamieńmy nazwę folderu `models` na `types`, aby uzgodnić strukturę z dobrymi praktykami w Node.js + TypeScript
+- utworzymy folder `repository` w `src`
+- utworzymy plik `games.repository.ts`
+```ts
+import { readJSON, writeJSON } from "../utils/fileUtils"
+import { Game } from "../types/game";
+
+const fileName = "gamesData.json";
+
+export function findAll(): Game[] {
+    return readJSON(fileName);
+}
+
+export function findById(id: number): Game | undefined {
+    return readJSON(fileName).find(g => g.id === id);
+}
+
+export function save(games: Game[]): void {
+    writeJSON(fileName, games);
+}
+
+export function deleteById(id: number): Game | null {
+    const games: Game[] = readJSON(fileName);
+    const index = games.findIndex(g => g.id === id);
+    if (index === -1) return null;
+
+    const deleted: Game = games.splice(index, 1)[0];
+    writeJSON(fileName, games);
+
+    return deleted;
+}
+```
+
+## Tworzymy `Service` - CRUD
+- utwórz folder `src/services
+- w folderze utwórz plik `games.service.ts`
+```ts
+import { Game } from "../types/Game";
+import * as repo from "../repositories/games.repository";
+
+export function getAllGames() {
+    return repo.findAll();
+}
+
+export function getGameById(id: number) {
+    return repo.findById(id);
+}
+
+export function createGame(data: Omit<Game, "id">) {
+    const games = repo.findAll();
+    const newGame: Game = {
+        id: Date.now(),
+        ...data
+    };
+    games.push(newGame);
+    repo.save(games);
+    return newGame;
+}
+
+export function updateGame(id: number, update: Partial<Game>) {
+    const games = repo.findAll();
+    const index = games.findIndex(g => g.id === id);
+    if (index === -1) return null;
+
+    games[index] = { ...games[index], ...update, id };
+    repo.save(games);
+    return games[index];
+}
+
+export function deleteGame(id: number) {
+    const games = repo.findAll();
+    const index = games.findIndex(g => g.id === id);
+    if (index === -1) return null;
+
+    const deleted = games.splice(index, 1)[0];
+    repo.save(games);
+    return deleted;
+}
+
+
+
+```
+
+## Tworzymy `Controller`
+- utworzymy folder `controllers`
+- utworzymy plik `games.controller.ts`
+```ts
+import { Request, Response } from "express";
+import * as service from "../services/games.sevice";
+
+export function getAll(req: Request, res: Response) {
+    res.json(service.getAllGames());
+}
+
+export function getOne(req: Request, res: Response) {
+    const game = service.getGameById(Number(req.params.id));
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    res.json(game);
+}
+
+export function create(req: Request, res: Response) {
+    const newGame = service.createGame(req.body);
+    res.status(201).json(newGame);
+}
+
+export function update(req: Request, res: Response) {
+    const updated = service.updateGame(Number(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ message: "Game not found" });
+    res.json(updated);
+}
+
+export function remove(req: Request, res: Response) {
+    const deleted = service.deleteGame(Number(req.params.id));
+    if (!deleted) return res.status(404).json({ message: "Game not found" });
+    res.json(deleted);
+}
+```
+
+## Modyfikujemy `routes/games.ts`
+- zmieńmy nazwę tego pliku na `games.routes.ts`
+- zawartość tego pliku to teraz tylko:
+```ts
+import * as controller from "../controllers/games.controller";
+import { validateGame } from "../middlewares/gameValidator";
+import { validateId } from "../middlewares/validateId";
+
+const router = Router();
+
+router.get("/", controller.getAll);
+router.get("/:id", validateId, controller.getOne);
+
+router.post("/", validateGame, controller.create);
+router.put("/:id", validateId, validateGame, controller.update);
+router.patch("/:id", validateId, controller.update);
+
+router.delete("/:id", validateId, controller.remove);
+
+export default router;
+```
+- dopasowałem nazwę pliku do nazwy `gameValidator` (bo był `GameValidator`)
+- brakuje nam middleware `validateId`:
+```ts
+import { Request, Response, NextFunction } from "express";
+
+export function validateId(req: Request, res: Response, next: NextFunction) {
+    const id = Number(req.params.id);
+
+    // Czy to liczba?
+    if (isNaN(id)) {
+        return res.status(400).json({
+            message: "Invalid ID: ID must be a number."
+        });
+    }
+
+    // Czy dodatnia?
+    if (id <= 0) {
+        return res.status(400).json({
+            message: "Invalid ID: ID must be a positive number."
+        });
+    }
+
+    // OK → przechodzimy dalej
+    next();
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

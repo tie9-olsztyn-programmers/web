@@ -1,0 +1,238 @@
+---
+title: Interfejsy
+---
+
+# Interfejsy
+## Definicja
+:::info Interfejs (*interface*)
+- definiuje kontrakt (strukturę), jaką musi spełniać obiekt, funkcja lub klasa,
+- pomaga w zapewnieniu spójności kodu,
+- nie ma implementacji (to nie klasy),
+- są kluczowe w dużych projektach, gdzie wiele części kodu musi pasować do siebie.
+
+:::
+
+## Syntaktyka
+Interfejs definiujemy za pomocą słowa kluczowego `interface`, po którym podajemy nazwę (*PascalCase*).
+
+```ts
+interface Osoba {
+  imie: string;
+  wiek: number;
+}
+
+// Użycie interfejsu jako typu
+const osoba: Osoba = {
+  imie: "Anna",
+  wiek: 25
+};
+
+console.log(`Imię: ${osoba.imie}, Wiek: ${osoba.wiek}`);
+
+```
+Wyjaśnienie:
+- obiekt musi dokładnie pasować do interfejsu
+- nie więcej, nie mniej właściwości
+- pojawi się błąd, jeśli zdefiniujesz obiekt np. bez wiek.
+
+## Interfejs jako "kształt" obiektu
+```ts
+interface Student {
+  name: string;
+  githubNick: string;
+  points: number;
+}
+
+const s1: Student = {
+  name: "Kasia",
+  githubNick: "k-fox",
+  points: 10,
+};
+
+// błąd – nie ma githubNick
+const s2: Student = {
+  name: "Bartek",
+  points: 5,
+};
+```
+
+## Pola opcjonalne `?`
+```ts
+interface Adres {
+  ulica: string;
+  numer: number;
+  miasto?: string;  // Opcjonalna
+}
+
+const adres1: Adres = { ulica: "Główna", numer: 10 };  // OK, bez miasta
+const adres2: Adres = { ulica: "Boczna", numer: 5, miasto: "Warszawa" };  // OK
+```
+
+```ts
+interface Game {
+  title: string;
+  platform: string;
+  rating?: number; // może być, ale nie musi
+}
+
+const g1: Game = {
+  title: "Dune II",
+  platform: "PC",
+};
+
+const g2: Game = {
+  title: "The Legend of Zelda",
+  platform: "NES",
+  rating: 10,
+};
+```
+
+## Właściowść tylko do odczytu `readonly`
+```ts
+interface Punkt {
+  readonly x: number;
+  readonly y: number;
+}
+
+const punkt: Punkt = { x: 1, y: 2 };
+// punkt.x = 3;  // Błąd: readonly
+```
+
+## Interfejs w funkcji
+```ts
+interface RetroGame {
+  title: string;
+  platform: string;
+  rating: number;
+}
+
+function printGame(game: RetroGame): void {
+  console.log(
+    `"${game.title}" on ${game.platform} has rating ${game.rating}/10`
+  );
+}
+
+const game: RetroGame = {
+  title: "Boulder Dash",
+  platform: "C64",
+  rating: 9,
+};
+
+printGame(game); // działa
+```
+
+```ts
+interface DodajFunkcja {
+  (a: number, b: number): number;  // Sygnatura: dwa argumenty number, zwrot number
+}
+
+const dodaj: DodajFunkcja = (x, y) => x + y;
+console.log(dodaj(2, 3));  // 5
+```
+
+## Interfejsy w klasach
+- Klasy mogą **implementować** interfejsy za pomocą implements.
+- Klasa musi spełniać kontrakt interfejsu.
+
+```ts
+interface Latajacy {
+  lataj(): void;
+}
+
+class Ptak implements Latajacy {
+  lataj() {
+    console.log("Ptak leci!");
+  }
+}
+
+const ptak = new Ptak();
+ptak.lataj();  // OK
+```
+
+
+```ts
+interface HasSummary {
+  getSummary(): string;
+}
+
+class Book implements HasSummary {
+  constructor(
+    public title: string,
+    public author: string,
+    public year: number
+  ) {}
+
+  getSummary(): string {
+    return `"${this.title}" by ${this.author} (${this.year})`;
+  }
+}
+
+const b = new Book("Dune", "Frank Herbert", 1965);
+console.log(b.getSummary());
+
+
+// tak klasa generuje błąd
+class BrokenBook implements HasSummary {
+  // błąd: Class 'BrokenBook' incorrectly implements interface 'HasSummary'.
+  //         Property 'getSummary' is missing...
+}
+
+
+```
+
+## Klasa może implementować wiele interfejsów
+Interfejsy to swoiste role, jakie może spełniać obiekt danej klasy.
+
+```ts
+interface CanCastSpell {
+  mana: number;
+  castSpell(spellName: string): void;
+}
+
+interface CanTakeDamage {
+  hp: number;
+  takeDamage(amount: number): void;
+}
+
+class Wizard implements CanCastSpell, CanTakeDamage {
+  constructor(
+    public name: string,
+    public hp: number,
+    public mana: number
+  ) {}
+
+  castSpell(spellName: string): void {
+    if (this.mana <= 0) {
+      console.log(`${this.name} has no mana.`);
+      return;
+    }
+    this.mana -= 10;
+    console.log(`${this.name} casts ${spellName}. Mana: ${this.mana}`);
+  }
+
+  takeDamage(amount: number): void {
+    this.hp -= amount;
+    console.log(`${this.name} takes ${amount} damage. HP: ${this.hp}`);
+  }
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

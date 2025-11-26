@@ -1,0 +1,92 @@
+---
+title: RetroGamesBD
+---
+
+# RetroGamesBD
+Stworzymy serwer API w Express + TypeScript, który pozwala zarządzać listą starych gier.
+
+## REST API - co to jest?
+:::note REST API
+*Representational State Transfer Application Programming Interface*
+- to styl architektoniczny:
+    - określa **sposób komunikacji** między różnymi systemami w sposób
+        - prosty,
+        - przejrzysty
+        - ustandaryzowany.
+- REST API jest dziś jednym z najpopularniejszych sposobów budowania aplikacji internetowych i mobilnych.
+- Pozwala:
+    - frontendowi (np. aplikacji w React, Android, Avalonia) komunikować się z
+    - backendem (np. serwerem Express lub .NET),
+    - a także integrować różne systemy ze sobą.
+
+
+:::
+
+## REST API - jak działa?
+- REST API opiera się na protokole HTTP, czyli tym samym, którego używają przeglądarki internetowe.
+- Komunikacja odbywa się w modelu `request → response`.
+    - Klient (np. przeglądarka lub aplikacja mobilna) wysyła żądanie do serwera.
+    - Serwer przetwarza to żądanie i zwraca odpowiedź — często w formacie JSON.
+
+
+
+## REST API - zasoby
+- W REST API wszystko jest traktowane jako **zasób** — czyli element danych, którym można zarządzać.
+- Zasobem może być np. użytkownik, produkt, gra, komentarz czy post na blogu.
+- Każdy zasób ma swój unikalny adres URL (tzw. *endpoint*).
+
+```bash
+GET https://api.example.com/users        → lista użytkowników
+GET https://api.example.com/users/1      → użytkownik o ID 1
+
+```
+## Metody HTTP
+
+REST API wykorzystuje standardowe metody HTTP do manipulacji zasobami:
+| **Metoda HTTP** | **Opis działania** | **Typowa operacja** | **Zmienia dane?** | **Przykładowy endpoint** | **Kod statusu (typowo)** |
+|-----------------|--------------------|---------------------|-------------------|--------------------------|--------------------------|
+| **GET** | Pobiera dane zasobu lub listę zasobów. | Odczyt |  Nie | `/games` <br/> `/games/1` | `200 OK` |
+| **POST** | Tworzy nowy zasób. | Dodawanie | ✅ Tak | `/games` | `201 Created` |
+| **PUT** | Zastępuje istniejący zasób nowym (pełna aktualizacja). | Nadpisanie | ✅ Tak | `/games/1` | `200 OK` <br/>`204 No Content` |
+| **PATCH** | Aktualizuje wybrane pola istniejącego zasobu (częściowa aktualizacja). | Modyfikacja | ✅ Tak | `/games/1` | `200 OK` |
+| **DELETE** | Usuwa istniejący zasób. | Usuwanie | ✅ Tak | `/games/1` | `204 No Content` <br/>`404 Not Found` |
+
+---
+
+## Przejrzysta struktura URL (endpointy)
+Dobre REST API ma intuicyjne, czytelne adresy.
+
+Przykład dla systemu postów na blogu:
+```
+GET    /posts        → pobiera listę postów
+GET    /posts/1      → pobiera post o ID 1
+POST   /posts        → tworzy nowy post
+PUT    /posts/1      → aktualizuje post o ID 1
+DELETE /posts/1      → usuwa post o ID 1
+```
+
+## Statelessness (bezstanowość)
+REST API jest bezstanowe, co oznacza, że:
+- serwer nie zapamiętuje kontekstu między kolejnymi zapytaniami od tego samego klienta.
+
+## Format danych
+Najczęściej REST API wymienia dane w formacie JSON (JavaScript Object Notation):
+
+```
+{
+  "id": 1,
+  "title": "Super Mario Bros.",
+  "year": 1985
+}
+```
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,29 @@
+---
+title: Łączenie metod
+---
+
+- metody można łączyć w ciągi wywołań,
+- to, co zwraca jedna metoda, trafia jako argument do drugiej funkcji
+
+
+```ts
+const numbers: number[] = [1, 2, 3, 4, 5, 6];
+
+// Znajdujemy liczby parzyste,
+// zwiększamy je o 10 i wypisujemy w konsoli
+
+numbers
+    .filter(num => num % 2 === 0)  // [2, 4, 6]
+    .map(num => num + 10)           // [12, 14, 16]
+    .forEach(num => console.log(num));
+
+
+// Wynik w konsoli:
+// 12
+// 14
+// 16
+```
+
+
+
+

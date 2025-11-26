@@ -1,0 +1,117 @@
+---
+title: Operatory *spread*
+---
+
+# Operator "rozpakowania" *spread*
+:::note Operatory *spread* `...`
+- "rozpakowuje" listę lub obiekt
+    - "wyciąga" elementy z listy
+    - "wyciąga" właściwości z obiektu
+
+:::
+
+## Łączenie tablic
+```ts
+const frontend = ['HTML', 'CSS', 'JavaScript'];
+const backend = ['Node.js', 'Express', 'MongoDB'];
+
+// Spread łączy obie listy w jedną
+const fullStack = [...frontend, ...backend];
+console.log(fullStack);
+// ["HTML", "CSS", "JavaScript", "Node.js", "Express", "MongoDB"]
+
+```
+## Kopiowanie tablic (nie referencji)
+```ts
+const numbers = [1, 2, 3];
+const copy = [...numbers];
+
+copy.push(4);
+console.log(numbers); // [1, 2, 3]
+console.log(copy);    // [1, 2, 3, 4]
+
+```
+
+## Rozpakowywanie elementów tablicy jako argumenty funkcji
+```ts
+function multiply(a: number, b: number, c: number) {
+  return a * b * c;
+}
+
+const values = [2, 3, 4];
+
+// Spread rozpakowuje tablicę do pojedynczych argumentów
+console.log(multiply(...values)); // 24
+```
+
+## Aktualizacja obiektu
+```ts
+type User = {
+  name: string;
+  age: number;
+  city: string;
+};
+
+const user: User = { name: 'Anna', age: 25, city: 'Warsaw' };
+
+// Spread pozwala zrobić nowy obiekt bez modyfikowania starego
+const updatedUser = { ...user, city: 'Krakow' };
+console.log(updatedUser);
+
+/*
+{
+  "name": "Anna",
+  "age": 25,
+  "city": "Krakow"
+}
+*/
+```
+
+## Łączenie wielu obiektów w jeden
+```ts
+const baseConfig = { apiUrl: 'https://api.example.com', timeout: 5000 };
+const devConfig = { debug: true, timeout: 10000 };
+
+// Spread scala obiekty w nowy
+const config = { ...baseConfig, ...devConfig };
+console.log(config);
+// { apiUrl: 'https://api.example.com', timeout: 10000, debug: true }
+
+/*
+{
+  "apiUrl": "https://api.example.com",
+  "timeout": 10000,
+  "debug": true
+}
+*/
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

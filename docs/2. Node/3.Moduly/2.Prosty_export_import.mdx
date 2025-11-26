@@ -1,0 +1,45 @@
+---
+title: Prosty export elementów
+---
+# Przykład 1. - prosty eksport
+- Utwórz w Webstorm nowy projekt `New Project -> TypeScript (to wystarczy)`
+- W folderze `src` zrób nowy plik `math.ts`
+```ts
+console.log("Hello from maths.ts");
+
+let stringOnlyInThatModule = "Hello";
+
+export const PI = Math.PI;
+
+export function square(x: number):number {
+    return x * x;
+}
+
+export function calculateCubeArea(a: number): number {
+    return 6 * a * a;
+}
+```
+
+w pliku `index.ts` zaimportujemy zmienne i funkcje
+```ts
+import {PI, square, calculateCubeArea, } from "./maths"
+
+// ten import nie zadziała, bo stringOnlyInThatModule
+// nie jest wyeksportowany
+//import {PI, square, calculateCubeArea,stringOnlyInThatModule } from "./maths"
+
+
+console.log(PI, square(2), calculateCubeArea(2))
+/*WYNIK
+Hello from maths.ts
+3.141592653589793 4 24
+ */
+
+// console.log(stringOnlyInThatModule) // ten kod się nie wykona
+// bo zmienna stringOnlyInThatModule jest zdefiniowana w module maths.ts
+// ale nie została wyeksportowana, więc jest jakby prywatna
+```
+
+
+
+

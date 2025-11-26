@@ -1,0 +1,72 @@
+---
+title: Ćwiczenia z *rest* i *spread*
+---
+
+# Ćwiczenia z *rest* i *spread*
+
+
+1. Dodaj nową właściwość do obiektu
+Mając obiekt `osoba = {imie:"Anna", wiek:30}`,
+użyj operatora spread, aby utworzyć nowy obiekt `nowaOsoba`,
+który będzie zawierał wszystkie właściwości z `osoba` oraz dodatkową właściwość `miasto:"Warszawa"`.
+
+// Wynik: `{ imie: "Anna", wiek: 30, miasto: "Warszawa" }`
+
+
+2. Funkcja zwracająca pozostałe elementy tablicy
+Napisz funkcję pozostałe, która przyjmuje pierwszy element tablicy jako osobny parametr,
+a resztę elementów jako tablicę za pomocą operatora rest.
+Funkcja powinna zwracać nową tablicę zawierającą tylko pozostałe elementy.
+
+`pozostale(1, 2, 3, 4, 5);`
+// Wynik: `[2, 3, 4, 5]`
+
+
+3. Kopiowanie i modyfikowanie obiektu
+Mając obiekt `produkt={nazwa:"telefon", cena: 1000}`,
+użyj operatora spread, aby skopiować go do nowego obiektu `zmodyfikowanyProdukt` z nową ceną `1200`.
+
+// Wynik: `{ nazwa: "Telefon", cena: 1200 }`
+
+
+4. Łączenie właściwości obiektów
+Mając dwa obiekty:
+- `dane1={imie:"Jan", wiek:40}` i
+- `dane2={kraj:"Polska", miasto:"Kraków"}`,
+użyj operatora spread, aby połączyć je w nowy obiekt `polaczoneDane`.
+
+
+// Wynik: `{ imie: "Jan", wiek: 40, kraj: "Polska", miasto: "Kraków" }`
+
+
+5. Oblicz sumę pozostałych elementów po destrukturyzacji
+Napisz funkcję `sumaPozostalych`,
+która przyjmuje pierwszy element tablicy osobno,
+a resztę elementów za pomocą operatora rest.
+Funkcja powinna zwracać sumę tylko tych pozostałych elementów.
+
+`sumaPozostalych(5, 10, 15, 20);`
+// Wynik: `45 (suma 10, 15, 20)`
+
+
+6. Łączenie i nadpisywanie właściwości obiektów
+Mając obiekty:
+- `domyslneDane = {jezyk:"pl", motyw:"jasny}` oraz
+- `uzytkownikDane = {motyw:"ciemny", kraj:"Polska"}`,
+połącz je w nowy obiekt konfiguracja, w którym nadpiszesz właściwości:
+- `domyslneDane` danymi z `uzytkownikDane` (użyj operatora spread).
+
+// Wynik: `{ jezyk: "pl", motyw: "ciemny", kraj: "Polska" }`
+
+
+7. Wyodrębnij imiona po pierwszym
+Napisz funkcję `pozostaleImiona`, która przyjmuje dowolną liczbę argumentów.
+Funkcja powinna zwracać nową tablicę, która zawiera wszystkie elementy poza pierwszym.
+
+`pozostaleImiona("Anna", "Jan", "Tomek", "Ola");`
+// `Wynik: ["Jan", "Tomek", "Ola"]`
+
+
+
+
+

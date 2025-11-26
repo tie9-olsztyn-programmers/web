@@ -1,0 +1,158 @@
+---
+title: Atualizacja `PUT`, `PATCH`
+---
+
+
+# Aktualizacja
+Zasoby mogą być aktualizowane za pomocę metod `PUT` i `PATCH`.
+
+| **Metoda** | **Typ aktualizacji** | **Opis działania** | **Przykład użycia** |
+|-------------|----------------------|---------------------|----------------------|
+| **PUT** | Pełna aktualizacja | Zastępuje **cały obiekt** nowymi danymi. Jeśli nie podasz jakiegoś pola, zostanie ono usunięte. | Wysyłasz wszystkie pola gry, nawet te, które się nie zmieniły. |
+| **PATCH** | Częściowa aktualizacja | Zmienia **tylko te pola**, które zostały przesłane w żądaniu. Pozostałe dane pozostają bez zmian. | Wysyłasz tylko jedno pole, np. `rating`. |
+
+## Metoda `PUT`
+### Destrukturalizacja obiektu
+```ts
+let dog = {name:"Reksio", age:10}
+let tmp = {age:0}
+
+let puppy = {...dog, ...tmp} // { name: "Reksio", age: 0 } dog nadpisywany przez tmp
+let notPuppy = {...tmp, ...dog} // { age: 10, name: "Reksio" } tmp nadpisywany przez dog
+
+let dogWithId = {id: 10, ...dog} // { id: 10, name: "Reksio", age: 10 }
+```
+
+
+### Definicja trasy z `PUT`
+
+```ts
+app.put("/games/:id", (req, res) => {
+    try {
+        const id = Number(req.params.id); // parsowanie id: string -> id: int
+        const index = games.findIndex(g => g.id === id); // zwraca index albo -1
+        if (index === -1) return res.status(404).send("Game not found");
+
+        games[index] = { id, ...req.body }; // nadpisujemy obiekt gry pozostawiamy id bez zmian
+        res.json(games[index]);
+    } catch (error) {
+        console.error("Błąd aktualizacji gry:", error); // Log do konsoli
+        res.status(500).json({ message: "Wewnętrzny błąd serwera" }); // Odpowiedź dla klienta
+    }
+});
+
+```
+
+
+### Zapytania do serwera - poprawne
+```http request
+
+### aktualizacja przez put
+# zmienimy title, year
+PUT {{baseUrl}}/games/1
+Content-Type: application/json
+
+{
+  "title": "Mario Po Polsku",
+  "year": 3993,
+  "platform": "PC",
+  "genre": "Shooter"
+}
+
+### pytamy o grę z indeksem 1
+GET {{baseUrl}}/games/1
+Accept: application/json
+
+```
+
+### Zapytania do serwera - niepoprawne
+
+```http request
+### zapytanie, które zniszczy grę id=2
+# chcieliśmy zamienić tytuł na same duże litery
+PUT {{baseUrl}}/games/2
+Content-Type: application/json
+
+{
+  "title": "PONG"
+}
+
+### sprawdzamy grę id=2
+GET {{baseUrl}}/games/2
+Accept: application/json
+```
+
+
+
+## Metoda `PATCH`
+### Metoda `Object.assign`
+:::tip Co to jest `Object.assign()`?
+- `Object.assign(target, source1, source2, ...)`
+- kopiuje własne pola z jednego lub wielu obiektów źródłowych do obiektu docelowego (`target`).
+
+:::
+
+```ts
+let dog = {name:"Reksio", age:10}
+let objectPuppy = {age: 1, id:20}
+Object.assign(objectPuppy, dog) // { age: 10, id: 20, name: "Reksio" }
+
+let newDog = Object.assign({}, dog, {age:99}, {age:222}) //{ name: "Reksio", age: 222 }
+
+let student = {name: "Zdzisław", age: 15, class: 3}
+Object.assign(student, {age:16, class:4})
+// student = Object { name: "Zdzisław", age: 16, class: 4 }
+let updatedStudent = Object.assign(student, {age:17, class:5})
+// udpatedStudent = { "name": "Zdzisław", "age": 17, "class": 5 }
+
+```
+
+
+
+### Definicja trasy z `PATCH`
+
+```ts
+app.patch("/games/:id", (req, res) => {
+    try{
+        const id = Number(req.params.id);
+        const game = games.find(g => g.id === id);
+        if (!game) return res.status(404).send("Game not found");
+
+        Object.assign(game, req.body); // aktualizacja tylko podanych pól
+        res.json(game);
+    }catch(error){
+        console.error(error)
+    }
+});
+
+```
+
+### Zapytania do serwera
+
+```http request
+
+### Metoda Patch gra id=3
+# zamienimy year na 3984
+PATCH {{baseUrl}}/games/3
+Content-Type: application/json
+
+{
+    "year":3983
+}
+
+### sprawdzamy poprawność zapytania o grę id=3
+GET {{baseUrl}}/games/3
+Accept: application/json
+
+### Metoda Patch z niepoprawnym id=9999
+PATCH {{baseUrl}}/games/9999
+Content-Type: application/json
+
+{
+  "year":3984
+}
+
+```
+
+
+

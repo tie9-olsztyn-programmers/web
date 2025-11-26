@@ -1,0 +1,272 @@
+---
+title: Moduł `http`
+---
+
+# Moduł `http`
+
+## Mała teoria
+
+:::note Co to jest `http`?
+- `http` (*HyperText Transfer Protocol*) to protokół komunikacji między przeglądarką a serwerem WWW.
+- Działa na podstawie TCP socketów, ale dodaje do nich jasne zasady wymiany danych:
+    - klient wysyła żądanie (`request`),
+    - serwer odpowiada odpowiedzią (`response`).
+
+:::tip
+Wyyobraź sobie:
+- Socket (`net`) to rozmowa telefoniczna – możesz mówić o wszystkim.
+- `HTTP` to rozmowa według ściśle określonego scenariusza:
+    - klient: „Chciałbym stronę /index.html metodą GET”
+    - serwer: „Oto odpowiedź, status 200, zawartość HTML”.
+    - Każde takie połączenie to:
+        - list wysłany i
+        - odpowiedź otrzymana – po wymianie połączenie się kończy.
+
+:::
+
+## Praktyka
+
+### Przygotowanie projektu
+- utwórz projekt (*New Project*) w WebStorm (pamiętaj o wybraniu TypeScript)
+- do instaluj potrzebne paczki: `npm install --save-dev ts-node @types/node#`
+- w twoim `package.json` powinieneś mieć:
+```json
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+```
+- do skryptów w `package.json` dopisz `start`:
+```json
+"scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts"
+  },
+```
+Poniewaź w pliku konfiguracyjnym TypeScripta mamy `"esModuleInterop": true,`,
+będziemy mogli używać uproszczonego importu.
+
+### Pierwszy serwer
+```ts
+import http from "http"
+
+const server = http.createServer((req, res) => {
+    console.log("Request req.url=",req.url)
+    console.log("req TO ",req)
+    console.log("res TO ",res)
+
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Hello from my first HTTP server!");
+})
+
+server.listen(8080, () => {
+    console.log("Server running at http://localhost:8080");
+})
+
+```
+- `res.writeHead(statusCode, headers)`
+    - Ustawia kod statusu HTTP (np. `200 OK`, `404 Not Found`, `500 Internal Server Error`),
+    - Ustawia nagłówki odpowiedzi (np. `Content-Type`, `Content-Length`, `Date`, itd.).
+    - Dzięki temu przeglądarka lub inny klient wie:
+        - czy operacja się powiodła,
+        - jakiego typu danych się spodziewać (tekst, HTML, JSON...).
+        - na przykład:
+            - `res.writeHead(200, { "Content-Type": "text/html" })` znaczy tyle, co:
+                - "Wszystko OK (200), a dane, które wysyłam, to HTML".
+
+- `res.end()`
+    - kończy odpowiedź serwera i wysyła ją do klienta,
+    - To ostatni krok w cyklu request–response,
+    - Dopiero po wywołaniu `.end()` Node.js wie, że:
+        - serwer zakończył pisanie do odpowiedzi,
+        - można ją odesłać przez sieć do klienta (np. przeglądarki).
+    - Jeśli zapomnisz o `.end()`, serwer:
+        - nigdy nie wysyła odpowiedzi,
+        - połączenie wisi – przeglądarka czeka, aż serwer powie "koniec”,
+        - użytkownik widzi "wczytywanie…" w nieskończoność.
+        - czyli `.end()` to sygnał: "zakończyłem wysyłanie danych”.
+::tip `.end()` metaforycznie
+Wyobraź sobie:
+- Serwer pisze list do klienta (`res.write()`),
+- Dopóki nie podpisze i nie zaklei koperty (`res.end()`), list nie może zostać wysłany przez pocztę.
+- czyli
+    - `res.write()` piszesz kolejne linijki w liście,
+    - `res.end()` podpisujesz, zaklejasz i wrzucasz do skrzynki pocztowej.
+
+:::
+
+
+:::note Obiekt żądanie - *request* (`req`)
+- to obiekt, który reprezentuje przychodzące żądanie od klienta.
+- Zawiera:
+    - `req.url` – adres zasobu,
+    - `req.method` – metoda HTTP (`GET`, `POST`, `PUT`, ...),
+    - `req.headers` – `nagłówki żądania` (np. przeglądarka, język, typ danych),
+    - `req` jest też czytelnym strumieniem (Readable Stream) – czyli można z niego odczytać dane (np. z formularza).
+
+:::tip metaforycznie
+Wyobraź sobie serwer jako urzędnika w okienku,
+a klient (np. przeglądarka) wysyła mu formularz z prośbą.
+- `request` to właśnie ten formularz, który klient przekazał urzędnikowi:
+    - mówi, czego chce (`req.url`),
+    - jak chce to zrobić (`req.method`),
+    - zawiera dodatkowe informacje (np. `req.headers`, np. język, dane użytkownika).
+
+:::
+
+
+:::info Obiekt odpowiedź - *response* (`res`)
+- to obiekt, który reprezentuje odpowiedź serwera,
+- czyli dane, które zostaną odesłane do klienta.
+- Zawiera metody do:
+    - ustawienia nagłówków (`res.writeHead()` lub `res.setHeader()`),
+    - wysłania treści (`res.write()`),
+    - zakończenia i wysłania odpowiedzi (`res.end()`).
+
+:::tip metaforyczni
+Wracając do urzędu:
+- `response` to odpowiedź, którą urzędnik daje klientowi po przeczytaniu jego formularza:
+    - `zawiera status` (np. „OK, sprawa załatwiona” albo „Błąd, brak dokumentów”),
+    - zawiera treść – odpowiedź na zapytanie.
+
+:::
+
+
+### Serwer z różnymi ścieżkami
+```typescript
+import  http from "http"
+
+const PORT = 8080
+
+const server = http.createServer((req, res) => {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8")
+
+    if (req.url === "/") {
+        res.end("Strona główna")
+    } else if (req.url === "/about") {
+        res.end("O nas")
+    } else {
+        res.statusCode = 404
+        res.end("Strona nie znaleziona")
+    }
+});
+
+server.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
+
+
+```
+
+### Server z HTML
+```typescript
+import http from "http"
+
+const PORT = 8080
+
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(`
+    <html>
+      <body>
+        <h1>Witaj na moim serwerze HTTP!</h1>
+        <p>To odpowiedź w formacie HTML.</p>
+      </body>
+    </html>
+  `);
+});
+
+
+server.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
+```
+
+### Server z plikiem
+- zróbmy plik `myWeb.html`
+
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <title>Witaj na moim serwerze</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #0066cc;
+        }
+        p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<h1>Strona główna</h1>
+<p>Witaj! Ta strona została wczytana z serwera HTTP napisanego w Node.js.</p>
+<p>Test polskich znaków: ą, ć, ę, ł, ń, ó, ś, ź, ż </p>
+</body>
+</html>
+```
+
+
+- zróby nasz serwer w pliku `index.ts`
+
+```ts
+import fs from "fs"
+const PORT = 8080
+const CONTENT_TYPE = "text/html; charset=utf-8"
+
+const server = http.createServer((req, res) => {
+    if (req.url === "/") {
+
+        fs.readFile("myWeb.html", (err, data) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": CONTENT_TYPE })
+                console.error(err);
+                res.end("Błąd serwera")
+            } else {
+                res.writeHead(200, { "Content-Type" : CONTENT_TYPE } )
+                res.end(data)
+            }
+        });
+    } else if (req.url === "/about"){
+        res.writeHead(200, { "Content-Type": CONTENT_TYPE })
+        res.write("Fanie, że chcesz się coś dowiedzieć o mnie\n")
+        res.write("Ale szczerze mówiąc nie wiele jest\n")
+        res.end("KONIEC połączenia, dane wysłane, pa")
+
+    }else {
+        res.writeHead(404, { "Content-Type": CONTENT_TYPE })
+        res.end("Nie znaleziono")
+    }
+});
+
+server.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`))
+
+```
+
+- wejście na stronę `localhost:8080` będzie zwracać napis `błąd serwera`
+- jest tak, ponieważ aplikację uruchamiamy `ts-node src/index.ts`, czyli
+    - ścieżką domyślną jest poziom `/`, a nie `src/`
+    - nasz plik `.html` jest `src` a nie `/`
+- żeby rozwiązać ten problem użyjemy modułu `path`:
+```ts
+//...
+import path from "node:path";
+//...
+
+const server = http.createServer((req, res) => {
+    const filePath = path.join(__dirname, "myWeb.html")
+    if (req.url === "/") {
+
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+//...
+```
+Pamiętaj o imporcie moduły `path`!!!!

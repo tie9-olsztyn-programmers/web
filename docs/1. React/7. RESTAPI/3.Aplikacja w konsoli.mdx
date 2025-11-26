@@ -1,0 +1,103 @@
+---
+title: Dane w konsoli
+---
+
+kontynuacja z poprzedniej lekcji
+
+
+
+# Pobranie danych JSON
+Zmień funkcję `fetchDataFromSwapi`:
+```tsx
+   const fetchDataFromSwapi = async () => {
+        const data: Response = await  fetch(`${BASE}people/1`)
+        const jsonData: any = await data.json()
+        console.log(jsonData)
+    }
+
+```
+
+# Zdefiniowanie typu danych
+- `jsonData` powinno przechowywać dane jsonowe
+- metoda `fetch` nie wie, jaka jest struktura tych danych, dlatego `jsonData` jest typu `any`
+- na stronie https://swapi.info/api/people/1 widać strukturę danych
+- więc samodzielnie zdefiniujemy nowy typ danych
+
+```tsx
+import './App.css'
+
+const BASE = 'https://swapi.info/api/'
+
+type Person = {
+    name: string
+    height: string
+    mass: string
+    birth_year: string
+    gender: string
+    homeworld: string
+    starships: string[]
+    vehicles: string[]
+    films: string[]
+    url: string
+}
+
+
+function App() {
+
+    const fetchDataFromSwapi = async () => {
+        const data: Response = await  fetch(`${BASE}people/1`)
+        const jsonData: Person = await data.json()
+        console.log(jsonData)
+    }
+
+  return (
+    <>
+      <h1>Star Wars Rest Api</h1>
+      <button onClick={fetchDataFromSwapi}>Fetch data from swapi.info</button>
+
+    </>
+  )
+}
+```
+- `type` działa po stronie TS (Typ w TypeScript to tylko deklaracja, co TY chcesz „widzieć” i kontrolować w swoim kodzie).
+- API zwraca pełne dane
+
+
+# Dodanie obsługi błędu
+```tsx
+    const fetchDataFromSwapi = async () => {
+        try{
+            const data: Response = await  fetch(`${BASE}people/1`)
+            const jsonData: Person = await data.json()
+            console.log(jsonData)
+        } catch(error){
+            if(error instanceof Error){
+                console.log(error.message)
+            }else {
+                console.log('Unknown error')
+            }
+
+        }
+
+    }
+```
+
+
+# Łańcuch obietnic - starsza syntaktyka
+```tsx
+ const fetchDataFromSwapi =  () => {
+
+        fetch(`${BASE}people/1`)
+            .then(data => data.json())
+            .then(jsonData => console.log(jsonData))
+            .catch(error => console.log(error))
+    }
+```
+Kod działa tak samo jak poprzedni.
+
+
+
+
+
+
+

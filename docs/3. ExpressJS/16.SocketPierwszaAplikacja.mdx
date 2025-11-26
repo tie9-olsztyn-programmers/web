@@ -1,0 +1,154 @@
+---
+title: Socket prosta aplikacja
+---
+
+# Gdy serwer rozmawiał klientem - prosta aplikacja
+## Podstawowe pojęcia
+:::note *server*
+- Serwer to program (lub komputer), który:
+  - czeka na połączenia i
+  - odpowiada na prośby (żądania) innych programów.
+- Serwer nie zaczyna rozmowy — tylko czeka, aż ktoś się z nim skontaktuje.
+- Kiedy klient wysyła zapytanie, serwer reaguje:
+  - przetwarza dane,
+  - wysyła wynik,
+  - zapisuje coś w bazie
+  - ...
+
+Serwer to **centrala telefoniczna** – siedzi i czeka na połączenia.
+:::
+
+
+:::info *client*
+Klient to program lub urządzenie, które nawiązuje połączenie z serwerem:
+- wysyła zapytania i
+- odbiera odpowiedzi.
+
+
+W kontekście socketów:
+- klient inicjuje połączenie (dzwoni pierwszy),
+- zna adres IP i port serwera,
+- po połączeniu może wysyłać i odbierać dane,
+- sam nie nasłuchuje — to on prosi o kontakt.
+
+Klient to **osoba, która wybiera numer i dzwoni** do centrali.
+:::
+
+
+## Tworzenie projektu
+- WebStorm,
+  - New Project,
+  - TypeScript
+- doinstalujemy paczki: `npm install --save-dev ts-node @types/node`
+
+### Utwórzmy plik `server.ts`:
+
+```ts
+import net from "net"
+
+const server = net.createServer( socket => {
+    console.log("New connection")
+
+    socket.setEncoding("utf8")
+
+    socket.write("Witam na serwerze")
+
+    socket.on("data", data => {
+        console.log("Otrzymano do klienta: " + data.toString().trim())
+
+    })
+
+    socket.on("end", ()=>{
+        console.log("Klient odłożył słuchawkę, koniec połączenia :( ")
+
+    })
+})
+
+server.listen(1410, ()=>{
+    console.log("Serwer uruchomiony na porcie 1410")
+})
+```
+**Wyjaśnienia**
+- `createServer( socket => {...)`
+```
+    const server = net.createServer((socket) => {
+    // Ten socket to "kanał komunikacyjny" z konkretnym klientem
+    // callback jest wywoływany za każdym razem, gdy nowy klient się połączy
+    // Klient Hans łączy się z serwerem, powstaje obiekt socket1
+    // Klient Mścibór łączy się z serwerem, powstaje obiekt socket2
+    // ...
+}
+});
+```
+- `socket.write('Cześć kliencie!')`
+  - ta metoda wysyła dane z serwera do danego klienta
+  - dane są wysyłane tylko do tego klient, z którego pochodzi `socket`
+
+- `socket.on("nazwaZdarzenia" ...)`:
+  - nasłuchiwanie na zdarzenie `nazwaZdarzenia`
+  - "Jeśli klient coś przyśle, to wykonana będzie odpowiednia akcja"
+  - typ danych to `Buffer`
+
+
+:::tip Automatyczny `emit`
+W czystym `EventEmitterze` w Node:
+- `emitter.on("coś", handler)`
+- `emitter.emit("coś", dane)`
+
+Czyli:
+- `on(...)` nasłuchuję na zdarzenie
+- `emit(...)` emituję zdarzenie
+
+ALE: w przypadku `socket.on("data", ...)`:
+- nie emitujesz tego zdarzenia sam, robi to Node.js za Ciebie.
+- obiekt `socket` (czy to po stronie serwera, czy klienta) jest:
+  - instancją klasy `Socket, która
+  - dziedziczy po `EventEmitter`.
+  - Node wewnętrznie:
+  - wywołuje `.emit("data", ...)` za Ciebie, kiedy
+  - przychodzą dane po TCP.
+
+:::
+
+
+### Utwórzmy plik `client.ts`:
+```ts
+import net from "net"
+
+const client = net.createConnection({port: 1410}, () => {
+    console.log("Połączono z serwerem")
+})
+
+client.setEncoding("utf8");
+
+client.on("data", data => {
+    console.log(`Otrzymano z serwera ${data.toString().trim()}`)
+
+    client.write("Dzięki, serwerze", ()=>{
+        console.log("Wiadomość wysłana")
+        client.end()
+    })
+
+})
+
+
+
+client.on("end", () => {
+    console.log("Rozłączono z serwerem")
+})
+```
+
+
+::tip Jaka jest relacja między `client.end()` a `client.on("end", ()=> ...)`
+1. `client.end()`, czyli `client` mówi do serwera: "Kończę!"
+2. `server` wykrywa zakończenie (np. w `socket.on("end")`)
+3. `server` zamyka swoje połączenie (np. `socket.end()`)
+4. `client` odbiera "koniec danych" z serwera
+5. `client.on("end")` się uruchamia
+
+:::
+
+
+
+
+

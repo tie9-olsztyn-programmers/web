@@ -1,0 +1,60 @@
+---
+title: Moduł `path`
+---
+
+# Moduł `path`
+
+## Po co używać modułu `path`?
+- W systemie Linux/Mac ścieżki mają / (np. `data/file.txt`).
+- W systemie Windows ścieżki mają \ (np. `data\file.txt`).
+- Jeśli napiszemy ścieżkę „na sztywno”, kod może działać na jednym systemie, a na innym się wywali.
+- Rozwiązanie: moduł `path` (wbudowany w Node.js).
+- Użycie modułu w kodzie `import * as path from "path";`
+
+## Łączenie - path.join()
+Łączy fragmenty ścieżki w sposób zgodny z systemem operacyjnym.
+```typescript
+import * as path from 'path'
+
+const filePath = path.join("data", "notes", "file.txt");
+console.log(filePath);
+// data/notes/file.txt (linux)
+```
+
+## Ścieżka absolutna - `path.resolve()`
+Buduje pełną ścieżkę absolutną od bieżącego katalogu.
+```typescript
+import * as path from 'path'
+const absPath = path.resolve("test3.txt");
+console.log(absPath);
+```
+
+## Analiza ścieżki
+```typescript
+import * as path from 'path'
+
+const absPath = path.resolve("test3.txt");
+console.log(absPath);
+console.log(path.basename(absPath))
+console.log(path.extname(absPath));
+console.log(path.dirname(absPath));
+console.log("--------------")
+console.log(__dirname);
+console.log(__filename);
+
+```
+kod zwraca
+```bash
+/home/js/WebstormProjects/myFsModul/src/test3.txt - to ścieżka absolutna
+test3.txt - nazwa pliku
+.txt - rozszerzenie pliku
+/home/js/WebstormProjects/myFsModul/src - katologia pliku
+--------------
+/home/js/WebstormProjects/myFsModul/src - katalog, w którym jest uruchomiony kod
+/home/js/WebstormProjects/myFsModul/src/index.ts - plik, w którym znajduje się kod
+
+
+```
+
+
+

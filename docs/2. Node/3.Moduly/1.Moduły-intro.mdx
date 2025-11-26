@@ -1,0 +1,61 @@
+---
+title: Moduły - wprowadzenie
+---
+
+
+
+# Moduł w Node.js:
+- To zestaw funkcji lub obiektów.
+- Można zaimportować go i wykorzystać w innym pliku JavaScript.
+- Moduły pomagają w organizacji kodu, umożliwiając jego podział na mniejsze, bardziej zarządzalne i wielokrotnie używalne fragmenty.
+- W Node.js każdy plik jest traktowany jako oddzielny moduł.
+
+
+# Typy modułów w Node.js:
+- **Wbudowane moduły** - Node.js dostarcza wiele wbudowanych modułów, które oferują podstawową funkcjonalność, taką jak:
+    - obsługa plików,
+    - obsługa sieci,
+    - praca z systemami operacyjnymi
+    - itp.
+    - Przykłady to moduły:
+        - `fs` (do operacji na systemie plików),
+        - `http` (do tworzenia serwerów HTTP),
+        - `path` (do pracy ze ścieżkami plików).
+- **Zewnętrzne moduły**:
+    - To moduły, które można zainstalować za pomocą menedżera pakietów npm (Node Package Manager).
+    - Są one tworzone przez społeczność i mogą oferować różnorodne funkcjonalności:
+        - od pracy z bazami danych,
+        - przez tworzenie interfejsów API,
+        - po zaawansowane narzędzia deweloperskie.
+- **Własne moduły** - Można tworzyć własne moduły:
+    - zapisując kod w osobnym pliku
+    - eksportując go, aby był dostępny do użycia w innych plikach.
+
+tworzymy moduł
+```ts
+// plik math.ts
+export function add(a:number, b:number):number {
+  return a + b;
+}
+```
+
+importujemy go w innym pliku
+```ts
+// plik app.ts
+import { add } from "./math.js";
+console.log(add(2, 3));
+```
+
+
+# Dwa systemy importu modułu w Node.js:
+- *CommonJS* – starszy (module.exports, require)
+- *ESM* (ECMAScript Modules) – nowszy (export, import)
+- W TypeScript używamy najczęściej ESM.
+
+
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+---
+title: Sockets i moduł `net`
+---
+
+# Sockets i modułe `net` - teoria
+
+## Definicje
+### Socket
+:::info Socket
+- to kanał komunikacyjny pomiędzy dwoma komputerami lub programami.
+- Umożliwia wysyłanie i odbieranie danych w czasie rzeczywistym.
+
+:::
+
+### Moduł `net`
+:::note Moduł `net`
+- to wbudowany moduł Node.js, który służy do tworzenia socketów TCP (połączenia sieciowe między komputerami).
+- Umożliwia:
+    - tworzenie serwerów (`net.createServer()`), które nasłuchują na określonym porcie,
+    - tworzenie klientów (`net.createConnection()`), którzy łączą się z serwerem,
+    - wysyłanie i odbieranie danych w trybie dwukierunkowym i strumieniowym.
+
+
+:::
+
+### Protokuł TCP
+
+:::info TCP (*Transmission Control Protocol*)
+- To protokół komunikacyjny, który określa, jak dwa komputery przesyłają dane przez sieć w sposób niezawodny i uporządkowany.
+- Działa on w warstwie transportowej modelu sieciowego (OSI), nad IP (Internet Protocol).
+    - Dlatego często spotkasz nazwę: TCP/IP – czyli dwa protokoły, które razem tworzą podstawę Internetu.
+
+Gwarantuje, że:
+- Wszystkie dane dotrą (jeśli pakiet zginie, zostanie wysłany ponownie).
+- Dane dotrą w odpowiedniej kolejności (nawet jeśli po drodze trafiły różnymi ścieżkami).
+- Nie zgubisz części danych (odbiorca dostaje dokładnie to, co wysłał nadawca).
+- Połączenie jest dwukierunkowe (obie strony mogą jednocześnie wysyłać i odbierać dane).
+
+
+:::note metafora
+Wyobraź sobie TCP jak rozmowę przez telefon:
+- najpierw trzeba się połączyć („halo?” – „halo, słyszę cię”),
+- rozmowa trwa, dopóki jedna strona nie odłoży słuchawki,
+- każda strona słyszy dokładnie to, co druga powiedziała — bez zgubionych słów.
+
+:::
+
+
+:::
+
+
+
+TCP a sockety:
+Każde połączenie TCP opiera się na gniazdach (socketach):
+- serwer nasłuchuje na jakimś porcie (np. 4000),
+- klient łączy się z tym portem,
+- połączenie TCP zapewnia stabilny kanał komunikacji.
+
+### Port
+:::note Co to jest port?
+- Port to numer identyfikujący konkretną usługę lub aplikację działającą na komputerze w sieci.
+- Możesz myśleć o nim jak o drzwiach do konkretnego programu.
+    - Każdy komputer w sieci ma adres IP (adres budynku),
+    - a port to numer drzwi, przez które dany program przyjmuje połączenia.
+
+:::
+
+**Metafora**
+Wyobraź sobie biurowiec (komputer):
+- adres IP to adres budynku (np. `192.168.1.10`)
+- **port* to numer pokoju (np. pokój `4000`), w którym siedzi określony dział.
+- Jeśli chcesz dostarczyć wiadomość:
+    - do księgowości                            to port 21 (FTP),
+    - do sekretariatu                           to port 80 (HTTP),
+    - do działu IT                              to port 22 (SSH),
+    - do twojego własnego serwera socketowego   to np. port 4000.
+
+
+## Jak działa socket (łopatologicznie)
+- Serwer otwiera port – czyli mówi:
+    - „Jestem dostępny na numerze 4000, możesz się połączyć”
+- Klient dzwoni pod ten numer (`port`).
+- Gdy serwer odbierze, powstaje połączenie socketowe.
+- Od teraz obie strony mogą:
+    - pisać do siebie (`socket.write()`),
+    - czytać dane, które przychodzą (`socket.on('data')`).
+- Po skończeniu rozmowy – socket się zamyka (`socket.end()`).
+
+
+
+:::tip Metafora Socket jak rozmowa telefoniczna
+Wyobraź sobie:
+- `EventEmitter` to jak dzwonek telefonu — ktoś sygnalizuje, że coś się stało.
+- `Socket` to rozmowa telefoniczna:
+    - obie strony słyszą się nawzajem,
+    - mogą mówić w tym samym czasie (dwukierunkowo),
+    - dopóki nie odłożysz słuchawki (end), połączenie trwa.
+
+
+Późniejsze HTTP to bardziej „list”:
+    - ktoś wysyła zapytanie (`request`),
+    - druga strona odpisuje (`response`)
+    - i koniec kontaktu.
+
+:::
+
+#

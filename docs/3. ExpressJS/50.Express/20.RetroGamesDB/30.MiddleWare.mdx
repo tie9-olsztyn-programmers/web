@@ -1,0 +1,198 @@
+---
+title: MiddleWare
+---
+
+# Co to jest MiddleWare?
+
+## Definicja
+:::info Middleware
+To po prostu funkcja pośrednicząc:
+- czyli kawałek kodu, który przechwytuje każde żądanie (`request`)
+- zanim trafi ono do właściwego endpointu (`app.get`, `app.post` itd.),
+- lub przechwytuje odpowiedź (response) zanim opuści serwer.
+
+Możesz o nim myśleć jako o filtrze lub etapie po drodze między klientem a serwerem.
+
+:::
+
+
+## Metafory
+:::tip Middleware jako filtry w kawiarni
+Middleware działa jak filtry przy parzeniu kawy:
+- gorąca woda (request) przechodzi przez filtr po filtrze (kolejne middleware’y),
+- każdy coś zmienia (np. odfiltrowuje fusy, dodaje aromat, mleko, cukier),
+- efekt końcowy to gotowy napój (response).
+
+Jeśli któryś filtr się zatka — kawa nie dotrze do kubka ☕
+(to jak brak next() → żądanie się zatrzymuje).
+
+:::
+
+:::tip 🧳 Middleware — metafora lotniska
+Wyobraź sobie, że:
+- **żądanie (request)** to pasażer, który chce dostać się do samolotu ✈️
+- Zanim jednak tam trafi, musi przejść przez kilka **kontroli** — to właśnie *middleware’y* w Expressie.
+
+Każdy middleware:
+- może coś **sprawdzić** (np. czy masz paszport → autoryzacja),
+- może coś **dodać** (np. dane z JSON-a → `req.body`),
+- może **zatrzymać Cię** (np. błąd 401),
+- albo przepuścić dalej (`next()`).
+
+Jeśli middleware nie wywoła `next()`:
+- pasażer zostaje zatrzymany i
+- nie dociera do samolotu.
+
+:::
+
+## Syntaktyka Middleware`a
+Wzór funkcji Middleware:
+```
+(req, res, next) => {
+// coś robimy z żądaniem lub odpowiedzią
+next(); // przekazuje sterowanie do kolejnego middleware’a lub endpointu
+}
+
+```
+
+
+## Przykład
+
+### Middleware dla zapytania pod dowolną ścieżką
+
+:::tip `app.use()`
+- dodaje middleware,
+- bez dookreślenia ścieżki działa dla wszystkich zapytań.
+
+:::
+
+
+Do naszego pliku `app.ts` dopiszemy pierwszy middleware:
+```ts
+//...
+const app = express();
+
+// TO JEST MIDDLEWARE !!!
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next(); // przejdź dalej
+});
+//...
+
+```
+
+### Middleware tylko dla ścieżek `/house`
+Do naszego pliku `app.ts` dopiszemy drugi middleware:
+```ts
+//...
+const app = express();
+//..
+
+// Middleware aktywny TYLKO dla ścieżek zaczynających się od /house
+app.use("/house", (req, res, next) => {
+    console.log("Middleware uruchomiony dla /house");
+    next(); // przepuść dalej do właściwego endpointu
+});
+
+
+// Dopiszemy kilka ścieżek
+// 🔹 przykładowe endpointy
+app.get("/house", (req, res) => {
+    res.send("Witaj w domu!");
+});
+
+app.get("/house/room", (req, res) => {
+    res.send("To jest pokój w domu 🛏️");
+});
+
+app.get("/garden", (req, res) => {
+    res.send("Tu nie działa middleware 🪴");
+});
+//...
+
+```
+
+Dopiszymy do naszego klienta `.http` kilka testowych zapytań
+```http request
+@baseUrl = http://localhost:3000/
+
+### pelne zapytanie
+GET http://localhost:3000
+Accept: application/json
+
+### zapytanie skrócone
+GET {{baseUrl}}
+Accept: application/json
+
+# NOWE ZAPYTANIA
+
+### zapytanie pod house
+GET {{baseUrl}}/house
+Accept: application/json
+
+### zapytanie pod house
+GET {{baseUrl}}/house/room
+Accept: application/json
+
+### zapytanie pod garden bez middleware
+GET {{baseUrl}}/graden
+Accept: application/json
+
+```
+
+---
+Przywróćmy stan `app.ts` i `.http` do poprzedniego stanu.
+
+
+---
+## `app.use(express.json())
+
+:::info Co robi  `app.use(express.json())`
+To middleware (czyli funkcja pośrednicząca), który mówi Expressowi:
+    „Jeśli klient wysyła dane w formacie JSON,
+        - odczytaj je,
+        - przetwórz i
+        - zapisz w `req.body` jako obiekt JavaScript.”
+
+:::
+
+Załóżmy, że klient wysyła żądanie (`request`):
+```http request
+POST /games
+Content-Type: application/json
+
+{
+  "title": "Doom",
+  "year": 1993,
+  "platform": "PC"
+}
+```
+- Żądanie jest przechwytywane przez middleware `express.json()`.
+- Express:
+    - czyta surowe dane JSON z żądania,
+    - parsuje (konwertuje) je do obiektu JS,
+    - udostępnia je w `req.body`, więc możesz ich używać w kodzie.
+- czyli w kodzie możemy odczytać np. tytuł tego obiektu:
+```ts
+app.post("/games", (req, res) => {
+  console.log(req.body.title); // 👉 "Doom"
+  res.send(`Dodano grę: ${req.body.title}`);
+});
+```
+
+Dodajmy ten middleware do naszego pliku `app.ts`
+```ts
+//...
+
+const app = express();
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.send("RetroGames APU. Use/games to see the games");
+})
+//...
+```
+
+
+

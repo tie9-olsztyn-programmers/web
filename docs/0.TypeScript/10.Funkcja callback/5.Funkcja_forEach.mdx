@@ -1,0 +1,97 @@
+---
+title: Funkcja `forEach()`
+---
+
+# Wyjaśnienie metaforyczne
+Wyobraź sobie, że masz koszyk z jabłkami:
+- Bierzesz jedno jabłko po drugim (to są elementy tablicy).
+- Przy każdym jabłku robisz jakąś czynność — np. oglądasz, polerujesz, naklejasz naklejkę.
+- Ale koszyk nie zmienia swojego składu — jabłka zostają takie same, tylko Ty coś z nimi zrobiłeś.
+
+## `map()` vs `forEach()`
+- `forEach`  używasz, gdy chcesz zrobić akcję dla każdego elementu, np:
+    - logowanie,
+    - zapis do bazy,
+    - itp.
+
+  **nie tworzy nowej tablicy!!**.
+- `map` używasz, gdy chcesz przekształcić tablicę w **nową tablicę**.
+
+## Proste przykłady
+
+przykład w JS
+```js
+const fruits = ['apple', 'banana', 'cherry'];
+
+// Wypisujemy każdy owoc w konsoli
+fruits.forEach(fruit => console.log(fruit));
+
+// Wynik w konsoli:
+// apple
+// banana
+// cherry
+```
+
+```ts
+const fruits: string[] = ['apple', 'banana', 'cherry'];
+
+// Wypisujemy każdy owoc w konsoli
+fruits.forEach(fruit => console.log(fruit));
+
+// Wynik w konsoli:
+// apple
+// banana
+// cherry
+```
+
+```ts
+const fruits: string[]  = ["apple", "banana", "cherry"];
+
+fruits.forEach((fruit, index) => {
+    console.log(`${index + 1}. ${fruit}`);
+});
+````
+
+:::note `forEach()` metoda tablicowa
+- przechodzi po każdym elemencie tablicy (od pierwszego do ostatniego),
+- wykonuje funkcję, którą jej podasz — dla każdego elementu po kolei.
+- Ta funkcja (callback) może przyjąć do 3 argumentów:
+    - `element` – aktualna wartość z tablicy,
+    - `index` – numer elementu (0, 1, 2, ...),
+    - `array` – sama tablica, po której iterujemy (rzadko używane).
+
+:::
+
+
+
+## Symulacja zapisu do bazy danych:
+```ts
+type User = {
+  id: number;
+  name: string;
+  active: boolean;
+};
+
+const users: User[] = [
+  { id: 1, name: "Alice", active: true },
+  { id: 2, name: "Bob", active: false },
+  { id: 3, name: "Charlie", active: true },
+];
+
+// Funkcja symulująca zapis do API
+function saveUserToAPI(user: User) {
+  console.log(`Saving ${user.name} (id: ${user.id})...`);
+}
+
+users.forEach(user => {
+  if (user.active) {
+    saveUserToAPI(user);
+  } else {
+    console.log(`Skipping ${user.name} (not active).`);
+  }
+});
+```
+
+
+
+

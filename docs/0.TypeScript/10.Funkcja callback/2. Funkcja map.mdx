@@ -1,0 +1,133 @@
+---
+title: Funkcja `map()`
+---
+
+# Opis
+:::info .map()
+- to jak magiczna maszyna, która bierze każde jabłko z koszyka,
+- przerabia je według ustalonego przepisu i
+- wkłada do nowego koszyka przetworzoną wersję.
+
+:::
+
+# Metoda map() – wyjaśnienie metaforyczne
+## 1. Taśma w fabryce
+- Wyobraź sobie taśmę produkcyjną, na której jadą jabłka.
+- Przy każdym jabłku pracownik nakleja etykietkę z ceną.
+- Na końcu taśmy masz tę samą liczbę jabłek, tylko każde ma teraz naklejoną etykietę.
+
+Metafora:
+`.map()` to taka taśma, która dla każdego elementu tworzy nową wersję tego elementu (według ustalonej instrukcji).
+
+## 2. Klasa i kartki papieru
+- Nauczyciel daje każdemu uczniowi czystą kartkę.
+- Każdy uczeń ma napisać na niej swoje imię wielkimi literami i
+- oddać kartkę z powrotem.
+- ogólnie:
+    - *Wejście*: lista uczniów,
+    - *Operacja*: zamiana imienia na wersję wielkimi literami,
+    - *Wynik*: lista imion wielkimi literami.
+
+## 3. Pudełko z cukierkami
+- Masz pudełko z cukierkami o różnych smakach.
+- Chcesz wiedzieć, jakie są kolory opakowań każdego z nich.
+- Przechodzisz po każdym cukierku, sprawdzasz kolor i zapisujesz na kartce.
+
+----
+
+
+# Przykład 1
+Zwraca nową tablicę, w której każdy element jest wynikiem działania funkcji strzałkowej.
+
+**wersja w JS**
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+
+// Zwiększamy każdy element o 1
+const incremented = numbers.map(num => num + 1);
+
+console.log(incremented); // [2, 3, 4, 5, 6]
+```
+
+**wersja w TS**
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];
+
+// Zwiększamy każdy element o 1
+const incremented: number[] = numbers.map((num: number): number => num + 1);
+
+console.log(incremented); // [2, 3, 4, 5, 6]
+```
+
+
+# Przykład 1: Postacie ze świata Wiedźmina
+```typescript
+type Character = {
+  id: number;
+  name: string;
+  profession: string;
+  level: number;
+};
+console.log("start")
+const characters: Character[] = [
+  { id: 1, name: "Geralt", profession: "Wiedźmin", level: 45 },
+  { id: 2, name: "Yennefer", profession: "Czarodziejka", level: 50 },
+  { id: 3, name: "Jaskier", profession: "Bard", level: 20 }
+];
+
+// Map na opisy postaci
+const descriptions: string[] = characters.map(
+  (c: Character): string => `${c.name} (${c.profession}) — poziom ${c.level}`
+);
+
+console.log(descriptions);
+console.log(
+"end"
+)
+/*
+[
+  "Geralt (Wiedźmin) — poziom 45",
+  "Yennefer (Czarodziejka) — poziom 50",
+  "Jaskier (Bard) — poziom 20"
+]
+*/
+```
+
+# Przykład 2: Przedmioty i ceny z podatkiem (jak products)
+```ts
+type Item = {
+    id: number;
+    name: string;
+    price: number;
+};
+
+const items: Item[] = [
+    { id: 1, name: "Srebrny miecz", price: 1200 },
+    { id: 2, name: "Eliksir Jaskółka", price: 300 },
+    { id: 3, name: "Zbroja z Kaer Morhen", price: 5000 }
+];
+
+// Dodajemy cenę z marżą handlarza (20%)
+const itemsWithMargin = items.map(item => ({
+    ...item,
+    priceWithMargin: item.price * 1.2
+}));
+
+console.log(itemsWithMargin);
+/*
+[
+  { id: 1, name: "Srebrny miecz", price: 1200, priceWithMargin: 1440 },
+  { id: 2, name: "Eliksir Jaskółka", price: 300, priceWithMargin: 360 },
+  { id: 3, name: "Zbroja z Kaer Morhen", price: 5000, priceWithMargin: 6000 }
+]
+*/
+
+```
+
+
+
+
+
+
+
+
