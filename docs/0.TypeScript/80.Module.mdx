@@ -152,7 +152,7 @@ export const students = [
 
 ```
 
-`src/utitls/average.ts`
+`src/utils/average.ts`
 ```ts
 export default function average(arr: number[]) {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -167,17 +167,6 @@ import average from "./utils/average";
 const grades = students.map(s => s.grade);
 console.log("Średnia ocen:", average(grades));
 ```
-
----
-## Barrel file
-
-:::tip Co to jest *barrel file*?
-- to zwykły plik (najczęściej `index.ts`),
-- nic sam nie robi,
-- jego zadaniem jest przekazanie eksportów z plików w tym folderze dalej
-
-
-:::
 
 
 

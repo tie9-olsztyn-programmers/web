@@ -1,0 +1,145 @@
+---
+title: Barrel file
+---
+
+# Barrel file
+
+:::tip Co to jest *barrel file*?
+- to zwykły plik (najczęściej `index.ts`),
+- nic sam nie robi,
+- jego zadaniem jest przekazanie eksportów z plików w tym folderze dalej
+
+:::
+
+## Struktura projektu
+
+```
+src/
+  app.ts
+  students/
+    addStudent.ts
+    listStudents.ts
+    countStudents.ts
+    index.ts         <-- barrel file
+  types/
+    student.ts
+    index.ts         <-- barrel file (opcjonalnie)
+  data/
+    students.data.ts
+  utils/
+    format.ts
+
+```
+
+### `data`
+
+`students.data.ts`
+```ts
+import { Student } from "../types";
+
+export let students: Student[] = [];
+
+```
+
+### `students`
+
+`addStudent.ts`
+```ts
+import { students } from "../data/students.data";
+import { Student } from "../types";
+
+export function addStudent(name: string, age: number, grade: number) {
+    const newStudent: Student = {
+        id: Date.now().toString(),
+        name,
+        age,
+        grade
+    };
+
+    students.push(newStudent);
+    return newStudent;
+}
+```
+
+`countStudents.ts`
+```ts
+import { students } from "../data/students.data";
+
+export function countStudents() {
+    return students.length;
+}
+
+```
+
+`listStudents.ts`
+```ts
+import { students } from "../data/students.data";
+
+export function listStudents() {
+    return students;
+}
+```
+
+`index.ts`
+```ts
+// to jest barrel
+export * from "./addStudent";
+export * from "./listStudents";
+export * from "./countStudents";
+
+```
+
+### `types`
+`student.ts`
+```ts
+export interface Student {
+    id: string;
+    name: string;
+    age: number;
+    grade: number;
+}
+```
+
+`index.ts`
+```ts
+// to jest barrel
+
+export * from "./student";
+```
+
+
+### `utils`
+`format.ts`
+```ts
+export function line() {
+    console.log("-----------------------------");
+}
+```
+
+### `app.ts`
+```ts
+import { addStudent, listStudents, countStudents } from "./students";
+import { line } from "./utils/format";
+
+console.log("🎓 Student Manager");
+line();
+
+console.log("Dodajemy studentów...");
+addStudent("Ola", 18, 5);
+addStudent("Bartek", 17, 4);
+addStudent("Kasia", 19, 6);
+
+line();
+console.log("Lista studentów:");
+console.log(listStudents());
+
+line();
+console.log("Liczba studentów:", countStudents());
+line();
+```
+
+
+
+
+
+
