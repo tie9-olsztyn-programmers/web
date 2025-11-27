@@ -94,6 +94,108 @@ import {divide, PI} from "./calculator"
 ../     wyżej
 ```
 
+## Przykłady
+
+### Import/eksport podstaowowy
+`math.ts`
+```ts
+export function add(a: number, b: number) {
+    return a + b;
+}
+
+export function sub(a: number, b: number) {
+    return a - b;
+}
+```
+
+`main.ts`
+```ts
+import { add, sub } from "./math";
+
+console.log(add(5, 10));
+console.log(sub(10, 3));
+
+```
+
+### Eksport domyślny i nazwany
+
+`shapes.ts`
+```ts
+export default function areaCircle(r: number) {
+    return Math.PI * r * r;
+}
+
+export function areaSquare(a: number) {
+    return a * a;
+}
+```
+
+`main.ts`
+```ts
+import circleArea, { areaSquare } from "./shapes";
+
+console.log(circleArea(3));
+console.log(areaSquare(4));
+```
+
+
+
+### Kilka plików
+`src/data/students.ts`
+```ts
+export const students = [
+    { name: "Ola", grade: 4 },
+    { name: "Bartek", grade: 5 },
+    { name: "Kuba", grade: 3 }
+];
+
+
+```
+
+`src/utitls/average.ts`
+```ts
+export default function average(arr: number[]) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+```
+
+`src/app.ts`
+```ts
+import { students } from "./data/students";
+import average from "./utils/average";
+
+const grades = students.map(s => s.grade);
+console.log("Średnia ocen:", average(grades));
+```
+
+---
+## Barrel file
+
+:::tip Co to jest *barrel file*?
+- to zwykły plik (najczęściej `index.ts`),
+- nic sam nie robi,
+- jego zadaniem jest przekazanie eksportów z plików w tym folderze dalej
+
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
