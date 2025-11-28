@@ -2,5 +2,109 @@
 title: MongoDB - wprowadzenie
 ---
 
+# Co to jest MongoDB?
+https://www.mongodb.com/
+
+## Najważniejsze cechy MongoDB
+
+| Cecha                        | Co to oznacza w praktyce?                                                                 |
+|------------------------------|-------------------------------------------------------------------------------------------|
+| Dokumentowa <br/>(zamiast tabelek)| Zapisujesz dane jako obiekty JSON (dokładnie tak jak w JavaScript)                        |
+| Przykład dokumentu           | `{ "name": "Kasia", "age": 16, "class": "3B", "hobbies": ["piłka", "czytanie"] }`        |
+| Kolekcja                     | Odpowiednik tabeli → np. kolekcja `students`, `teachers`, `posts`                        |
+| Elastyczny schemat           | Możesz mieć dokumenty o różnej strukturze w jednej kolekcji (choć zwykle używa się Mongoose) |
+| Świetnie działa <br /> z JS/Node.js | Dane wyglądają dokładnie tak samo jak obiekty w JavaScript                               |
+| Skalowalna                   | Używana przez Netflix, Google, eBay, Ubisoft, Allegro, OLX i tysiące innych firm         |
+
+
+
+## Porównanie z bazami SQL (czyli tym, co znacie z lekcji)
+
+| Tradycyjna baza SQL (MySQL, PostgreSQL) | MongoDB                                              |
+|------------------------------------------|------------------------------------------------------|
+| Baza → tabele → wiersze i kolumny        | Baza → kolekcje → dokumenty (obiekty JSON)          |
+| Dane rozbite na wiele tabel              | Jeden dokument może zawierać wszystko (nawet zagnieżdżone obiekty i tablice) |
+| Trzeba robić JOIN-y                      | Najczęściej wszystko trzymasz w jednym dokumencie lub używasz referencji + `populate()` |
+| Sztywny schemat                          | Schemat elastyczny (lub kontrolowany przez Mongoose) |
+
+
+
+## Instalacja
+https://www.mongodb.com/try/download/community
+
+W przypadku Fedory 43
+```bash
+sudo tee /etc/yum.repos.d/mongodb-org-7.0.repo << 'EOF'
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://pgp.mongodb.com/server-7.0.asc
+EOF
+```
+
+potem
+`sudo dnf install mongodb-org`
+
+
+
+
+## Z czego składa się ekosystem MongoDB?
+
+| Element                        | Co to jest?                                                                                   | Jak się tego używa?                                      |
+|--------------------------------|-----------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| **MongoDB Server**             | Właściwa baza danych (demon mongod) – przechowuje dane na dysku                              | Lokalnie albo w chmurze (MongoDB Atlas)                  |
+| **MongoDB Atlas**              | MongoDB w chmurze     | Zakładasz konto, tworzysz klaster, dostajesz URI       |
+| **mongosh** (dawniej mongo shell) | Konsola tekstowa do wpisywania komend bezpośrednio do bazy                                 | `mongosh "mongodb+srv://..."`                            |
+| **MongoDB Compass**            | Graficzny program (jak phpMyAdmin dla MySQL) – widzisz i edytujesz dane klikając             | Najlepszy sposób na podgląd danych podczas nauki         |
+| **Drivers** (drajwery)         | Biblioteki do różnych języków (Node.js, Python, Java…)                                        | W Node.js: `npm install mongodb` lub `npm install mongoose` |
+| **Mongoose** (najpopularniejszy w Node.js) | Nakładka na driver – daje schematy, walidację, wygodniejsze metody                         | To właśnie będziemy używać z Expressem                  |
+
+
+## Podstawowe pojęcia MongoDB
+### DOKUMENT
+To taki jakby obiekt JS, np.:
+```
+{
+    "_id": "64f124a89ffed71290c12345",
+    "title": "Doom",
+    "year": 1993,
+    "platform": "PC"
+}
+```
+
+### KOLEKCJA
+Zbiór dokumentów — odpowiednik tabeli w SQL.
+Np. games, users, orders.
+
+### BAZA
+Zbiór kolekcji.
+
+### _id
+Unikalny identyfikator dokumentu. MongoDB generuje go automatycznie.
+
+## Konfiguracja MongoDB w systemie Linux
+
+Aby Mongo uruchamiało się razem z systemem:
+`sudo systemctl enable mongod`
+
+Uruchamiania i zatrzymywanie MongoDB
+`sudo systemctl start mongod`
+`sudo systemctl stop mongod`
+
+Sprawdzanie stanu MongoDB
+`sudo systemctl status mongod`
+
+
+Uruchamiamy terminalowy interfejs do MongoDB - `mongosh`
+
+Jeżeli system nie rozpoznaje instrukcji `mongosh`: `sudo apt install -y mongodb-mongosh`
+
+
+
+
+
+
 
 

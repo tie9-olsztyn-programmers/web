@@ -1,0 +1,136 @@
+---
+title: Mongosh
+---
+
+# Mongosh
+
+
+## Pierwsze kroki
+| Komenda             | Opis                                                             |
+| ------------------- | ---------------------------------------------------------------- |
+| `show dbs`          | Wyświetla wszystkie istniejące bazy danych                       |
+| `db`                | Pokazuje, w jakiej bazie danych aktualnie pracujesz              |
+| `use mojaBaza`      | Przełącza się do wybranej bazy lub tworzy ją, jeśli nie istnieje |
+| `db.dropDatabase()` | Usuwa **aktualnie wybraną** bazę danych                          |
+
+
+```
+show dbs
+db
+use shopDB
+db.dropDatabase()
+```
+
+
+## Tworzenie kolekcji i dokumentów
+🟦
+### Jawne utworzenie kolekcji
+`db.createCollection("shop")`
+
+### Automatyczne tworzenie kolekcji podczas dodawania dokumentu
+`db.users.insertOne({ name: "Jurek", age: 20 })`
+
+### Wyświetlanie kolekcji w danej bazie
+`show collections`
+
+
+### Dodawanie wielu dokumentów naraz
+```
+db.users.insertMany([
+{ name: "Joe", age: 11 },
+{ name: "Zosia", age: 22 },
+{ name: "x23", age: 214 }
+])
+```
+
+### Pobieranie danych (READ)
+#### Pobieranie wszystkich dokumentów
+`db.users.find()`
+
+### Pobranie jednego dokumentu
+`db.users.findOne({ name: "Jurek" })`
+
+### Warunki wyszukiwania
+`db.users.find({ age: { $gt: 20 }})           // wiek > 20`
+`db.users.find({ age: { $gt: 10, $lt: 30 }})  // 10 < wiek < 30`
+
+### Operatory
+
+#### Operatory porównania (*Comparison Operators*)
+| Operator | Znaczenie / Opis                  | Przykład użycia                        |
+| -------- | --------------------------------- | -------------------------------------- |
+| `$eq`    | równe                             | `{ age: { $eq: 18 }}`                  |
+| `$ne`    | nie równe                         | `{ age: { $ne: 18 }}`                  |
+| `$gt`    | większe niż                       | `{ age: { $gt: 18 }}`                  |
+| `$gte`   | większe lub równe                 | `{ age: { $gte: 18 }}`                 |
+| `$lt`    | mniejsze niż                      | `{ age: { $lt: 18 }}`                  |
+| `$lte`   | mniejsze lub równe                | `{ age: { $lte: 18 }}`                 |
+| `$in`    | wartość z listy                   | `{ platform: { $in: ["PC","Xbox"] }}`  |
+| `$nin`   | wartość nie znajduje się w liście | `{ platform: { $nin: ["PC","Xbox"] }}` |
+
+
+#### Operatory logiczne (*Logical Operators*)
+| Operator | Znaczenie / Opis                             | Przykład użycia                                       |
+| -------- | -------------------------------------------- | ----------------------------------------------------- |
+| `$and`   | oba warunki muszą być spełnione              | `{ $and: [ {age: {$gt: 18}}, {city: "Olsztyn"} ] }`   |
+| `$or`    | co najmniej jeden warunek musi być spełniony | `{ $or: [ {age: {$lt: 10}}, {age: {$gt: 60}} ] }`     |
+| `$nor`   | żaden z warunków nie może być spełniony      | `{ $nor: [ {city: "Olsztyn"}, {city: "Warszawa"} ] }` |
+| `$not`   | negacja warunku                              | `{ age: { $not: { $gt: 30 } } }`                      |
+
+#### Operatory aktualizacji (*Update Operator*)
+| Operator    | Znaczenie / Opis                                        | Przykład użycia                                                        |
+| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `$set`      | ustawia lub nadpisuje wartość pola                      | `db.users.updateOne({name:"Joe"}, { $set: {age: 25} })`                |
+| `$inc`      | zwiększa lub zmniejsza wartość liczbową pola            | `db.users.updateMany({}, { $inc: {age: 1} })`                          |
+| `$unset`    | usuwa pole z dokumentu                                  | `db.users.updateOne({_id: id}, { $unset: {city: ""} })`                |
+| `$rename`   | zmienia nazwę pola                                      | `db.users.updateMany({}, { $rename: {"age": "wiek"} })`                |
+| `$push`     | dodaje element do tablicy                               | `db.users.updateOne({name:"Joe"}, { $push: {hobbies: "gaming"} })`     |
+| `$pull`     | usuwa element z tablicy (jeśli spełnia warunek)         | `db.users.updateOne({name:"Joe"}, { $pull: {hobbies: "gaming"} })`     |
+| `$pop`      | usuwa ostatni (`1`) lub pierwszy (`-1`) element tablicy | `db.users.updateOne({name:"Joe"}, { $pop: {hobbies: 1} })`             |
+| `$addToSet` | dodaje element do tablicy **tylko jeśli go nie ma**     | `db.users.updateOne({name:"Joe"}, { $addToSet: {hobbies: "coding"} })` |
+| `$mul`      | mnoży wartość liczbową pola                             | `db.products.updateOne({_id: id}, { $mul: {price: 1.1} })`             |
+| `$min`      | ustawia wartość pola, jeśli jest mniejsza               | `db.stats.updateOne({_id: id}, { $min: {highscore: 300} })`            |
+| `$max`      | ustawia wartość pola, jeśli jest większa                | `db.stats.updateOne({_id: id}, { $max: {highscore: 300} })`            |
+
+
+
+
+
+
+### Projekcja i filtrowanie zwracanych pól
+
+Funkcja: `db.collection.find(<filter>, <projection>)`
+    - filter określa, które dokumenty pobrać
+🟦  - projection  określa, które pola zwrócić
+Przykład:
+```
+db.users.find(
+    { age: { $gt: 18 }},        // filter
+    { name: 1, age: 1, _id: 0 } // projection
+)
+```
+
+### Zliczanie dokumentów
+Policzenie wszystkich:
+`db.users.countDocuments()`
+
+Policzenie z filtrem:
+`db.users.countDocuments({ age: { $gt: 18 } })`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
