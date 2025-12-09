@@ -1,0 +1,31 @@
+---
+title: Projekcja i filtrowanie
+---
+
+# Projekcja i filtrowanie
+
+Funkcja: `db.collection.find(<filter>, <projection>)`
+- filter określa, które dokumenty pobrać
+🟦  - projection  określa, które pola zwrócić
+Przykład:
+```
+db.users.find(
+    { age: { $gt: 18 }},        // filter
+    { name: 1, age: 1, _id: 0 } // projection
+)
+```
+
+### Zliczanie dokumentów
+Policzenie wszystkich:
+`db.users.countDocuments()`
+
+Policzenie z filtrem:
+`db.users.countDocuments({ age: { $gt: 18 } })`
+
+
+
+
+
+
+
+

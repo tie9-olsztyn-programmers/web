@@ -1,0 +1,77 @@
+---
+title: Operatory porównania
+---
+
+# Operatory porównania (*Comparison Operators*)
+
+| Operator | Znaczenie / Opis                  | Przykład użycia                        |
+| -------- | --------------------------------- | -------------------------------------- |
+| `$eq`    | równe                             | `{ age: { $eq: 18 }}`                  |
+| `$ne`    | nie równe                         | `{ age: { $ne: 18 }}`                  |
+| `$gt`    | większe niż                       | `{ age: { $gt: 18 }}`                  |
+| `$gte`   | większe lub równe                 | `{ age: { $gte: 18 }}`                 |
+| `$lt`    | mniejsze niż                      | `{ age: { $lt: 18 }}`                  |
+| `$lte`   | mniejsze lub równe                | `{ age: { $lte: 18 }}`                 |
+| `$in`    | wartość z listy                   | `{ platform: { $in: ["PC","Xbox"] }}`  |
+| `$nin`   | wartość nie znajduje się w liście | `{ platform: { $nin: ["PC","Xbox"] }}` |
+
+## Przygotowanie bazy danych
+```
+use filmyDB
+```
+
+```
+db.filmy.insertMany([
+  { tytul: "Zielona Mila", rok: 1999, gatunek: "Dramat", ocena: 8.6 },
+  { tytul: "Joe Black", rok: 1998, gatunek: "Dramat", ocena: 7.2 },
+  { tytul: "Matrix", rok: 1999, gatunek: "Sci-Fi", ocena: 8.7 },
+  { tytul: "Shrek", rok: 2001, gatunek: "Animacja", ocena: 7.9 },
+  { tytul: "Incepcja", rok: 2010, gatunek: "Sci-Fi", ocena: 8.8 },
+  { tytul: "Titanic", rok: 1997, gatunek: "Dramat", ocena: 7.8 },
+  { tytul: "Gladiator", rok: 2000, gatunek: "Historyczny", ocena: 8.5 },
+  { tytul: "Avatar", rok: 2009, gatunek: "Sci-Fi", ocena: 7.8 }
+])
+```
+
+### Zapytania
+#### Filmy z roku 1999
+`db.filmy.find({ rok: { $eq: 1999 } })`
+
+#### Filmy z gatunku Dramat lub Sci-Fi
+`db.filmy.find({ gatunek: { $in: ["Dramat", "Sci-Fi"] } })`
+
+#### Dramaty o ocenie większej niż 7.7
+`db.filmy.find({gatunek: "Dramat", ocena: {$gt: 7.7} })`
+
+#### Filmy, które nie są dramatami
+`db.filmy.find({ gatunek: { $ne: "Dramat" } })`
+
+#### Filmy z oceną maksymalnie 8
+`db.filmy.find({ ocena: { $lte: 8 } })`
+
+#### Filmy, które nie są ani Sci-Fi, ani Historycznymi
+`db.filmy.find({ gatunek: { $nin: ["Sci-Fi", "Historyczny"] } })`
+
+
+#### Filmy między 2001 a 2010 roku
+`db.filmy.find({ rok: { $gte: 2001, $lte: 2010 } })`
+
+
+## Proste zadania
+1. Znajdź wszystkie filmy z oceną większą niż 8.0.
+2. Znajdź filmy z gatunku Sci-Fi lub Animacja.
+3. Znajdź filmy nie będące Sci-Fi.
+4. Wyświetl tylko filmy wydane do roku 2000 włącznie.
+5. Wyświetl filmy z oceną mniejszą niż 8.0.
+
+
+
+
+
+
+
+
+
+
+
+

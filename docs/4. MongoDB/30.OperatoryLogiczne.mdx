@@ -1,0 +1,101 @@
+---
+title: Operatory logiczne
+---
+
+# Operatory logiczne (*Logical Operators*)
+| Operator | Znaczenie / Opis                             | Przykład użycia                                       |
+| -------- | -------------------------------------------- | ----------------------------------------------------- |
+| `$and`   | oba warunki muszą być spełnione              | `{ $and: [ {age: {$gt: 18}}, {city: "Olsztyn"} ] }`   |
+| `$or`    | co najmniej jeden warunek musi być spełniony | `{ $or: [ {age: {$lt: 10}}, {age: {$gt: 60}} ] }`     |
+| `$nor`   | żaden z warunków nie może być spełniony      | `{ $nor: [ {city: "Olsztyn"}, {city: "Warszawa"} ] }` |
+| `$not`   | negacja warunku                              | `{ age: { $not: { $gt: 30 } } }`                      |
+
+
+## Przygotowanie bazy danych
+```
+use sklep
+```
+
+```
+db.produkty.insertMany([
+  { nazwa: "Laptop X200", kategoria: "Elektronika", cena: 3200, marka: "TechCo", dostepny: true },
+  { nazwa: "Smartfon A50", kategoria: "Elektronika", cena: 1800, marka: "MobiTech", dostepny: false },
+  { nazwa: "Kawa Premium", kategoria: "Spozywcze", cena: 25, marka: "Aroma", dostepny: true },
+  { nazwa: "Herbata Zielona", kategoria: "Spozywcze", cena: 15, marka: "Aroma", dostepny: true },
+  { nazwa: "Krzesło Biurkowe", kategoria: "Meble", cena: 450, marka: "FurniPro", dostepny: false },
+  { nazwa: "Biurko Pro", kategoria: "Meble", cena: 850, marka: "FurniPro", dostepny: true }
+])
+```
+
+
+## Zapytania
+### Elektronika, która jest dostępna
+`db.produkty.find({ $and: [ {kategoria: "Elektronika"},{ dostepny: true} ]} )`
+
+### Produkty, które kosztują mniej niż 20 lub są niedostępne
+`db.produkty.find({ $or: [ {cena: {$lt: 20}}, {dostepny: false} ]} )`
+
+
+### Produkty, które nie są ani marki "TechCo", ani "MobiTech"
+`db.produkty.find({ $nor: [ {marka: "TechCo"}, {marka: "MobiTech"} ]} )`
+
+### Produkty, których cena nie jest większa od 1000
+`db.produkty.find({cena: {$not: {$gt: 1000  }}})`
+
+
+### Produkty, które nie są marki "Aroma"
+`db.produkty.find({marka: {$ne: "Aroma"}})`
+
+### Produkty, które nie są "TechCo"  i są dostępne lub ich cena jest mniejsza niż 20
+```
+db.produkty.find({
+  $and: [
+    { marka: { $ne: "TechCo" } },
+    {
+      $or: [
+        { dostepny: true },
+        { cena: { $lt: 20 } }
+      ]
+    }
+  ]
+})
+```
+
+### Produkty, które są dostępne, a ich cena > 2000 lub kategoria "Meble"
+```
+db.produkty.find({
+  $and: [
+    { dostepny: true },
+    {
+      $or: [
+        { cena: { $gt: 2000 } },
+        { kategoria: "Meble" }
+      ]
+    }
+  ]
+})
+```
+
+## Zadania
+1. Znajdź wszystkie produkty, które są dostępne ORAZ tańsze niż 1000 zł.
+2. Znajdź wszystkie produkty, które są elektroniką LUB meblami.
+3. Znajdź wszystkie produkty, które NIE są marki "Aroma".
+4. Znajdź produkty, które NIE są elektroniką ORAZ NIE są niedostępne.
+5. Znajdź wszystkie produkty tańsze niż 50 zł, które jednocześnie NIE są spożywcze.
+6. Znajdź produkty, które nie są ani elektroniką, ani meblami.
+7. Znajdź produkty, które są dostępne LUB mają cenę mniejszą niż 20 zł.
+8. Znajdź produkty, które nie są marki "TechCo" ORAZ (są dostępne LUB ich cena jest mniejsza niż 20 zł).
+9. Znajdź produkty z kategorii "Meble", które są jednocześnie dostępne I mają cenę większą niż 500 zł.
+10. Znajdź produkty, które są dostępne LUB (nie są elektroniką I kosztują mniej niż 30 zł).
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,143 @@
+---
+title: Operatory aktualizacji
+---
+
+# Operatory aktualizacji (*Update Operator*)
+
+| Operator    | Znaczenie / Opis                                        | Przykład użycia                                                        |
+| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `$set`      | ustawia lub nadpisuje wartość pola                      | `db.users.updateOne({name:"Joe"}, { $set: {age: 25} })`                |
+| `$inc`      | zwiększa lub zmniejsza wartość liczbową pola            | `db.users.updateMany({}, { $inc: {age: 1} })`                          |
+| `$unset`    | usuwa pole z dokumentu                                  | `db.users.updateOne({_id: id}, { $unset: {city: ""} })`                |
+| `$rename`   | zmienia nazwę pola                                      | `db.users.updateMany({}, { $rename: {"age": "wiek"} })`                |
+| `$push`     | dodaje element do tablicy                               | `db.users.updateOne({name:"Joe"}, { $push: {hobbies: "gaming"} })`     |
+| `$pull`     | usuwa element z tablicy (jeśli spełnia warunek)         | `db.users.updateOne({name:"Joe"}, { $pull: {hobbies: "gaming"} })`     |
+| `$pop`      | usuwa ostatni (`1`) lub pierwszy (`-1`) element tablicy | `db.users.updateOne({name:"Joe"}, { $pop: {hobbies: 1} })`             |
+| `$addToSet` | dodaje element do tablicy **tylko jeśli go nie ma**     | `db.users.updateOne({name:"Joe"}, { $addToSet: {hobbies: "coding"} })` |
+| `$mul`      | mnoży wartość liczbową pola                             | `db.products.updateOne({_id: id}, { $mul: {price: 1.1} })`             |
+| `$min`      | ustawia wartość pola, jeśli jest mniejsza               | `db.stats.updateOne({_id: id}, { $min: {highscore: 300} })`            |
+| `$max`      | ustawia wartość pola, jeśli jest większa                | `db.stats.updateOne({_id: id}, { $max: {highscore: 300} })`            |
+
+## Przygotowanie bazy danych
+
+```
+use usersDB
+```
+
+```
+db.users.insertMany([
+  {
+    name: "Ania",
+    age: 22,
+    city: "Olsztyn",
+    hobbies: ["reading", "running"],
+    score: 120,
+    premium: false
+  },
+  {
+    name: "Bartek",
+    age: 30,
+    city: "Warszawa",
+    hobbies: ["gaming", "cars"],
+    score: 200,
+    premium: true
+  },
+  {
+    name: "Celina",
+    age: 27,
+    city: "Gdańsk",
+    hobbies: ["music", "yoga", "travel"],
+    score: 150,
+    premium: false
+  }
+])
+```
+
+## Zapytania
+
+### Ania przeniosła się z Olsztyna do Krakowa
+`db.users.updateOne({name: "Ania"}, {$set: {city:"Kraków"}})`
+
+### Bartek zdobywa dodatkowe 50 punktów
+`db.users.updateOne({name: "Bartek"}, {$inc: {score: 50}})`
+
+### Celina nie będzie miała pola "premium"
+`db.users.updateMany({name:"Celina"}, {$unset: {premium: ""}})`
+
+### Zamieniamy w dokumentach pole "score" na pole "points"
+`db.users.updateMany({}, {$rename: {"score": "points"}})`
+
+### Bartek przestał interesować się samochodami
+`db.users.updateOne({name:"Bartek"}, {$pull: {hobbies: "cars"}})`
+
+
+### Celina przestaje podróżować, a Ania czytać
+- `1`   - usuwa ostatni element
+- `-1`  - usuwa pierwszy element
+
+`db.users.updateOne({name:"Celina"}, {$pop: {hobbies: 1}})`
+
+`db.users.updateOne({name:"Ania"}, {$pop: {hobbies: -1}})`
+
+
+### Ania dodaje do swoich hobby "coding"
+`db.users.updateOne({name:"Ania"}, {$addToSet: {hobbies: "coding"}})`
+
+no i jeszcze raz dodajemy do swoich hobbii "coding"
+`db.users.updateOne({name:"Ania"}, {$addToSet: {hobbies: "coding"}})`
+ale nic się nie dzieje.
+
+
+### Pomnażamy wszystkim użytkownikom punkty 1.1
+`db.users.updateMany({}, {$mul: {points: 1.1}})`
+
+
+### Odmładzamy staruchów, młodzieniaszków pozostawiamy
+`db.users.updateMany({}, { $min: { age: 25 } })`
+
+
+"Ustaw `age` na 25 tylko wtedy, gdy ktoś ma więcej niż 25 lat"
+
+
+### Podciągamy słabeuszów do 180 punktów
+`db.users.updateMany({}, {$max: {points: 180}})`
+
+"Ustaw wszystkim użytkownikom pole `points` na wartość 180,
+ale tylko tym, którzy mają mniej niż 180 punktów"
+
+
+
+
+## Zadania
+Na nowo zrób bazę danych.
+1. Ustaw wszystkim użytkownikom status premium na true, ale tylko tym, którzy mają więcej niż 150 punktów.
+(użyj `$set` + filtr)
+
+2. Podnieś wiek wszystkich użytkowników o 2 lata, ale tylko osób z miasta Olsztyn.
+(użyj `$inc`)
+
+3. Usuń z tablicy hobbies wszystkich użytkowników hobby "running".
+(użyj `$pull`)
+
+4. Dodaj Celinie hobby "cooking", ale tylko jeśli jeszcze go nie ma.
+(użyj `$addToSet`)
+
+5. Ustaw Bartkowi miasto na "Poznań" i zwiększ mu punkty o 20 w ramach jednej aktualizacji.
+(użyj `$set` + `$inc` w tym samym update)
+
+6. Usuń pole premium wszystkim użytkownikom, którzy mają mniej niż 100 punktów.
+(użyj `$unset` + filtr)
+
+7. Zmień nazwę pola points na score tylko u użytkowników premium.
+(użyj `$rename` + filtr)
+
+8. Pomnóż wszystkim użytkownikom punkty x 1.2, ale tylko tym, którzy mają więcej niż 2 hobby.
+(użyj `$mul` + warunek na długość tablicy)
+
+9. Usuń pierwsze hobby u każdego użytkownika, który ma więcej niż 2 elementy w tablicy hobbies.
+(użyj `$pop` z wartością -1)
+
+10. Ustaw minimalną wartość pola age na 25 dla wszystkich użytkowników, ale nie zmieniaj osób, które mają 25 lub więcej.
+(użyj `$min`)
+
+

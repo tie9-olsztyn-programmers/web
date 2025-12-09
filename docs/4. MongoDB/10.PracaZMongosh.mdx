@@ -1,8 +1,8 @@
 ---
-title: Mongosh
+title: Mongosh - same podstawy
 ---
 
-# Mongosh
+# Mongosh - same podstawy
 
 
 ## Pierwsze kroki
@@ -22,100 +22,103 @@ db.dropDatabase()
 ```
 
 
-## Tworzenie kolekcji i dokumentów
+## Kolekcja - CR_D
 🟦
-### Jawne utworzenie kolekcji
+### Jawne utworzenie kolekcji - CREATE
 `db.createCollection("shop")`
 
-### Automatyczne tworzenie kolekcji podczas dodawania dokumentu
+### Automatyczne tworzenie kolekcji podczas dodawania dokumentu - CREATE
 `db.users.insertOne({ name: "Jurek", age: 20 })`
 
-### Wyświetlanie kolekcji w danej bazie
+
+### Wyświetlanie kolekcji w danej bazie - READ
 `show collections`
 
 
-### Dodawanie wielu dokumentów naraz
+### Usuwanie kolekcji - DELETE
+`db.<nazwaKolekcji>.drop()`
+
+np. `db.shop.drop()`
+
+
+### Podsumowanie operacji na kolekcji i CRD
+
+| Operacja | Opis | Komenda |
+|----------|------|---------|
+| **C — Create** | Jawne tworzenie nowej kolekcji | `db.createCollection("nazwa")` |
+| **R — Read**   | Wyświetlenie listy kolekcji w bieżącej bazie | `show collections` |
+| **D — Delete** | Usunięcie całej kolekcji | `db.nazwa.drop()` |
+
+
+
+
+## Praca z dokumentami - CRUD
+
+| Operacja | Opis | Komenda (przykład) |
+|----------|-------|--------------------|
+| **C — Create** | Dodanie nowego dokumentu | `db.users.insertOne({ name: "Jurek", age: 20 })` |
+| **R — Read** | Wyszukiwanie dokumentów | `db.users.find({ age: { $gt: 18 } })` |
+| **U — Update** | Aktualizacja istniejącego dokumentu | `db.users.updateOne({ name: "Jurek" }, { $set: { age: 21 } })` |
+| **D — Delete** | Usuwanie dokumentów | `db.users.deleteOne({ name: "Jurek" })` |
+
+
+### Przygotowanie bazy danych
 ```
-db.users.insertMany([
-{ name: "Joe", age: 11 },
-{ name: "Zosia", age: 22 },
-{ name: "x23", age: 214 }
+test> use trylogia
+switched to db trylogia
+
+trylogia> db.createCollection("bohaterowie")
+{ ok: 1 }
+trylogia>
+
+```
+### CREATE - dodawanie dokumentów
+#### Dodanie jednego dokumentu
+`db.bohaterowie.insertOne({ imie: "Andrzej Kmicic", powiesc: "Potop", rola: "bohater" }) `
+
+#### Dodanie wielu dokumentów
+```
+db.bohaterowie.insertMany([
+{ imie: "Michał Wołodyjowski", powiesc: "Pan Wołodyjowski" },
+{ imie: "Jan Skrzetuski", powiesc: "Ogniem i Mieczem" }
 ])
 ```
 
-### Pobieranie danych (READ)
-#### Pobieranie wszystkich dokumentów
-`db.users.find()`
+### READ — odczyt dokumentów
 
-### Pobranie jednego dokumentu
-`db.users.findOne({ name: "Jurek" })`
+#### Odczyt wszystkich dokumentów
+`db.bohaterowie.find()`
 
-### Warunki wyszukiwania
-`db.users.find({ age: { $gt: 20 }})           // wiek > 20`
-`db.users.find({ age: { $gt: 10, $lt: 30 }})  // 10 < wiek < 30`
+#### Filtrowanie
+`db.bohaterowie.find({powiesc:"Potop"})`
 
-### Operatory
+#### Wyszukiwanie konkretnej postaci
+`db.bohaterowie.find({imie:"Andrzej Kmicic"})`
 
-#### Operatory porównania (*Comparison Operators*)
-| Operator | Znaczenie / Opis                  | Przykład użycia                        |
-| -------- | --------------------------------- | -------------------------------------- |
-| `$eq`    | równe                             | `{ age: { $eq: 18 }}`                  |
-| `$ne`    | nie równe                         | `{ age: { $ne: 18 }}`                  |
-| `$gt`    | większe niż                       | `{ age: { $gt: 18 }}`                  |
-| `$gte`   | większe lub równe                 | `{ age: { $gte: 18 }}`                 |
-| `$lt`    | mniejsze niż                      | `{ age: { $lt: 18 }}`                  |
-| `$lte`   | mniejsze lub równe                | `{ age: { $lte: 18 }}`                 |
-| `$in`    | wartość z listy                   | `{ platform: { $in: ["PC","Xbox"] }}`  |
-| `$nin`   | wartość nie znajduje się w liście | `{ platform: { $nin: ["PC","Xbox"] }}` |
+### UPDATE - aktualizacja dokumentów
+#### Zmiana wartości istniejącego pola
+`db.bohaterowie.updateOne({imie:"Andrzej Kmicic"}, {$set: {imie:"ANDRZEJ KMICIC"}})`
+
+#### Dodanie nowego pola do dokumentu
+**dla wszystkich dokumentów**
+`db.bohaterowie.updateMany({}, {$set: {epoka: "Barok"}})`
+
+**dla wybranych dokumentów**
+`db.bohaterowie.updateMany({imie:'Michał Wołodyjowski'}, {$set: {czyLubiany:true}})`
 
 
-#### Operatory logiczne (*Logical Operators*)
-| Operator | Znaczenie / Opis                             | Przykład użycia                                       |
-| -------- | -------------------------------------------- | ----------------------------------------------------- |
-| `$and`   | oba warunki muszą być spełnione              | `{ $and: [ {age: {$gt: 18}}, {city: "Olsztyn"} ] }`   |
-| `$or`    | co najmniej jeden warunek musi być spełniony | `{ $or: [ {age: {$lt: 10}}, {age: {$gt: 60}} ] }`     |
-| `$nor`   | żaden z warunków nie może być spełniony      | `{ $nor: [ {city: "Olsztyn"}, {city: "Warszawa"} ] }` |
-| `$not`   | negacja warunku                              | `{ age: { $not: { $gt: 30 } } }`                      |
+### DELETE - usuwanie dokumentu
+`db.bohaterowie.deleteOne({ imie: "Michał Wołodyjowski" })`
 
-#### Operatory aktualizacji (*Update Operator*)
-| Operator    | Znaczenie / Opis                                        | Przykład użycia                                                        |
-| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `$set`      | ustawia lub nadpisuje wartość pola                      | `db.users.updateOne({name:"Joe"}, { $set: {age: 25} })`                |
-| `$inc`      | zwiększa lub zmniejsza wartość liczbową pola            | `db.users.updateMany({}, { $inc: {age: 1} })`                          |
-| `$unset`    | usuwa pole z dokumentu                                  | `db.users.updateOne({_id: id}, { $unset: {city: ""} })`                |
-| `$rename`   | zmienia nazwę pola                                      | `db.users.updateMany({}, { $rename: {"age": "wiek"} })`                |
-| `$push`     | dodaje element do tablicy                               | `db.users.updateOne({name:"Joe"}, { $push: {hobbies: "gaming"} })`     |
-| `$pull`     | usuwa element z tablicy (jeśli spełnia warunek)         | `db.users.updateOne({name:"Joe"}, { $pull: {hobbies: "gaming"} })`     |
-| `$pop`      | usuwa ostatni (`1`) lub pierwszy (`-1`) element tablicy | `db.users.updateOne({name:"Joe"}, { $pop: {hobbies: 1} })`             |
-| `$addToSet` | dodaje element do tablicy **tylko jeśli go nie ma**     | `db.users.updateOne({name:"Joe"}, { $addToSet: {hobbies: "coding"} })` |
-| `$mul`      | mnoży wartość liczbową pola                             | `db.products.updateOne({_id: id}, { $mul: {price: 1.1} })`             |
-| `$min`      | ustawia wartość pola, jeśli jest mniejsza               | `db.stats.updateOne({_id: id}, { $min: {highscore: 300} })`            |
-| `$max`      | ustawia wartość pola, jeśli jest większa                | `db.stats.updateOne({_id: id}, { $max: {highscore: 300} })`            |
+`db.bohaterowie.deleteMany({epoka:"Barok"})`
 
 
 
 
 
 
-### Projekcja i filtrowanie zwracanych pól
 
-Funkcja: `db.collection.find(<filter>, <projection>)`
-    - filter określa, które dokumenty pobrać
-🟦  - projection  określa, które pola zwrócić
-Przykład:
-```
-db.users.find(
-    { age: { $gt: 18 }},        // filter
-    { name: 1, age: 1, _id: 0 } // projection
-)
-```
 
-### Zliczanie dokumentów
-Policzenie wszystkich:
-`db.users.countDocuments()`
-
-Policzenie z filtrem:
-`db.users.countDocuments({ age: { $gt: 18 } })`
 
 
 
