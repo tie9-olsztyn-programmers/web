@@ -1,26 +1,188 @@
 ---
-title: Projekcja i filtrowanie
+title: Projekcja
 ---
 
-# Projekcja i filtrowanie
+# Projekcja
 
+## Teoria
 Funkcja: `db.collection.find(<filter>, <projection>)`
-- filter określa, które dokumenty pobrać
-🟦  - projection  określa, które pola zwrócić
-Przykład:
+- `filter`      określa, które dokumenty pobrać
+- `projection`  określa, które pola zwrócić
+
+
+:::info *Projection*
+- to operacja, która pozwala określić:
+    - które pola chcemy zobaczyć,
+    - które pola ukryć,
+    - jak przekształcić lub obliczyć nowe pola podczas zwracania danych.
+
+Projekcja **nie zmienia danych w bazie** — wpływa tylko na wynik zapytania.
+
+:::
+
+dokument:
 ```
-db.users.find(
-    { age: { $gt: 18 }},        // filter
-    { name: 1, age: 1, _id: 0 } // projection
-)
+{
+  "_id": 1,
+  "name": "Anna",
+  "age": 22,
+  "email": "anna@example.com"
+}
 ```
 
-### Zliczanie dokumentów
-Policzenie wszystkich:
-`db.users.countDocuments()`
 
-Policzenie z filtrem:
-`db.users.countDocuments({ age: { $gt: 18 } })`
+**projekcja**
+```
+db.users.find({}, { name: 1, age: 1 })
+```
+
+
+w y n i k:
+```
+{
+  "name": "Anna",
+  "age": 22
+}
+```
+
+:::tip Projekcja vs filtrowanie
+- Filtrowanie = które dokumenty mają się pojawić
+- Projekcja = które pola z tych dokumentów mają się pojawić
+
+
+Filtr       ->  wybiera wiersze/dokumenty
+Projekcja   ->  wybiera kolumny/pola
+
+:::
+
+
+## Przykłady
+- Przygotujmy bazę danych `chartoon` i kolekcję `chartoonCharacters`.
+- pracujemy w `Compass`
+    - łączymy się z Mongo
+    - w połączeniu (lewa strona okienka) jest znak `+` dodający bazę danych:
+        - baza `chartoon`
+        - kolekcja `chartoonCharacters`
+    - przycisk `ADD DATA` pozwoli nam sformułować zapytanie `insert` - wklejamy:
+```
+[
+  {
+    "name": "Shrek",
+    "species": "ogre",
+    "age": 35,
+    "friends": ["Donkey", "Fiona"],
+    "powerLevel": 70
+  },
+  {
+    "name": "Donkey",
+    "species": "donkey",
+    "age": 20,
+    "friends": ["Shrek"],
+    "powerLevel": 40
+  },
+  {
+    "name": "Fiona",
+    "species": "ogre",
+    "age": 30,
+    "friends": ["Shrek", "Donkey"],
+    "powerLevel": 85
+  },
+  {
+    "name": "Puss in Boots",
+    "species": "cat",
+    "age": 10,
+    "friends": ["Shrek", "Donkey"],
+    "powerLevel": 60
+  },
+  {
+    "name": "Gingy",
+    "species": "cookie",
+    "age": 5,
+    "friends": [],
+    "powerLevel": 15
+  }
+]
+```
+
+### Wyświetl tylko imię i gatunek wszystkich dokumentów
+- mongosh (`Open MongoDB shell`): `db.chartoonCharacters.find({},{name:1,species:1})`
+- w zakładce `Documents` mamy oddzielne pola do `filter`, `projection`, `sort` ...
+    - w polu *filter* wpisujemy `{}`
+    - w polu *projection* wpisujemy `{name:1,species:1}`
+
+### Ukryj pole `friends`
+- `db.chartoonCharacters.find({},{friends:0})`
+- w zakładce `Documents`:
+    - `{}
+    - w polu *projection* wpisujemy `{friends:0}`
+
+### Projekcja na tablicach — tylko jeden przyjaciel Shreka
+- `db.chartoonCharacters.find({name: "Shrek"}, {friends: {$slice: 1}, _id: 0})`
+- w `Documents`:
+    - `{name: "Shrek"}`
+    - w polu *projection* wpisujemy `{firends: {$slice: 1}, _id:0}`
+
+
+wynik:
+```
+{
+  name: 'Shrek',
+  species: 'ogre',
+  age: 35,
+  friends: [
+    'Donkey'
+  ],
+  powerLevel: 70
+}
+```
+
+:::tip slice
+- `$slice: 1` pokaż tylko pierwszy element tablicy,
+- `$slice: 2` pokaż dwa pierwsze elementy tablicy,
+- `$slice: -1` pokaż ostatni element tablicy
+
+:::
+
+
+### Znajdź postacie, które mają choć jednego przyjaciela
+### Wyświetl tylko imię i wiek takiej postaci
+- *filter*: `{friends: {$exists: true, $ne: []} }`
+- *projection*: `{name:1,age:1, _id:0}`
+
+:::tip `$exists` i `$ne`
+- `{ friends: { $exists: true } }` zwróć tylko te dokumenty, w których pole `friends` faktycznie istnieje
+- `{ friends: { $ne: [] } }`:
+    - wybierz dokumenty, w których `friends` nie jest pustą tablicą
+    - jeżeli dokument nie ma pola `friends`, czyli jest to różne od `[]`, to taki dokument będzie zwrócony
+- `{friends: {$exists: true, $ne: []} }`:
+    - wybierz dokumenty, które mają pole `friends`
+    - i z tych dokumentów wybierz tylko te, które mają przynajmniej jednego przyjaciela
+
+:::
+
+
+
+### Pokaż imię i liczbę przyjaciół każdej postaci
+- *filter*: `{}`
+- *projection*: `{ name: 1, friendsCount: {$size: "$friends"} }`
+
+:::tip `$size` i `"$friends"`
+- `$size` operator zwracający długość tablicy (*per analogiam* `friends.length`)
+- `"$friends"` odwołanie do pola `friends`:
+    - `"name"` to tekst
+    - `"$name"` to odwołanie do pola `name`
+
+:::
+
+
+
+### Znajdź postacie, które mają dokładnie 2 przyjaciół (wyświetl tylko imię bohatera)
+- *filter*: `{friends: {$size: 2}}`
+- *projection*: `{name:1}`
+
+
+
+
 
 
 

@@ -1,0 +1,124 @@
+---
+title: Agregacja
+---
+
+# Agregacja
+
+## Teoria
+### Definicja
+:::info Co to jest agregacja?
+- Agregacja to sposób przetwarzania danych w etapach (*pipeline*).
+- Każdy etap bierze dane z poprzedniego i zmienia je lub filtruje.
+
+:::tip W MongoDB każdy taki etap to operator zaczynający się od $:
+- `$match` – wybiera dokumenty
+- `$project` – wybiera pola / tworzy nowe pola
+- `$group` – grupuje i liczy
+- `$sort` – sortuje
+- `$limit` – ogranicza wynik
+- `$count` – liczy dokumenty
+- `$lookup` – dołącza dane z innej kolekcji (prawie jak JOIN)
+
+
+:::
+
+
+### Struktura agregacji
+```
+db.collection.aggregate([
+  { etap1 },
+  { etap2 },
+  { etap3 }
+])
+```
+
+### Prosty przykład
+```
+db.users.aggregate([
+  { $match: { age: { $gt: 18 } } },
+  { $project: { name: 1, age: 1 } }
+])
+```
+- `$match`      wybierz pełnoletnich
+- `$project`    pokaż tylko imię i wiek
+
+### `find()` i `aggregate()`
+| find() | aggregate() |
+|--------|-------------|
+| Filtruje dokumenty | Filtruje i przetwarza dokumenty w etapach |
+| Pokaż wybrane pola | Twórz nowe pola, zmieniaj strukturę |
+| Tylko proste zapytania | Statystyki, grupowanie, sortowanie |
+| Nie robi JOIN | Ma `$lookup` |
+| Bardzo proste | Bardzo potężne |
+
+## Praktyka
+- tworzymy bazę `use foodDB`
+- tworzymy kolekcję `db.createCollection("foods")`
+- wprowadzamy dane przez interfejs *Compass* -> `Documents` > `+`:
+```
+/**
+* Paste one or more documents here
+*/
+[
+  { "name": "Apple",      "category": "fruit",  "calories": 52,  "vitamins": ["A", "C"] },
+  { "name": "Banana",     "category": "fruit",  "calories": 96,  "vitamins": ["B6", "C"] },
+  { "name": "Carrot",     "category": "vegetable", "calories": 41, "vitamins": ["A", "K"] },
+  { "name": "Broccoli",   "category": "vegetable", "calories": 55, "vitamins": ["C", "K"] },
+  { "name": "Chicken",    "category": "meat",   "calories": 239, "vitamins": ["B6"] }
+]
+```
+### Zapytania
+#### Wybierzmy tylko warzywa
+```
+db.foods.aggregate([
+  {$match: { category: "vegetable"}}
+])
+```
+#### Z warzyw wyświetlmy tylko nazwę i kaloryczność
+```
+db.foods.aggregate([
+  {$match: { category: "vegetable"}},
+  {$project: {name: 1, calories: 1, _id:0}}
+])
+```
+
+
+To samo w *Compass*:
+- wybieramy zakładkę `Aggregations`:
+    - tworzymy nowy `stage` przez naciśnięcie przyciku `Add stage`
+    - w `Stage 1 <Select> ` wybieramy `$match` i wpisujemy:
+        - `{category: "vegetable"}`
+    - w `Stage 2 <Select> ` wybieramy `$project` i wpisujemy:
+        - `{ name:1, calories: 1, _id:0 }`
+
+
+
+#### Grupujemy `$group` - ile produków w danej kategorii
+```
+db.foods.aggregate([{
+ $group: {
+  	_id: "$category",
+    totalFoods: {$sum: 1}
+ }
+}])
+```
+- `_id`     pole, po którym grupujemy (tu: kategoria jedzenia)
+- `$sum: 1` dodaj 1 dla każdego dokumentu
+
+
+
+
+
+
+
+
+
+## Zliczanie dokumentów
+Policzenie wszystkich:
+`db.users.countDocuments()`
+
+Policzenie z filtrem:
+`db.users.countDocuments({ age: { $gt: 18 } })`
+
+
+
