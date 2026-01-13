@@ -57,12 +57,12 @@ Projekcja   ->  wybiera kolumny/pola
 
 
 ## Przykłady
-- Przygotujmy bazę danych `chartoon` i kolekcję `chartoonCharacters`.
+- Przygotujmy bazę danych `cartoon` i kolekcję `cartoonCharacters`.
 - pracujemy w `Compass`
     - łączymy się z Mongo
     - w połączeniu (lewa strona okienka) jest znak `+` dodający bazę danych:
-        - baza `chartoon`
-        - kolekcja `chartoonCharacters`
+        - baza `cartoon`
+        - kolekcja `cartoonCharacters`
     - przycisk `ADD DATA` pozwoli nam sformułować zapytanie `insert` - wklejamy:
 ```
 [
@@ -142,6 +142,18 @@ wynik:
 - `$slice: -1` pokaż ostatni element tablicy
 
 :::
+
+
+
+Zmiana zapytania tak, aby wyświetlało się tylko imię bohatera i jednego przyhaciela:
+```
+db.cartoonCharacters.find(
+  { name: "Shrek" },
+  { name: 1, friends: { $slice: 1 }, _id: 0 }
+)
+```
+
+
 
 
 ### Znajdź postacie, które mają choć jednego przyjaciela

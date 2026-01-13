@@ -277,3 +277,44 @@ Policzenie z filtrem:
 
 
 
+## Wracamy do bazy danych z kreskówkami
+- pobieramy dokument *Shrek*a
+- chcemy wyświetlić imię *Shrek*
+- chcemy wyświetlć przyjaciela Shreka
+```
+db.chartoonCharacters.aggregate([
+  { $match: { name: "Shrek" } },
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      friend: { $arrayElemAt: ["$friends", 0] }
+    }
+  }
+])
+```
+
+:::tip
+- `$slice`          ogranicza liczbę elementów tablicy
+- `$arrayElemAt`    wyciąga konkretny element tablicy
+- `find()`          zwraca dane „jak są”
+- `aggregate()`     pozwala zmieniać strukturę wyniku
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
