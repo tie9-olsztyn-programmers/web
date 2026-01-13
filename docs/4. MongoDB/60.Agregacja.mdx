@@ -93,7 +93,9 @@ To samo w *Compass*:
 
 
 
-#### Grupujemy `$group` - ile produków w danej kategorii
+### Grupujemy `$group`
+
+#### Ile produków w danej kategorii
 ```
 db.foods.aggregate([{
  $group: {
@@ -105,12 +107,165 @@ db.foods.aggregate([{
 - `_id`     pole, po którym grupujemy (tu: kategoria jedzenia)
 - `$sum: 1` dodaj 1 dla każdego dokumentu
 
+:::tip Co to jest `$category`
+- `"$category"` oznacza: „weź wartość pola `category` z każdego dokumentu”
+- Czyli:
+    - bez `$` to zwykły tekst "category"
+    - z `$` to odwołanie do pola w dokumencie
+
+
+to tak, jabyśmy powiedzieli:
+„Grupuj dokumenty według tego, co jest zapisane w polu category”.
+
+:::
+
+
+
+#### Średnia liczba kalorii w każdej kategorii
+```
+db.foods.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      avgCalories: { $avg: "$calories" }
+    }
+  }
+])
+```
+
+
+#### Najmniej i najbardziej kaloryczny produkt w kategorii
+```
+db.foods.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      minCalories: { $min: "$calories" },
+      maxCalories: { $max: "$calories" }
+    }
+  }
+])
+```
+
+
+#### Lista nazw produktów w każdej kategorii
+```
+db.foods.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      products: { $push: "$name" }
+        }
+    }
+])
+```
+
+
+
+### Sortujemy
+#### Sortowanie po kaloriach malejąco (najbardziej kaloryczne)
+```
+db.foods.aggregate([
+  { $sort: { calories: -1 } }
+])
+```
+
+:::tip sortowanie `1`, `-1`
+- sortowanie w agregacji,
+- `-1` = malejąco, `1 =` rosnąco.
+
+:::
+
+
+
+
+#### Sortowanie po kategorii, a w ramach kategorii po kaloriach
+```
+db.foods.aggregate([
+  { $sort: { category: 1, calories: -1 } }
+])
+```
+
+#### Dwa najbardziej kaloryczne produkty
+```
+db.foods.aggregate([
+  { $sort: { calories: -1 } },
+  { $limit: 2 }
+])
+
+```
+
+### Ograniczenia wyników - `limit`
+
+#### Najbardziej kaloryczny produkt w każdej kategorii
+
+```
+db.foods.aggregate([
+  { $sort: { calories: -1 } },
+  {
+    $group: {
+      _id: "$category",
+      topFood: { $first: "$$ROOT" }
+    }
+  },
+  { $limit: 3 }
+])
+```
+
+
+:::tip Co się dzieje krok po kroku?
+- `$sort`   dokumenty są posortowane od najbardziej kalorycznych
+- `$group`  MongoDB bierze dokumenty kategoria po kategorii
+- `$first`  bierze pierwszy dokument w danej grupie
+- `$$ROOT`  zapisuje cały dokument, a nie tylko jedno pole
+
+
+Efekt:
+Dla każdej kategorii dostajesz najbardziej kaloryczny produkt jako pełny obiekt.
+
+
+:::
+
+Takie same zapytanie, ale w odpowiedzie dostajemy tylko nazwę produktu
+```
+db.foods.aggregate([
+    { $sort: { calories: -1 } },
+    {
+        $group: {
+            _id: "$category",
+            topFood: { $first: "$name" }
+        }
+    },
+    { $limit: 3 }
+])
+
+```
+
+#### Pierwsze 3 produkty po alfabecie (projekcja + limit)
+```
+db.foods.aggregate([
+  { $sort: { name: 1 } },
+  { $limit: 3 },
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      category: 1
+    }
+  }
+])
+
+```
 
 
 
 
 
+:::tip
+- `$name`   „weź tylko imię”
+- `$$ROOT`  „zrób ksero całego dokumentu”
 
+:::
 
 
 ## Zliczanie dokumentów
