@@ -269,11 +269,88 @@ db.foods.aggregate([
 
 
 ## Zliczanie dokumentów
+### Zliczanie podstawowe
 Policzenie wszystkich:
 `db.users.countDocuments()`
 
 Policzenie z filtrem:
 `db.users.countDocuments({ age: { $gt: 18 } })`
+
+### Zliczanie w agregacji
+Wracamy do naszej bazy danych z jedzeniem.
+
+#### Zliczamy wszystkie dokumenty
+```
+db.foods.aggregate([
+  { $count: "totalProducts" }
+])
+```
+
+#### Zliczanie dokumentów w kategoriach
+```
+db.foods.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      count: { $sum: 1 }
+    }
+  }
+])
+```
+#### Zliczanie tylko owoców i warzyw
+```
+db.foods.aggregate([
+  { $match: { category: { $in: ["fruit", "vegetable"] } } },
+  {
+    $group: {
+      _id: "$category",
+      count: { $sum: 1 }
+    }
+  }
+])
+```
+
+#### Ile produktów ma dokładnie 2 witaminy?
+```
+db.foods.aggregate([
+  {
+    $project: {
+      name: 1,
+      vitaminsCount: { $size: "$vitamins" }
+    }
+  },
+  { $match: { vitaminsCount: 2 } },
+  { $count: "productsWithTwoVitamins" }
+])
+```
+
+#### Średnia liczba witamin na produkt
+```
+db.foods.aggregate([
+  {
+    $project: {
+      vitaminsCount: { $size: "$vitamins" }
+    }
+  },
+  {
+    $group: {
+      _id: null,
+      avgVitamins: { $avg: "$vitaminsCount" }
+    }
+  }
+])
+```
+:::tip `_id` w `$group`
+- `_id` określa „po czym dzielimy dokumenty na grupy”
+- jeżeli `_id:null`  oznacza „Nie dziel dokumentów na grupy – wrzuć wszystkie do jednej”
+
+:::
+
+
+
+
+
+
 
 
 
@@ -303,13 +380,99 @@ db.chartoonCharacters.aggregate([
 :::
 
 
+# ĆWICZENIA
+
+## Przygotowanie bazy i danych
+- baza danych: `star_trekDB`
+- kolekcja `characters`
+- wprowadź dane
+```
+[
+  {
+    "name": "Jean-Luc Picard",
+    "species": "Human",
+    "rank": "Captain",
+    "ship": "USS Enterprise-D",
+    "series": "TNG",
+    "episodes": 178,
+    "age": 59,
+    "skills": ["diplomacy", "leadership"]
+  },
+  {
+    "name": "William Riker",
+    "species": "Human",
+    "rank": "Commander",
+    "ship": "USS Enterprise-D",
+    "series": "TNG",
+    "episodes": 176,
+    "age": 35,
+    "skills": ["tactics", "leadership"]
+  },
+  {
+    "name": "Spock",
+    "species": "Vulcan",
+    "rank": "Commander",
+    "ship": "USS Enterprise",
+    "series": "TOS",
+    "episodes": 79,
+    "age": 66,
+    "skills": ["logic", "science"]
+  },
+  {
+    "name": "Kathryn Janeway",
+    "species": "Human",
+    "rank": "Captain",
+    "ship": "USS Voyager",
+    "series": "VOY",
+    "episodes": 172,
+    "age": 42,
+    "skills": ["science", "leadership"]
+  },
+  {
+    "name": "Data",
+    "species": "Android",
+    "rank": "Lieutenant Commander",
+    "ship": "USS Enterprise-D",
+    "series": "TNG",
+    "episodes": 176,
+    "age": null,
+    "skills": ["science", "analysis"]
+  },
+  {
+    "name": "Worf",
+    "species": "Klingon",
+    "rank": "Lieutenant",
+    "ship": "USS Enterprise-D",
+    "series": "TNG",
+    "episodes": 172,
+    "age": 40,
+    "skills": ["combat", "tactics"]
+  }
+]
+```
 
 
+## Pytania do bazy
+
+Ilu bohaterów pochodzi z każdej serii?
+
+Jaka jest średnia liczba odcinków na serię?
 
 
+Który bohater wystąpił w największej liczbie odcinków?
+Ilu kapitanów jest w bazie i jacy to są?
+
+Średni wiek bohaterów według gatunku (pomijając androidy)
+
+Ile postaci służyło na każdym statku?
+Jakie umiejętności występują najczęściej?
 
 
+Które serie mają bohaterów z więcej niż 150 odcinkami?
 
+Najstarszy bohater w każdej serii
+
+Średnia liczba umiejętności na bohatera
 
 
 
