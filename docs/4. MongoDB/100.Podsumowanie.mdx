@@ -1,0 +1,160 @@
+---
+title: Agregacja w E-sporcie (Pipeline)
+sidebar_label: Projekt Liga E-sportowa
+description: Zaawansowane łączenie danych, liczenie statystyk i grupowanie.
+---
+
+import Admonition from '@theme/Admonition';
+
+# Projekt: Analityka Ligi E-sportowej 🎮
+- W tym scenariuszu wcielamy się w rolę analityków danych.
+- Naszym celem jest wyłonienie najlepszej drużyny na podstawie wyników poszczególnych graczy.
+- Użyjemy do tego **Aggregation Pipeline**.
+
+W bazie danych *liga* będziemy mieli dwie kolekcje:
+1.  **`teams`**  baza organizacji.
+2.  **`players`** zawodnicy ze statystykami z ostatniego meczu.
+
+## 1. Przygotowanie Danych (Seed Data)
+* Skopiuj poniższe polecenia do swojego terminala (mongosh) lub Compassa.
+* Zauważ, że używamy czytelnych ID (slugów) dla drużyn, aby łatwiej śledzić relacje.
+* Można w Mongo nadpisać domyślne pole "_id" np. stringiem.
+
+### Kolekcja `teams`
+```javascript
+db.teams.insertMany([
+  { "_id": "navi", "name": "Natus Vincere", "region": "EU", "founded": 2009 },
+  { "_id": "t1", "name": "T1", "region": "KR", "founded": 2003 },
+  { "_id": "g2", "name": "G2 Esports", "region": "EU", "founded": 2014 }
+])
+```
+
+### Kolekcja `players`
+```js
+db.players.insertMany([
+  { "nickname": "s1mple", "team_id": "navi", "role": "Sniper", "stats": { "kills": 25, "deaths": 10, "assists": 5 } },
+  { "nickname": "b1t", "team_id": "navi", "role": "Rifler", "stats": { "kills": 18, "deaths": 12, "assists": 8 } },
+  { "nickname": "Faker", "team_id": "t1", "role": "Mid", "stats": { "kills": 10, "deaths": 2, "assists": 15 } },
+  { "nickname": "Zeus", "team_id": "t1", "role": "Top", "stats": { "kills": 12, "deaths": 5, "assists": 10 } },
+  { "nickname": "Caps", "team_id": "g2", "role": "Mid", "stats": { "kills": 20, "deaths": 20, "assists": 10 } },
+  { "nickname": "FreeAgent_01", "team_id": null, "role": "Support", "stats": { "kills": 5, "deaths": 5, "assists": 20 } }
+])
+
+```
+
+### Cel biznesowy: Ranking efektywności
+Nasz szef chce raportu, który:
+1. Odrzuci graczy bez drużyny (`team_id: null`).
+2. Połączy gracza z nazwą jego drużyny.
+3. Obliczy współczynnik KDA (Kills + Assists / Deaths) dla każdego gracza.
+4. Zgrupuje wyniki, aby pokazać średnie KDA całej drużyny.
+5. Posortuje drużyny od najlepszej do najgorszej.
+
+To klasyczny przykład *ETL* (*Extract*, *Transform*, *Load*) wykonywany w locie przez bazę danych.
+
+
+### Budujemy Pipeline
+- W *Compass* wybieramy kolekcję `players` i "zakładkę" *Aggregations".
+- Będzie po kolei dodawali odpowiednie *stage*, czyli będziemy budowali *pipeline*
+
+1. Filtrowanie - `$match`
+```js
+{
+   "team_id": { $ne: null }
+}
+```
+
+
+2. Łączenie - `$lookup`
+```js
+{
+  from: "teams",
+  localField: "team_id",
+  foreignField: "_id",
+  as: "team_info"
+}
+```
+
+3. Spłaszczamy - `$unwind`
+```js
+{
+  path: "$team_info",
+}
+```
+
+4. Obliczanie współczynnika KDA - `addFields`
+Dodajemy wirtualne pole `kda_ratio`.
+```js
+{
+    kda_ratio :{
+        $divide: [
+            {$add: ["$stats.kills", "$stats.assists"]},
+            {$max: ["$stats.deaths", 1]}
+        ]
+    }
+}
+```
+`{$max: ["$stats.deaths", 1]}` to zabezpieczenie przed sytuacją, gdy `stats.deaths` miałby wartość `0`.
+
+5. Grupowanie wyników - `$group`
+Obliczamy średnią `kda` dla każdej drużyny
+```js
+{
+  "_id": "$team_info.name",
+  "avg_tea_kda": { $avg: "$kda_ratio" },
+  "players_count": {$sum: 1}
+}
+
+```
+
+6. Sortujemy od najwyższegp wyniku `$sort`
+```js
+{
+  "avg_team_kda": 1
+}
+```
+
+Całe zapytanie:
+```js
+db.players.aggregate([
+  { $match: { team_id: { $ne: null } } },
+  {
+    $lookup: {
+      from: "teams",
+      localField: "team_id",
+      foreignField: "_id",
+      as: "team_info"
+    }
+  },
+  { $unwind: "$team_info" },
+  {
+    $addFields: {
+      kda_ratio: {
+        $divide: [
+          { $add: ["$stats.kills", "$stats.assists"] },
+          { $max: ["$stats.deaths", 1] }
+        ]
+      }
+    }
+  },
+  {
+    $group: {
+      _id: "$team_info.name",
+      avg_team_kda: { $avg: "$kda_ratio" },
+      player_count: { $sum: 1 }
+    }
+  },
+  { $sort: { avg_team_kda: 1 } }
+])
+
+```
+
+
+
+
+
+
+
+
+
+

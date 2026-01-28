@@ -1,0 +1,184 @@
+---
+title: Relacje w MongoDB - Operator $lookup
+sidebar_label: Operator $lookup
+description: Jak łączyć dane z różnych kolekcji w potoku agregacji?
+---
+
+# Łączenie kolekcji: Operator `$lookup`
+- W świecie baz danych rzadko zdarza się, aby wszystkie informacje znajdowały się w jednym miejscu.
+- Czasem musimy "sięgnąć" do innej kolekcji, aby pobrać dodatkowe dane.
+- W MongoDB służy do tego etap agregacji o nazwie `$lookup`.
+
+## Metafora: Detektyw i Kartoteka
+Wyobraź sobie, że masz dwie teczki:
+1. **Teczka Zamówień**: Zawiera numer zamówienia i `klient_id`.
+2. **Teczka Klientów**: Zawiera szczegóły (imię, adres) przypisane do konkretnego ID.
+
+
+Operator `$lookup` działa jak detektyw, który bierze `klient_id` z zamówienia,
+idzie do kartoteki klientów, znajduje pasującą osobę
+i "dokleja" jej dane do Twojego zamówienia jako nową listę.
+
+##  Składnia operatora
+
+Oto jak wygląda podstawowa struktura `$lookup`:
+
+```javascript
+{
+  $lookup: {
+    from: "kolekcja_docelowa",       // Skąd bierzemy dane?
+    localField: "pole_u_nas",        // Jakie pole w obecnej kolekcji jest kluczem?
+    foreignField: "pole_u_nich",     // Jakie pole w tamtej kolekcji mu odpowiada?
+    as: "nazwa_wyniku"               // Pod jaką nazwą zapisać połączone dane?
+  }
+}
+```
+
+:::tip Dlaczego wynik ląduje w tablicy?
+- MongoDB zawsze zwraca wynik $lookup jako tablicę (`Array`),
+    - nawet jeśli znajdzie tylko jeden pasujący dokument.
+- Dlaczego?
+    - Bo system nie wie, czy relacja to 1:1 czy 1:wiele.
+
+
+:::
+
+
+## Prosty przykład *Rok 1984*
+
+### Kolekcja *authors*
+Zróby bazę danych *library* z kolekcją *authors* i wprowadźmy dane:
+```js
+db.authors.insertOne({
+  _id: ObjectId("65a123abcde1234567890123"),
+  name: "George Orwell",
+  birth_year: 1903,
+  nationality: "British"
+})
+```
+### Kolekcja *books*
+Zróby drugą kolekcję w tej bazie *books*:
+```js
+db.books.insertOne({
+  title: "Rok 1984",
+  genre: "Dystopia",
+  published: 1949,
+  author_id: ObjectId("65a123abcde1234567890123") // To jest nasz "most"
+})
+
+```
+
+### Łączenie
+```js
+db.books.aggregate([
+  {
+    $lookup: {
+      from: "authors",           // 1. Idź do kolekcji 'authors'
+      localField: "author_id",    // 2. Weź 'author_id' z obecnej książki
+      foreignField: "_id",        // 3. Znajdź dokument, który ma takie '_id' w autorach
+      as: "author_info"           // 4. Wynik wrzuć do pola 'author_info'
+    }
+  }
+])
+```
+
+
+wynik
+```
+{
+  _id: ObjectId('697a5cac659b9eaf0c1b6386'),
+  title: 'Rok 1984',
+  genre: 'Dystopia',
+  published: 1949,
+  author_id: ObjectId('65a123abcde1234567890123'),
+  author_info: [
+    {
+      _id: ObjectId('65a123abcde1234567890123'),
+      name: 'George Orwell',
+      birth_year: 1903,
+      nationality: 'British'
+    }
+  ]
+}
+```
+
+
+### Dodajemy dwie książki Orwella
+```js
+[
+{
+    "title": "Folwark zwierzęcy",
+    "original_title": "Animal Farm",
+    "genre": "Satyra polityczna",
+    "published": 1945,
+    "author_id": ObjectId("65a123abcde1234567890123")
+  },
+  {
+    "title": "Wiwat aspidistra",
+    "original_title": "Keep the Aspidistra Flying",
+    "genre": "Literatura piękna",
+    "published": 1936,
+    "author_id": ObjectId("65a123abcde1234567890123")
+  }
+]
+```
+
+ZAPYTANIE
+> Wyświetl listę tytułów wraz z pełnymi profilami ich autorów.
+
+```js
+db.books.aggregate([
+  {
+    $lookup: {
+      from: "authors",
+      localField: "author_id",
+      foreignField: "_id",
+      as: "author_details"
+    }
+  }
+])
+```
+
+## Odwijamy `$unwind`
+- `$lookup` zawsze zwraca tablicę (wynik w nawiasach `[...]`),
+    - nawet jeśli znajdzie tylko jednego autora.
+- w używaniu danych na frontendzi (React) to utrudnienie, bo:
+    - zamiast pisać `book.author.name`,
+    - musi pisać `book.author[0].name`.
+
+
+:::waring `$umwimd`
+`$unwind` służy do "wyjęcia" elementu z tablicy i spłaszczenia struktury dokumentu.
+
+
+:::tip Analogia - Pudełko w pudełku
+Wyobraź sobie, że kupiłeś jedną książkę.
+- Sprzedawca, zamiast podać Ci ją do ręki, włożył ją do wielkiego kartonu (tablicy).
+- Bez `$unwind`: Masz karton, w którym jest jedna książka. Żeby ją przeczytać, musisz najpierw otworzyć karton.
+- Z `$unwind`: Rozrywasz karton i wyrzucasz go. Zostaje Ci sama książka w ręku.
+
+:::
+
+Przykład zapytania:
+```js
+db.books.aggregate([
+  {
+    $lookup: {
+      from: "authors",
+      localField: "author_id",
+      foreignField: "_id",
+      as: "author_details"
+    }
+  },
+  {
+    $unwind: "$author_details" // "Odwijamy" tablicę
+  }
+])
+```
+
+
+
+
+
+
+
