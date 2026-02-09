@@ -11,33 +11,65 @@ title: Formularz TSX
 # `App.tsx` jako formularz
 
 ## Dodajemy komponent `form`
-Zmieniamy zawartość pliku `App.tsx` na:
 
-```typescript jsx
-import './App.css'
-import type {FormEvent} from "react";
+:::tip Co to jest `SyntheticEvent`?
+- W React nie pracujemy bezpośrednio na "surowych" zdarzeniach przeglądarki.
+- Zamiast tego, React podstawia nam **SyntheticEvent** (Zdarzenie Syntetyczne).
+
+:::note Analogia: React jako Tłumacz
+Wyobraź sobie, że każda przeglądarka (Chrome, Firefox, Safari) mówi w nieco innym dialekcie.
+* Chrome mówi: *"Użytkownik kliknął guzik"*.
+* Starszy Internet Explorer mówi: *"Wciśnięto przycisk myszy"*.
+
+Gdybyś pisał czysty JavaScript, musiałbyś rozumieć te wszystkie dialekty.
+React działa jak **profesjonalny tłumacz**. Stoi między przeglądarką a Twoim kodem:
+1.  Wyłapuje bełkotliwe zdarzenie z przeglądarki.
+2.  "Tłumaczy" je na jeden, standardowy język (React).
+3.  Przekazuje Tobie czysty, przewidywalny obiekt **`SyntheticEvent`**.
+
+:::
+
+
+
+Zmieniamy zawartość pliku `App.tsx` na:
+```tsx
+
+import type {SyntheticEvent} from "react";
 
 function App() {
 
-    function handleSubmit(event: FormEvent) {
+    // 2. Typujemy zdarzenie jako ogólne zdarzenie syntetyczne Reacta
+    // HTMLFormElement informuje, na czym to zdarzenie występuje
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
-        console.log(event);
+        console.log(event.currentTarget); //
     }
 
-
-  return (
-    <>
-         <form onSubmit={handleSubmit}>
-
-             <button type="submit" >Submit</button>
-         </form>
-    </>
-  )
+    return (
+        <form onSubmit={handleSubmit}>
+            <button type="submit">Submit</button>
+        </form>
+    );
 }
 
-export default App
+export default App;
 
 ```
+
+:::tip `<HTMLFormElement>`
+Ten zapis w nawiasach ostrych to informacja dla TypeScripta: "Z jakiego konkretnie elementu HTML pochodzi to zdarzenie?".
+
+Analogia: Instrukcja Obsługi
+Wyobraź sobie, że SyntheticEvent to pudełko z narzędziami.
+
+Jeśli powiesz tylko SyntheticEvent (bez nawiasów), TypeScript widzi pudełko, ale nie wie, do czego ono służy. Myśli: "To jest jakieś zdarzenie z jakiegoś elementu".
+
+Jeśli dodasz `<HTMLFormElement>`, przyklejasz na pudełko etykietę: "To jest FORMULARZ".
+
+:::
+
+
+
 :::note znacznik `<form>`
 - to wbudowany komponent do tworzenia formularza
 - ma wbudowaną właściwość `onSubmit`, która jako swoją wartość przyjmuje nazwę funkcji, która ma być wywołana, gdy formularz zostanie zatwierdzony (w naszym przypadku jest to funkcja `handleSubmit`)
@@ -65,10 +97,7 @@ import type {ChangeEvent, FormEvent} from "react";
 
 function App() {
 
-    function handleSubmit(event: FormEvent) {
-        event.preventDefault();
-        console.log(event);
-    }
+  //...
 
     function handleTextInputChange(e: ChangeEvent<HTMLInputElement>){
        console.log(e)
