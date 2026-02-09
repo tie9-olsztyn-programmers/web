@@ -1,0 +1,44 @@
+---
+title: Checkbox
+---
+
+
+# Dodajemy CheckBoxa i więcej walidacji
+```tsx
+    <label>
+        <input
+            type="checkbox"
+            checked={hasAgreed}       // Tu nie ma "value", jest "checked"
+            onChange={handleCheckboxChange}
+        />
+        Akceptuję regulamin
+    </label>
+
+{/* Button zablokowany, jeśli brak zgody LUB tekst za krótki */}
+    <button type="submit" disabled={!hasAgreed || textInput.length < 3}>
+        Submit
+    </button>
+```
+
+## Brakuje nam funkcji `handleCheckboxChange` i `hasAgreed`
+1. Podtrzebujemy dodatkowego `useState` do obsługi checkboxa:
+```tsx
+
+function App() {
+
+    const [hasAgreed, setHasAgreed] = useState<boolean>(false);
+
+//...
+```
+
+2. Potrzebujemy funkcji obsługującej zmiane w polu checkboxa:
+```tsx
+
+   function handleCheckboxChange(e: ChangeEvent<HTMLInputElement>) {
+        // Tu nie używamy e.target.value, tylko e.target.checked!
+        console.log(e.target.checked);
+        setHasAgreed(e.target.checked);
+    }
+
+```
+

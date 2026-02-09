@@ -1,0 +1,66 @@
+---
+title: Radiobutton
+---
+
+
+# Radiobuttony, czyli jak chcesz płacić
+
+## Definiujemy stan
+Mamy opcje: "Karta", "BLIK", "Przelew".
+`const [paymentMethod, setPaymentMethod] = useState("blik"); // Domyślnie BLIK`
+
+## Definiujemy handler
+```tsx
+function handlePaymentChange(e: ChangeEvent<HTMLInputElement>) {
+    setPaymentMethod(e.target.value);
+    console.log(e.target.value)
+}
+```
+
+## Definiujemy JSX
+```tsx
+ <div>
+    <p>Wybierz formę płatności:</p>
+    <label>
+        <input
+            type="radio"
+            name="payment"            // Ważne: grupuje przyciski dla przeglądarki
+            value="blik"              // To trafi do stanu
+            checked={paymentMethod === "blik"} // Logika: Czy ja jestem wybrany?
+            onChange={handlePaymentChange}
+        />
+        BLIK
+    </label>
+
+
+{/* Opcja 2: Karta */}
+    <label style={{ marginLeft: "15px" }}>
+        <input
+            type="radio"
+            name="payment"
+            value="card"
+            checked={paymentMethod === "card"} // Czy stan to "card"?
+            onChange={handlePaymentChange}
+        />
+        Karta
+    </label>
+
+    {/* Opcja 3: Gotówka */}
+    <label style={{ marginLeft: "15px" }}>
+        <input
+            type="radio"
+            name="payment"
+                        value="cash"
+                        checked={paymentMethod === "cash"}
+                        onChange={handlePaymentChange}
+                    />
+                    Gotówka
+    </label>
+</div>
+
+
+```
+
+
+
+

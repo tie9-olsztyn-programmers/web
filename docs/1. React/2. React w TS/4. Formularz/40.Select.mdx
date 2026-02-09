@@ -1,0 +1,41 @@
+---
+title: Select
+---
+
+# Lista rozwijana `<select>`, czyli który owoc wolisz
+
+## Dodamy obsługę stanu i obsługę zmiany stanu
+:::important Zwróć uwagę
+`e: ChangeEvent<HTMLSelectElement>` - pracuje na `select` a nie `input`
+
+:::
+
+```tsx
+ // 1. Stan (możemy ustawić domyślną wartość, np. "orange")
+    const [fruit, setFruit] = useState("orange");
+
+// 2. Handler - to samo co przy tekście!
+    function handleSelectChange(e: ChangeEvent<HTMLSelectElement>) {
+        console.log(e.target.value);
+        setFruit(e.target.value);
+    }
+```
+
+## Dodajemy `select` do formularza
+```tsx
+    <label>
+        Wybierz ulubiony owoc:
+        <select
+            value={fruit}
+            onChange={handleSelectChange}
+            style={{marginLeft: "10px"}}
+            >
+            <option value={"apple"}>Jabłko</option>
+            <option value={"orange"}>Pomarańcza</option>
+            <option value={"banana"}>Banan</option>
+        </select>
+    </label>
+
+    <button disabled={!hasAgreed || textInput.length < 3} type="submit">Submit</button>
+
+```
