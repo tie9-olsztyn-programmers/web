@@ -1,0 +1,81 @@
+---
+title: Start
+---
+
+# Start - zasiewamy ziarno
+
+Mamy już plan architektoniczny (schema.md).
+Teraz czas na Start — czyli wypełnienie naszej bazy danymi, na których będziemy pracować.
+Zamiast wpisywać wszystko ręcznie w konsoli, stworzymy skrypt
+
+
+## Cel etapu
+Stworzenie powtarzalnego skryptu, który:
+- Wyczyści bazę z ewentualnych starych danych (reset).
+- Doda zestaw produktów, klientów i zamówień.
+
+Napiszemy skrypt `seed.ts`
+```js
+// 1. Wybór bazy danych
+db = db.getSiblingDB('cyber_piekarnia');
+
+// 2. Czyszczenie kolekcji (Reset przed Startem)
+db.produkty.drop();
+db.klienci.drop();
+db.zamowienia.drop();
+
+console.log("--- Start: Inicjalizacja bazy CyberPiekarnia ---");
+
+// 3. Dodawanie produktów
+db.produkty.insertMany([
+    { _id: 1, nazwa: "Chleb Kwantowy", cena: 12.99, skladniki: ["mąka żytnia", "zakwas"], czy_wege: true, stan_magazynowy: 50 },
+    { _id: 2, nazwa: "Bułka z Prądem", cena: 4.50, skladniki: ["mąka pszenna", "cukier"], czy_wege: false, stan_magazynowy: 100 },
+    { _id: 3, nazwa: "Bajgiel Binarny", cena: 7.00, skladniki: ["mąka", "mak", "sezam"], czy_wege: true, stan_magazynowy: 30 }
+]);
+
+// 4. Dodawanie klientów (z obiektem preferencji!)
+db.klienci.insertMany([
+    {
+        _id: 101,
+        login: "kromka_99",
+        email: "jan@cyber.pl",
+        punkty_lojalnosciowe: 250,
+        czy_vip: true,
+        preferencje: { ulubiony_typ: "bułki", smak: "słodki" }
+    },
+    {
+        _id: 102,
+        login: "bajt_master",
+        email: "anna@it.pl",
+        punkty_lojalnosciowe: 50,
+        czy_vip: false,
+        preferencje: { ulubiony_typ: "chleb", smak: "słony" }
+    }
+]);
+
+// 5. Dodawanie pierwszego zamówienia (Relacje)
+db.zamowienia.insertOne({
+    klient_id: 101,
+    produkty: [1, 2], // Jan kupił Chleb Kwantowy i Bułkę z Prądem
+    data_zakupu: new Date(),
+    kwota_koncowa: 17.49
+});
+
+console.log("--- Sukces: Piekarnia gotowa do pracy! ---");
+```
+
+**W konsoli wpisujemy instrukcję:** `mongosh seed.js`. To uruchomi nasz skrypt, który wprowadzi dane do bazy danych.
+
+
+:::tip Metoda `getSiblingDB`
+- to nie jest standardowy JavaScript, który znajdziesz w przeglądarce.
+- to specjalna funkcja dostarczana przez środowisko `mongosh` (MongoDB Shell).
+
+
+Kiedy uruchamiasz plik za pomocą `mongosh` `scripts/seed.js`, MongoDB "opakowuje"
+Twój kod w swoje własne środowisko.
+To środowisko automatycznie udostępnia globalny obiekt `db`.
+`getSiblingDB` jest metodą tego właśnie obiektu.
+Można powiedzieć, że to programistyczny odpowiednik komendy `use`.
+
+:::

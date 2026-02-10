@@ -1,0 +1,133 @@
+---
+title: Plan
+---
+
+# Czas na wielki plan
+Jeśli nie zaplanujesz danych, Twoja baza szybko zmieni się w cyfrowe wysypisko.
+
+## Cel etapu
+- Stworzenie dokumentu, który będzie mapą dla całego zespołu.
+- Każdy, kto zajrzy do pliku `schema.md`, musi od razu wiedzieć,
+jakie dane przechowujemy i jak są one ze sobą połączone.
+
+
+## Wyobraź sobie
+Wyobraź sobie, że siedzisz naprzeciwko właściciela najnowocześniejszej piekarni w mieście.
+Klient nie zna się na bazach danych, mówi „językiem biznesu”.
+Twoim zadaniem jest wyłapanie z tej opowieści konkretnych pól, typów danych i kolekcji.
+
+**Wywiad z właścicielem**:
+> „Słuchajcie, moja *CyberPiekarnia* to nie jest zwykły sklep z bułkami.
+> Potrzebuję systemu, który ogarnie nasz asortyment.
+> Każdy wypiek ma swoją unikalną nazwę, wiadomo, ale też cenę.
+> Ważne są składniki, bo teraz mnóstwo ludzi ma alergie –
+muszę mieć listę wszystkich produktów użytych do pieczenia w każdym chlebie.
+> No i muszę wiedzieć, czy dany produkt jest wegański, czy nie – to teraz bardzo modne.
+>
+> Co do klientów... chcę ich śledzić (oczywiście dla ich dobra!).
+> Każdy musi mieć swój pseudonim, e-mail do wysyłki newslettera i informację o tym,
+ile ma u nas punktów lojalnościowych.
+> Niektórzy to nasi 'Cyber-VIPy' – mają wtedy aktywny status subskrypcji, co daje im darmowe dowozy.
+> I najważniejsze: zamówienia. Muszę wiedzieć, kto kupił, co kupił i kiedy dokładnie to było.
+> System ma też zapisywać całkowitą kwotę, jaką klient zapłacił, bo czasem mamy promocje i
+cena z katalogu może się różnić od tej na paragonie.”
+
+:::tip Podpowiedź — jak analizować ten tekst?
+- Szukaj "Głównych Bohaterów" (Kolekcje):
+  - To byty, o których klient chce gromadzić dane.
+  - Zazwyczaj występują w liczbie mnogiej lub jako grupy przedmiotów.
+  - Przykład: "Chcę systemu, który ogarnie nasz asortyment" -> Kolekcja produkty.
+- Szukaj "Etykiet" (Pola/Atrybuty):
+  - To cechy, które przyklejamy do naszych "bohaterów".
+  - Opisują one konkretny egzemplarz.
+  - Przykład: "...każdy wypiek ma swoją nazwę i cenę" -> To są detale, które wędrują do środka dokumentu w kolekcji produkty.
+:::
+
+## Struktura bazy danych
+1. Kolekcja `produkty` (Katalog towarów)
+ - nazwa: String (np. "Chleb Kwantowy")
+ - cena: Number (zmiennoprzecinkowy)
+ - składniki: Array (np. `["mąka żytnia", sól, "oliwki"]`)
+ - czy_wege: Boolean
+ - stan_magazynowy: Int (ile sztuk mamy na półce)
+
+2. Kolekcja `klienci` (Baza użytkowników)
+Musimy wiedzieć, komu sprzedajemy nasze wypieki.
+ - login: String (unikalny)
+ - email: String
+ - punkty_lojalnosciowe: Int
+ - czy_vip: Boolean
+ - preferencje: Object (np. `{ ulubiony_typ: "bułki", smak: "z dodatkami }`)
+
+3. Kolekcja zamowienia (Relacje!)
+To najtrudniejszy element.
+Musimy połączyć klienta z produktem.
+W MongoDB robimy to zazwyczaj przez Referencje (zapisujemy ID klienta i ID produktu).
+ - klient_id: ObjectId
+ - produkty: Array (elementami ObjectId produktów)
+ - data_zakupu: Date
+ - kwota_koncowa: Float
+
+## Mój `md`
+### Kod
+```
+### 1. Kolekcja: `produkty`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `nazwa` | **String** | Unikalna nazwa produktu. | `"Chleb Kwantowy"` |
+| `cena` | **Number** | Cena katalogowa. | `12.99` |
+| `skladniki` | **Array** | Lista surowców. | `["mąka żytnia", "sól"]` |
+| `czy_wege` | **Boolean** | Czy produkt jest wegański. | `true` |
+| `stan_magazynowy` | **Int** | Ilość sztuk na półce. | `42` |
+
+### 2. Kolekcja: `klienci`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `login` | **String** | Unikalny identyfikator. | `"kromka_99"` |
+| `email` | **String** | Adres newslettera. | `"jan@cyber.pl"` |
+| `punkty_lojalnosciowe` | **Int** | Punkty za zakupy. | `250` |
+| `czy_vip` | **Boolean** | Status Cyber-VIP. | `false` |
+| `preferencje` | **Object** | Zagnieżdżone ustawienia. | `{ "ulubiony_typ": "bułki" }` |
+
+### 3. Kolekcja: `zamowienia`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `klient_id` | **ObjectId** | Referencja do klienci._id. | `ObjectId("507f1f...")` |
+| `produkty` | **Array** | Lista ID produktów. | `[ObjectId("...")]` |
+| `data_zakupu` | **Date** | Czas transakcji. | `ISODate("2024-05-21")` |
+| `kwota_koncowa` | **Float** | Faktyczna suma zapłacona. | `35.50` |
+```
+
+### Wygląd
+
+#### 1. Kolekcja: `produkty`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `nazwa` | **String** | Unikalna nazwa produktu. | `"Chleb Kwantowy"` |
+| `cena` | **Number** | Cena katalogowa. | `12.99` |
+| `skladniki` | **Array** | Lista surowców. | `["mąka żytnia", "sól"]` |
+| `czy_wege` | **Boolean** | Czy produkt jest wegański. | `true` |
+| `stan_magazynowy` | **Int** | Ilość sztuk na półce. | `42` |
+
+---
+
+#### 2. Kolekcja: `klienci`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `login` | **String** | Unikalny identyfikator. | `"kromka_99"` |
+| `email` | **String** | Adres newslettera. | `"jan@cyber.pl"` |
+| `punkty_lojalnosciowe` | **Int** | Punkty za zakupy. | `250` |
+| `czy_vip` | **Boolean** | Status Cyber-VIP. | `false` |
+| `preferencje` | **Object** | Zagnieżdżone ustawienia. | `{ "ulubiony_typ": "bułki" }` |
+
+---
+
+#### 3. Kolekcja: `zamowienia`
+| Pole | Typ | Opis | Przykład |
+| :--- | :--- | :--- | :--- |
+| `klient_id` | **ObjectId** | Referencja do klienci._id. | `ObjectId("507f1f...")` |
+| `produkty` | **Array** | Lista ID produktów. | `[ObjectId("...")]` |
+| `data_zakupu` | **Date** | Czas transakcji. | `ISODate("2024-05-21")` |
+| `kwota_koncowa` | **Float** | Faktyczna suma zapłacona. | `35.50` |
+
+

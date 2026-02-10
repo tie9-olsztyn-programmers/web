@@ -1,0 +1,60 @@
+---
+title: Raport
+---
+
+# Czas na raport
+
+## Wydobywamy wartość (`analysis.js`)
+Dane w bazie są jak surowce w magazynie — same w sobie nie zarabiają.
+Dopiero gdy potrafisz je przetworzyć w czytelny raport, dajesz klientowi to, za co Ci płaci.
+
+
+## Cel etapu
+Napisanie skryptu, który:
+- Przeanalizuje zachowania klientów.
+- Obliczy zyski piekarni.
+- Wykorzysta Agregacje (*Aggregation Pipelines*) do zaawansowanych obliczeń.
+
+
+## Skrypt `analysis.js`
+```js
+db = db.getSiblingDB('cyber_piekarnia');
+
+print("\n--- RAPORT ANALITYCZNY CYBERPIEKARNI ---");
+
+//  Kto u nas jest VIP-em?
+print("\n1. Lista naszych klientów VIP:");
+const vipy = db.klienci.find({ czy_vip: true }, { login: 1, email: 1, _id: 0 }).toArray();
+printjson(vipy);
+
+
+//  Średnia cena produktów wegańskich
+print("\n2. Ile średnio kosztuje u nas bułka wege?");
+const sredniaWege = db.produkty.aggregate([
+    { $match: { czy_wege: true } },
+    { $group: { _id: null, sredniaCena: { $avg: "$cena" } } },
+    //{ $set: { sredniaCena: {$round: ["$sredniaCena", 2]}}} // zwraca 10
+    { $set: { sredniaCena: { $trunc: ["$sredniaCena", 2] } } } // zwraca 9.99
+]).toArray();
+printjson(sredniaWege);
+
+
+// Ile łącznie zarobiliśmy na wszystkich zamówieniach?
+print("\n3. Całkowity przychód z zamówień:");
+const przychod = db.zamowienia.aggregate([
+    { $group: { _id: null, suma: { $sum: "$kwota_koncowa" } } }
+]).toArray();
+printjson(przychod);
+```
+
+**Uruchamiamy** przez `mongosh analysis.js`
+
+
+:::tip `printjson()`
+- to wbudowana funkcja pomocnicza (*Shell Helper*) dostarczana przez środowisko mongosh (*MongoDB Shell*).
+- Gdy uruchamiasz skrypt przez `mongosh`, powłoka ta wstrzykuje do globalnego zasięgu zestaw narzędzi
+ułatwiających pracę z bazami danych.
+- Gdybyś spróbował uruchomić ten sam plik za pomocą zwykłego polecenia `node analysis.js`,
+terminal wyrzuciłby błąd: `ReferenceError: printjson is not defined`.
+
+:::
