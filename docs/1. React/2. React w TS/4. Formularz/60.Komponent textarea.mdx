@@ -1,0 +1,59 @@
+---
+title: Komponent textarea
+---
+
+
+:::info textarea
+- to element formularza służący do wprowadzania dłuższego tekstu, który może zajmować wiele linii
+(np. treść wiadomości, komentarz, opis profilu).
+
+:::
+
+## Definicja stanu
+Musimy wprowadzić zmienną obsługującą stan `textarea`:
+`const [description, setDescription] = useState("")`
+
+
+## Obsługa zmiany stanu
+Potrzebujemy funkcji, która będzie obsługiwała zmiany w komponencie `textarea`
+```ts
+function handleDescriptionChange(e: ChangeEvent<HTMLTextAreaElement>) {
+    setDescription(e.target.value);
+    console.log(e.target.value)
+}
+```
+
+## JSX
+```jsx
+//...
+<br />
+<br />
+
+<label>
+    Opisz swój problem (opcjonalne):
+    <textarea
+        value={description}
+        onChange={handleDescriptionChange}
+        rows={4}
+        placeholder={"Wpisz treść wiadomości ..."}
+    />
+</label>
+
+<button disabled={!hasAgreed || textInput.length < 3} type="submit">Submit</button>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

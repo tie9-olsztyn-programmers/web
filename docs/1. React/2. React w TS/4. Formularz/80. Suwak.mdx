@@ -1,0 +1,73 @@
+---
+title: Suwak
+---
+
+
+:::note Suwak `<input type="range  >`
+- to element, który pozwala użytkownikowi wybrać liczbę z określonego przedziału, przesuwając "uchwyt" (thumb) po "szynie" (track).
+- typowe zastosowania: Głośność, jasność ekranu, cena (od-do), ocena (1-10).
+
+
+W przeciwieństwie do pola tekstowego, suwak nie pokazuje wybranej liczby.
+Użytkownik widzi tylko pozycję kropki.
+Dlatego programista musi wyświetlić wartość zmiennej obok suwaka (np. w `<span>` lub `<p>`), żeby formularz był użyteczny.
+:::
+
+## Definicja stanu
+`const [volume, setVolume] = useState("50")`
+
+## Definicja handlera
+```tsx
+function handleVolumeChange(e: ChangeEvent<HTMLInputElement>) {
+    setVolume(e.target.value);
+}
+```
+
+## JSX
+```jsx
+<label>
+    Poziom głośności:
+    <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
+
+        {/* suwak */}
+        <input
+            type="range"
+            min="0"
+            max="100"
+            step="10"
+            value={volume}
+            onChange={handleVolumeChange}
+            />
+
+        {/*Wyświetlanie wartości suwaka */}
+        <span style={{ fontWeight: "bold" }}>
+            {volume} %
+        </span>
+    </div>
+</label>
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
