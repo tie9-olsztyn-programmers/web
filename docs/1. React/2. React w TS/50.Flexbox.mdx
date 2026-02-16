@@ -1,0 +1,188 @@
+---
+title: Flexbox
+---
+# Flexbox: Teoria i "Kolorowe Klocki"
+
+Zanim zaczniemy układać formularze, musimy zrozumieć,
+jak działa **Flexible Box Layout** (w skrócie Flexbox).
+To potężne narzędzie CSS, które pozwala kontrolować ułożenie elementów w kontenerze – w jednym wymiarze (wierszu lub kolumnie).
+
+## 1. Definicja i Relacja Rodzic-Dziecko
+
+Flexbox opiera się na ścisłej relacji między dwoma elementami:
+1.  **Flex Container (Rodzic):**
+    - Element, któremu nadajemy `display: flex`.
+        - To on decyduje, jak dzieci mają się zachowywać.
+2.  **Flex Items (Dzieci):**
+    - Bezpośrednie elementy wewnątrz rodzica.
+    - To one są "przesuwane".
+
+:::warning Ważna Zasada
+Właściwości sterujące układem (jak `justify-content` czy `align-items`) nadajemy **Rodzicowi**, a nie Dzieciom!
+:::
+
+## 2. Oś Główna i Oś Poprzeczna (*Main vs Cross Axis*)
+
+We Flexboxie "lewo/prawo" i "góra/dół" są pojęciami względnymi. Wszystko zależy od **Osi Głównej**.
+
+* **Main Axis (Oś Główna):** Kierunek, w którym układają się elementy (**domyślnie poziomo**).
+* **Cross Axis (Oś Poprzeczna):** Kierunek prostopadły do Osi Głównej (**domyślnie pionowo**).
+
+## 3. Laboratorium: Kolorowe Klocki
+Utwórzmy nowy projekt i w `App.tsx` w `return` zostawmy tylko `<>  ... </>`.
+
+
+### Kierunek (`flex-direction`)
+- To "kierownica" Flexboxa.
+- Decyduje, jak biegnie Oś Główna.
+    - `row` (domyślne): Klocki układają się w rzędzie (lewo -> prawo).
+    - `column`: Klocki spadają jeden pod drugim (góra -> dół).
+
+:::tip Proporcje
+- Możesz sterować proporcjami.
+- Jeśli jeden element ma `flex: 2`, a drugi `flex: 1`, to ten pierwszy zabierze **dwa razy więcej** wolnej przestrzeni.
+:::
+```jsx
+  <div style={{display: 'flex', gap: '20px', marginBottom: '20px'}}>
+
+        <div style={{flex: 1}}>
+          <strong>flex-direction: row</strong>
+            <div style={{display: 'flex', flexDirection: 'row',
+                       background: '#eee', padding: '10px', border: '1px solid #ccc'}}>
+            <div style={{width: 40, height: 40, background: 'red', margin: 2}}>1</div>
+            <div style={{width: 40, height: 40, background: 'blue', margin: 2}}>2</div>
+            <div style={{width: 40, height: 40, background: 'green', margin: 2}}>3</div>
+          </div>
+        </div>
+
+        <div style={{flex: 1}}>
+          <strong>flex-direction: column</strong>
+          <div style={{display: 'flex', flexDirection: 'column',
+                       background: '#eee', padding: '10px', border: '1px solid #ccc'}}>
+            <div style={{width: 40, height: 40, background: 'red', margin: 2}}>1</div>
+            <div style={{width: 40, height: 40, background: 'blue', margin: 2}}>2</div>
+            <div style={{width: 40, height: 40, background: 'green', margin: 2}}>3</div>
+          </div>
+        </div>
+      </div>
+
+```
+
+
+
+### Wyrównanie w Osi Głównej (justify-content)
+- Ta właściwość odpowiada na pytanie: "Jak rozłożyć klocki, jeśli w kontenerze jest wolne miejsce?".
+- Najważniejsze wartości:
+    - `flex-start`: Domyślnie. Klocki tulą się do początku osi.
+    - `center`: Klocki zbierają się na środku.
+    - `space-between`: Pierwszy klocek na początku, ostatni na końcu, reszta równo pomiędzy.
+    - `space-around`: Każdy klocek ma równy margines po obu stronach.
+
+```jsx
+<div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div>
+          <code>justify-content: flex-start</code>
+          <div style={{display: 'flex', justifyContent: 'flex-start', background: '#eee', padding: '5px'}}>
+            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
+          </div>
+        </div>
+        <div>
+          <code>justify-content: center</code>
+          <div style={{display: 'flex', justifyContent: 'center', background: '#eee', padding: '5px'}}>
+            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
+          </div>
+        </div>
+        <div>
+          <code>justify-content: space-between</code>
+          <div style={{display: 'flex', justifyContent: 'space-between', background: '#eee', padding: '5px'}}>
+            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
+            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
+          </div>
+        </div>
+      </div>
+```
+
+
+### Wyrównanie w Osi Poprzecznej (`align-items`)
+To decyduje, jak klocki zachowują się w "drugą stronę" (np. w pionie, jeśli układamy w rzędzie).
+- `stretch` (Domyślne): Klocki rozciągają się, by wypełnić wysokość kontenera (chyba że mają ustaloną wysokość).
+- `center`: Klocki są wyśrodkowane w poprzek.
+- `flex-start`: Klocki są na górze.
+
+Właściwość `alignItems` decyduje o tym, jak elementy zachowują się "w poprzek" głównego nurtu.
+Skoro domyślnie układamy elementy w poziomie (`row`), to `alignItems` steruje ich położeniem **Góra-Dół**.
+
+:::warning Warunek Konieczny
+Aby zobaczyć działanie `alignItems`,
+Twój kontener musi mieć ustaloną **wysokość** (np. `height: 200px` lub `min-height: 100vh`).
+Jeśli kontener jest tak niski jak jego zawartość, wyrównywanie nie ma sensu!
+:::
+
+```jsx
+ <>
+      <div style={{
+        display: 'flex',
+        alignItems: 'flex-start', // ZMIANA
+        height: '150px',
+        background: '#e0e0e0',
+        border: '2px dashed #999',
+        marginBottom: '20px'
+      }}>
+        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
+        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
+        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
+      </div>
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'center', // ZMIANA
+        height: '150px',
+        background: '#e0e0e0',
+        border: '2px dashed #999',
+        marginBottom: '20px'
+      }}>
+        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
+        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
+        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
+      </div>
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'flex-end', // <--- KLUCZOWA ZMIANA
+        height: '150px',
+        background: '#e0e0e0',
+        border: '2px dashed #999',
+        marginBottom: '20px'
+      }}>
+        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
+        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
+        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
+      </div>
+    </>
+```
+
+
+----
+
+## Ważne
+| CSS (Plik .css) | React `(style={{...}})` |
+| ---             | ---                   |
+align-items | alignItems
+justify-content | justifyContent
+background-color | backgroundColor
+font-size | fontSize
+z-index | zIndex
+
+
+
+
+
+
+
+
+
