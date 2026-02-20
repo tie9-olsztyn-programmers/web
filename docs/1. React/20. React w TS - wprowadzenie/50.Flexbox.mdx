@@ -73,38 +73,42 @@ Utwórzmy nowy projekt i w `App.tsx` w `return` zostawmy tylko `<>  ... </>`.
 ### Wyrównanie w Osi Głównej (justify-content)
 - Ta właściwość odpowiada na pytanie: "Jak rozłożyć klocki, jeśli w kontenerze jest wolne miejsce?".
 - Najważniejsze wartości:
-    - `flex-start`: Domyślnie. Klocki tulą się do początku osi.
+    - `flex-start`: Klocki tulą się do początku osi głównej.
+    - `flex-end`: Klocki tulą się na osi głównej
     - `center`: Klocki zbierają się na środku.
     - `space-between`: Pierwszy klocek na początku, ostatni na końcu, reszta równo pomiędzy.
     - `space-around`: Każdy klocek ma równy margines po obu stronach.
 
 ```jsx
-<div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-        <div>
-          <code>justify-content: flex-start</code>
-          <div style={{display: 'flex', justifyContent: 'flex-start', background: '#eee', padding: '5px'}}>
-            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
-          </div>
+ <div style={{display: 'flex', flexDirection: 'row', gap:"10px"}}>
+
+            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                background:"#efdc63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
+
+            </div>
+
+            <br />
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center',
+                background:"#7def63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
+
+            </div>
+
+            <br />
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end',
+                background:"#ef8d63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
+
+            </div>
+
         </div>
-        <div>
-          <code>justify-content: center</code>
-          <div style={{display: 'flex', justifyContent: 'center', background: '#eee', padding: '5px'}}>
-            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
-          </div>
-        </div>
-        <div>
-          <code>justify-content: space-between</code>
-          <div style={{display: 'flex', justifyContent: 'space-between', background: '#eee', padding: '5px'}}>
-            <div style={{width: 30, height: 30, background: 'red', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'blue', margin: 2}}></div>
-            <div style={{width: 30, height: 30, background: 'green', margin: 2}}></div>
-          </div>
-        </div>
-      </div>
 ```
 
 
@@ -124,46 +128,38 @@ Jeśli kontener jest tak niski jak jego zawartość, wyrównywanie nie ma sensu!
 :::
 
 ```jsx
- <>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start', // ZMIANA
-        height: '150px',
-        background: '#e0e0e0',
-        border: '2px dashed #999',
-        marginBottom: '20px'
-      }}>
-        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
-        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
-        <div style={{width: 50, height: 50, background: '#007bff', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
-      </div>
+      <div style={{display: 'flex', flexDirection: 'row', gap:"10px"}}>
 
-      <div style={{
-        display: 'flex',
-        alignItems: 'center', // ZMIANA
-        height: '150px',
-        background: '#e0e0e0',
-        border: '2px dashed #999',
-        marginBottom: '20px'
-      }}>
-        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
-        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
-        <div style={{width: 50, height: 50, background: '#28a745', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
-      </div>
+            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                alignItems: 'center',
+                background:"#efdc63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
 
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-end', // <--- KLUCZOWA ZMIANA
-        height: '150px',
-        background: '#e0e0e0',
-        border: '2px dashed #999',
-        marginBottom: '20px'
-      }}>
-        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>1</div>
-        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>2</div>
-        <div style={{width: 50, height: 50, background: '#dc3545', margin: 5, color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>3</div>
-      </div>
-    </>
+            </div>
+
+            <br />
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center',
+                alignItems: 'center',
+                background:"#7def63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
+
+            </div>
+
+            <br />
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end',
+                alignItems: 'center',
+                background:"#ef8d63" , width: '300px', height: '300px'}}>
+                <div style={{width: 30, height: 30, background: 'red', margin: 2}}>1</div>
+                <div style={{width: 30, height: 30, background: 'blue', margin: 2}}>2</div>
+                <div style={{width: 30, height: 30, background: 'green', margin: 2}}>3</div>
+
+            </div>
+
+        </div>
 ```
 
 
