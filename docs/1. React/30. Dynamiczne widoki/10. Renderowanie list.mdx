@@ -1,11 +1,51 @@
 ---
 title: Renderowanie list
-----
+---
+
+W tej lekcji nauczymy się,
+jak przekształcać tablice danych w gotowe elementy interfejsu użytkownika.
+Jest to kluczowa umiejętność przy tworzeniu aplikacji typu e-commerce czy
+paneli administracyjnych.
 
 
+## Metoda .map()
 
+W React do wyświetlania list najczęściej używamy czystego
+JS/TS, a konkretnie metody tablicowej `.map()`.
 
+:::info Analogia
+Wyobraź sobie, że masz listę zakupów na kartce.
 
+Metoda `.map()` to proces, w którym bierzesz każdy produkt po kolei i
+wkładasz go do osobnego, identycznego koszyka.
+
+Wynikiem jest rząd gotowych koszyków z produktami.
+:::
+
+## Prosty przykład
+
+Zróbmy nowy komponent i użyjmy go w komponecie `App.tsx`:
+```ts
+const technolgie = ["HTML", "CSS", "JavaScript", "React"];
+
+function ListaTechnologii() {
+  return (
+    <ul style={ { listStyleType: "none"   }}>
+      {technolgie.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+```
+
+:::warning Uwaga o Kluczach (Keys)
+- Każdy element wygenerowany w pętli musi posiadać unikalny atrybut key.
+- Pozwala on Reactowi śledzić, które elementy uległy zmianie, zostały dodane lub usunięte.
+- Na egzaminie brak klucza może skutkować ostrzeżeniami w konsoli i
+błędnym działaniem aplikacji!
+:::
 
 
 

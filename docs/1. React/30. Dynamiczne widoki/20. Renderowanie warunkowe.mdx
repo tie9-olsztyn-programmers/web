@@ -2,6 +2,53 @@
 title: Renderowanie warunkowe
 ---
 
+# *Conditional Rendering*
+
+
+W aplikacjach webowych często chcemy wyświetlać
+różne elementy w zależności od spełnienia określonych warunków
+(np. czy użytkownik jest zalogowany, czy formularz jest poprawnie wypełniony).
+
+:::tip Zapamiętaj
+Wewnątrz bloku `return` w React nie możemy używać
+standardowych instrukcji `if` ani `for`.
+Musimy korzystać z wyrażeń JavaScript, które zwracają wartość.
+:::
+
+
+## Operator logiczny `&&`
+
+Używamy go, gdy chcemy coś wyświetlić tylko wtedy,
+gdy warunek jest prawdziwy. Jeśli warunek jest fałszywy,
+React całkowicie pominie ten fragment.
+
+## Przykład
+Utwórzmy nowy komponent
+
+```jsx
+function Powitanie({ czyZalogowany }) {
+  return (
+    <div>
+      <h1>Witaj w aplikacji!</h1>
+      {czyZalogowany && <button>Wyloguj się</button>}
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
