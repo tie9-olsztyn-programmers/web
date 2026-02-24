@@ -1,0 +1,119 @@
+---
+title: Formularz z useState
+---
+c.d projektu z poprzedniej strony
+
+# Hook `useState`
+:::info useState
+- to *hook* (czyli specjalny rodzaj funkcji) w React, który pozwala na zarządzanie stanem (ang. *state*) w komponentach funkcyjnych.
+- dzięki niemu możemy przechowywać i aktualizować wartości, które mogą się zmieniać w czasie działania aplikacji.
+
+:::
+
+Syntaktyka hooka `useState`
+```js
+const [state, setState] = useState(initialValue);`
+```
+- `state` aktualna wartość stanu.
+- `setState` funkcja do aktualizacji stanu.
+- `initialValue` wartość początkowa (np. "", 0, {}).
+
+
+
+# `useState` obsługujący `input`
+```typescript jsx
+import './App.css'
+import {type ChangeEvent, type FormEvent, useState} from "react";
+
+function App() {
+    const [textInput, setTextInput] = useState("to jest z useState")
+
+
+
+    function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+        console.log(event);
+    }
+
+    function handleTextInputChange(e: ChangeEvent<HTMLInputElement>){
+        setTextInput(e.target.value);
+        console.log(textInput);
+    }
+
+  return (
+    <>
+         <form onSubmit={handleSubmit}>
+            <input
+                type={"text"}
+                value = {textInput}
+                onChange={handleTextInputChange}
+                placeholder={"Wprowadź jakiś tekst"}
+            />
+
+             <button type="submit" >Submit</button>
+         </form>
+    </>
+  )
+}
+
+export default App
+```
+
+# Dane z `input` w konsoli
+Wyświetlimy zawatość pola do wprodzania danych w konsoli.
+
+Zmieniamy ciało funkcji:
+```typescript jsx
+function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    console.log(`Wartość z inputa to: ${textInput}`);
+}
+```
+
+---------
+# Asynchroniczność
+- W konsoli, gdy zmieniamy wartość komponentu `input`, wyświetlana jest wartość zmiennej `textInput` z przedostatniej zmiany.
+- Wynika to z tego, że `useState` działa asynchronicznie (czyli nie pokolei).
+- Użyjemy nowego hooka, aby konsolować poprawną wartość zmiennej.
+
+:::info Hook  `useEffect`
+- to *hook* w React, który pozwala na wykonywanie efektów ubocznych (ang. *side effects*) w komponentach funkcyjnych.
+- możesz go używać np. do:
+    - Pobierania danych z API
+    - Subskrypcji i czyszczenia zasobów
+    - Obsługi `setInterval` i `setTimeout`
+    - Reagowania na zmiany w stanie komponent
+
+SYNTAKTYKA
+```js
+useEffect(() => {
+    // Kod, który wykona się po renderowaniu
+}, [dependencies]);
+```
+- Pierwszy argument → Funkcja, która uruchamia efekt uboczny.
+- Drugi argument (`dependencies`) → Lista zależności, które powodują ponowne uruchomienie efektu.
+
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

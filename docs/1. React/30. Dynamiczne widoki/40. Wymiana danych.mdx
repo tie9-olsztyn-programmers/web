@@ -1,21 +1,138 @@
 ---
-title: Wymiana danych
+title: Komunikacja między komponentami
 ---
 
+- Większe aplikacje w React składają się z dziesiątek, a nawet setek małych komponentów.
+- Aby aplikacja działała jako spójna całość, komponenty muszą potrafić ze sobą "rozmawiać:.
+- W React wykorzystujemy do tego mechanizm **Props** (od angielskiego *properties* - właściwości).
 
 
 
 
-## Od rodzica do dziecka
+
+
+## Przekazywanie danych w dół (Rodzic ➡️ Dziecko)
+
+> Podstawowa zasada Reacta mówi: **dane płyną z góry na dół**.
+> Komponent wyżej w hierarchii (Rodzic) przekazuje informacje do komponentu niżej (Dziecka) za pomocą atrybutów,
+> podobnie jak w zwykłym HTML.
+> Ponieważ pracujemy w **TypeScript** musimy:
+>    - dokładnie zdefiniować, jakiego typu danych oczekuje dany komponent.
+> Dzięki temu edytor kodu od razu podpowie nam błędy, jeśli zapomnimy przekazać jakiejś wartości!
+
+### Typowanie propsów
+Nasz nowy komponent `UserCard.tsx`.
+
+```tsx
+// 1. Definiujemy, jakich danych oczekuje komponent
+interface UserCardProps {
+  name: string;
+  role: string;
+  age?: number; // Znak zapytania oznacza, że to prop opcjonalny
+}
+```
+
+### Komponent dziecko (odbiera propsy)
+Do pliku `UserCard.tsx` dopisujemy:
+
+```tsx
+// 2. Komponent DZIECKO (odbiera propsy)
+// Używamy destrukturyzacji i przypisujemy nasz interfejs
+function UserCard({ name, role, age }: UserCardProps) {
+  return (
+    <div className="card">
+      <h2>{name}</h2>
+      <p>Stanowisko: {role}</p>
+      {/* Renderowanie warunkowe dla opcjonalnego propa */}
+      {age && <p>Wiek: {age}</p>}
+    </div>
+  );
+}
+
+export default UserCard;
+```
+
+Użycie komponentu w `App.tsx`:
+```tsx
+ <div>
+    <h1>Nasi pracownicy</h1>
+    <UserCard name="Anna Nowak" role="Programistka React" age={28} />
+    {/* Tutaj nie podajemy wieku, co jest dozwolone dzięki 'age?' */}
+    <UserCard name="Jan Kowalski" role="Tester Oprogramowania" />
+</div>
+
+```
 
 
 
 
-## Od dziecka do rodzica
 
 
 
+## Przekazywanie funkcji w górę (Dziecko ➡️ Rodzic)
+W React dane płyną w dół, więc jak dziecko ma zmienić stan rodzica? Rodzic musi przekazać dziecku funkcję w propsach.
 
+W TypeScript musimy dokładnie opisać tę funkcję: czy przyjmuje jakieś argumenty i co zwraca (zazwyczaj void,
+bo funkcja zmieniająca stan niczego nie zwraca).
+
+### Lista zakupów
+
+Zróbmy nowy komponent: `ProductItem.tsx`
+```tsx
+// --- INTERFEJS DLA DZIECKA ---
+interface ProductItemProps {
+    title: string;
+    // Typujemy funkcję: nie przyjmuje argumentów, nic nie zwraca
+    onRemove: () => void;
+}
+
+// --- DZIECKO ---
+function ProductItem({ title, onRemove }: ProductItemProps) {
+    return (
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <span>{title}</span>
+            <button onClick={onRemove}>Usuń produkt</button>
+        </div>
+    );
+}
+
+export default ProductItem;
+```
+
+Teraz zróbmy kolejny komponent `ShoppingList.tsx`, który będzie rodzicem dla komponentu `ProductItem.tsx`
+```tsx
+
+
+
+// --- RODZIC ---
+import {useState} from "react";
+import ProductItem from "./ProductItem.tsx";
+
+export default function ShoppingList() {
+    // W TypeScript warto jawnie typować stan, jeśli to tablica
+    const [products, setProducts] = useState<string[]>(['Mleko', 'Chleb', 'Masło']);
+
+    const handleDelete = (productToDelete: string) => {
+        setProducts(products.filter(item => item !== productToDelete));
+    };
+
+    return (
+        <div>
+            <h2>Lista zakupów</h2>
+            {products.map(product => (
+                <ProductItem
+                    key={product}
+                    title={product}
+                    // Przekazujemy funkcję w dół
+                    onRemove={() => handleDelete(product)}
+                />
+            ))}
+        </div>
+    );
+}
+```
+
+Używamy go w `App.tsx` -> `<ShoppingList />`
 
 
 

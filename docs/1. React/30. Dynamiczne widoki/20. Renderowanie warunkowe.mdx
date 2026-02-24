@@ -23,21 +23,141 @@ gdy warunek jest prawdziwy. Jeśli warunek jest fałszywy,
 React całkowicie pominie ten fragment.
 
 ## Przykład
-Utwórzmy nowy komponent
+Utwórzmy nowy komponent `Powitanie.jsx`
 
 ```jsx
-function Powitanie({ czyZalogowany }) {
-  return (
-    <div>
-      <h1>Witaj w aplikacji!</h1>
-      {czyZalogowany && <button>Wyloguj się</button>}
-    </div>
-  );
+function Powitanie({ czyZalogowany }: { czyZalogowany: boolean}) {
+    return (
+        <div>
+            <h1>Witaj w aplikacji!</h1>
+            {czyZalogowany && <button>Wyloguj się</button>}
+        </div>
+    );
 }
 
+export default Powitanie;
+```
+Użyjmy komponentu w `App.jsx`
+```tsx
+function App() {
+  return (
+    <>
+        <Powitania czyZalogowany={true}/>
+        <Powitania czyZalogowany={false} />
+    </>
+  )
+}
+```
 
 
+## Operator trójskładnikowy (*Ternary Operator*)
+### ` warunek   ? opcja1  :  opcja2 `
+To skrócony `if`", który pozwala wybrać jedną z dwóch opcji.
 
+
+### Przykład - przłączanie `text <-> input`
+
+Utwórzmy nowy komponent `EdytowalnaNazwa.tsx`
+
+```tsx
+
+import { useState } from 'react';
+
+ function EdytowalnaNazwa() {
+    // Stan przechowujący wpisany tekst
+    const [nazwa, setNazwa] = useState("Jan Kowalski");
+    // Stan kontrolujący, czy jesteśmy w trybie edycji
+    const [isEditing, setIsEditing] = useState(false);
+
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc', width: '300px' }}>
+            <h3>Profil Użytkownika</h3>
+
+            <div style={{ marginBottom: '15px' }}>
+                {/* OPERATOR TRÓJSKŁADNIKOWY: Zwraca <input> LUB <span> */}
+                {isEditing ? (
+                    <input
+                        type="text"
+                        value={nazwa}
+                        onChange={(e) => setNazwa(e.target.value)}
+                    />
+                ) : (
+                    <strong>{nazwa}</strong>
+                )}
+            </div>
+
+            {/* Przycisk również zmienia swój tekst zależnie od stanu */}
+            <button onClick={() => setIsEditing(!isEditing)}>
+                {isEditing ? "Zapisz" : "Edytuj"}
+            </button>
+        </div>
+    );
+}
+
+export default EdytowalnaNazwa;
+```
+
+
+Użyjmy go w głównym komponencie.
+
+### Przykład — Dynamiczne przypisywanie klas CSS
+
+`TaskItem.css`
+```css
+/* Klasa bazowa - wspólna dla wszystkich zadań */
+.task-card {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+}
+
+/* Klasa dla zadania oczekującego */
+.status-pending {
+    background-color: #fff3cd;
+    border-color: #ffe69c;
+    color: #664d03;
+}
+
+/* Klasa dla zadania zakończonego */
+.status-completed {
+    background-color: #d1e7dd;
+    border-color: #a3cfbb;
+    color: #0f5132;
+    text-decoration: line-through;
+}
+```
+
+Komponent `TaskItem.tsx`
+```tsx
+import { useState } from 'react';
+import './TaskItem.css'; // Pamiętaj o imporcie stylów!
+
+export default function TaskItem() {
+    const [isCompleted, setIsCompleted] = useState(false);
+
+    return (
+        // OPERATOR TRÓJSKŁADNIKOWY w atrybucie className
+        // klsa task-card jest "zawsze"
+        // klasy satus-completed i status-pending są konkatenowane z task-card
+        <div className={`task-card ${isCompleted ? "status-completed" : "status-pending"}`}>
+
+            <h4>Nauczyć się Reacta</h4>
+
+            <label>
+                <input
+                    type="checkbox"
+                    checked={isCompleted}
+                    onChange={(e) => setIsCompleted(e.target.checked)}
+                />
+                Oznacz jako wykonane
+            </label>
+
+        </div>
+    );
+}
+```
 
 
 
