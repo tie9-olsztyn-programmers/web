@@ -1,0 +1,86 @@
+---
+title: Konfiguracja app.ts
+---
+
+# Konfiguracja Express w `app.ts`
+## Importy
+### ExpressJS
+- to framework dla Node.js, który ułatwia budowę backendu
+- obsługuje
+  - trasy,
+  - middleware,
+  - requesty
+  - responsy.
+
+**Instalacja typów dla ExpressJS**
+`npm install @types/express --save-dev`
+
+
+### CORS (Cross-Origin Resource Sharing)
+CORS pozwala na wysyłanie żądań między różnymi domenami - np:
+- frontend na `http://localhost:3000` chce połączyć się z
+- backendem na  `http://localhost:5000`
+
+Bez CORS przeglądarka nie pozwoli na komunikację między backendem a frontendem.
+
+INSTALACJA
+- `npm install cors`
+- `npm install @types/cors --save-dev`
+
+### Moduł `path`
+- moduł path to wbudowana biblioteka Node.js do pracy z systemowymi ścieżkami plików.
+- przykładowe użycie
+```ts
+import path from "path";
+app.use(express.static(path.join(__dirname, "../public")));
+```
+czyli pliki statyczne w Express będą dostępne w folderze public
+
+### `dotenv` – Obsługa zmiennych środowiskowych
+Pozwala przechowywać wrażliwe dane (np. hasła do bazy, klucze API) w pliku .env,
+zamiast trzymać je w kodzie.
+
+- *instalacja*: `npm install dotenv`
+- *instalacja typów*: `npm install @types/dotenv --save-dev`
+
+**przykładowe użycie**
+```ts
+import dotenv from "dotenv";
+dotenv.config(); // Załaduj zmienne z `.env`
+
+const port = process.env.PORT || 3000; // Pobiera wartość z .env
+```
+
+## Przekształcamy zawartość pliku `app.ts` :
+
+```ts
+import express from "express";
+import cors from "cors";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json()); // Parsowanie JSON w requestach
+
+app.use(express.static(path.join(__dirname, "../public")));
+
+app.get("/", (req, res) => {
+  res.json({ message: "API Express + TypeScript działa!" });
+});
+
+export default app;
+```
+
+
+
+
+
+
+
+
+
+

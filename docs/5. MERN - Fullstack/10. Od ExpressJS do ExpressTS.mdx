@@ -1,0 +1,119 @@
+---
+title: Od ExpressJS do ExpressTS
+
+---
+# Tworzymy projekst Express w WebStorm
+
+## Wstępna konfiguracja
+- Webstorm:
+    - projekt Express:
+        - bez View Engine,
+        - z Stylesheet ustawionym na Plain CSS
+    - utwórz folder `src`:
+        - utwórz w nim folder `models`
+        - do folderu `src` przenieś folder `routes`
+        - do folderu `src` przenieś plik `app.js`
+
+## Wstępna instalacja pakietów
+Zainstaluj podstawowe pakiety potrzebne dla TypeScript:
+- typescript i nodemon: `npm install --D typescript tsx nodemon`
+- typy: `npm i -D @types/node @types/express`
+
+:::tip Czym jest i do czego służy narzędzie `tsx`?
+- **`tsx` (TypeScript Execute)** to nowoczesna, superszybka alternatywa dla przestarzałego `ts-node`.
+- Służy do bezpośredniego uruchamiania plików TypeScript (`.ts`) w środowisku Node.js.
+- Zamiast powoli analizować cały kod i sprawdzać poprawność typów przed każdym startem serwera,
+`tsx` korzysta z potężnego silnika **esbuild**.
+- Działa jak błyskawiczna gumka do ścierania – po prostu "wymazuje" (ang. *type stripping*)
+z plików adnotacje TypeScriptu i natychmiast uruchamia czysty JavaScript.
+
+**Dlaczego to nowy standard w MERN?**
+1. **Prędkość światła:** Restarty serwera w trybie deweloperskim (flaga `--watch`) trwają ułamki sekund,
+co drastycznie poprawia komfort pracy (tzw. *Developer Experience* - *DX*).
+2. **Harmonia z ESM:** W przeciwieństwie do starszych narzędzi, `tsx` natywnie i bezbłędnie rozumie
+nowoczesne moduły (`"type": "module"` w `package.json` oraz naszą konfigurację `nodenext`).
+:::
+
+
+
+
+## Konfiguracja TypeScripta
+Zrób plik dla TypeScript `npx tsc --init` i wprowadź zmiany:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    // 1. JAK WYGLĄDA WYNIKOWY KOD:
+    // Tłumaczymy TS na najnowszy standard JS obsługiwany przez Node.js
+    "target": "esnext",
+
+    // 2. JAK ZARZĄDZAMY IMPORTAMI:
+    // Mówimy kompilatorowi: "Nasz Node.js korzysta z nowoczesnych modułów ESM (import/export)".
+    "module": "nodenext",
+
+    // 3. ORGANIZACJA FOLDERÓW:
+    // Skąd bierzemy nasz czysty kod TypeScript...
+    "rootDir": "./src",
+    // ...i dokąd wrzucamy gotowy, skompilowany kod JavaScript.
+    "outDir": "./dist",
+
+    // 4. BEZPIECZEŃSTWO I JAKOŚĆ KODU:
+    // "Surowy Strażnik": zapobiega błędom na serwerach Linux, pilnując wielkości liter w nazwach plików.
+    "forceConsistentCasingInFileNames": true,
+    // "Surowy Nauczyciel": włącza rygorystyczne sprawdzanie typów (np. chroni przed null/undefined).
+    "strict": true,
+
+    // 5. OPTYMALIZACJA I ZGODNOŚĆ:
+    // Magiczny klej, który pozwala bezbłędnie importować starsze biblioteki (CommonJS) do nowego kodu (ESM).
+    "esModuleInterop": true,
+    // Przyspiesza kompilację: TypeScript nie będzie tracił czasu na sprawdzanie typów w cudzym kodzie w node_modules.
+    "skipLibCheck": true,
+
+    // 6. Aby można było importować pliki Json
+    "resolveJsonModule": true
+  },
+
+  // 6. KTÓRE PLIKI UWZGLĘDNIAĆ:
+  // Kompiluj wszystko wewnątrz folderu src/ i jego podfolderach.
+  "include": ["src/**/*"],
+
+  // 7. CZEGO UNIKAĆ:
+  // Nie dotykaj folderu node_modules ani plików testowych (np. user.spec.ts).
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
+```
+
+
+## Zmiana rozszerzań
+
+:::important Zmiana rozszerzenia
+- `mv bin/www bin/www.ts`
+- `mv src/app.js src/app.ts`
+:::
+
+## Plik `.env`
+- w gównej ścieżce zrób plik `.env` z zawartością:
+```dotenv
+MONGO_URI=mongodb://localhost:27017/mydatabase
+PORT=5000
+```
+
+## Struktura projektu
+STRUKTURA PROJEKTU POWINNA WYGLĄDAĆ TAK:
+```
+<twojaNazwaProjektu>
+    |- .idea
+    |- bin
+        |-- www.ts
+    |- node_modules
+    |- public
+    |- src
+        |--  models
+        |--  routes
+        |--  app.ts
+    |- .env
+    |- package.json
+    |- package-lock.json
+    |- tsconfig.json
+```
+---
