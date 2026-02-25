@@ -1,11 +1,39 @@
 ---
-title: Wprowadzenie do MERN
+id: mern-wprowadzenie
+title: Czym jest stos MERN?
+sidebar_label: Wprowadzenie do MERN
 ---
 
+# Architektura MERN: Full-Stack w jednym języku
+
+Termin **MERN** to akronim określający zbiór czterech potężnych technologii
+(tzw. stos technologiczny - *tech stack*), które współpracują ze sobą,
+aby stworzyć nowoczesną, dynamiczną aplikację internetową (Full-Stack).
+
+Jego największą zaletą jest to, że na każdym etapie – od interfejsu użytkownika po bazę danych –
+używamy tego samego języka: **JavaScript** (lub jego bezpieczniejszej wersji: **TypeScript**).
 
 
 
+### Zrozumieć MERN na przykładzie restauracji
 
+Wyobraź sobie naszą aplikację jako nowoczesną, zautomatyzowaną restaurację:
 
-
-
+* **N - Node.js (Środowisko / Budynek i prąd):**
+    - Zanim cokolwiek powstanie, potrzebujemy budynku i prądu.
+    - Node.js to środowisko uruchomieniowe (*runtime environment*), które pozwala językowi
+  JavaScript działać po stronie serwera (poza przeglądarką).
+    - To nasz fundament.
+* **M - MongoDB (Baza danych / Magazyn):**
+    - To nasza spiżarnia. MongoDB to nierelacyjna baza danych (NoSQL),
+    która przechowuje informacje (np. dane użytkowników, posty) w formacie przypominającym
+  obiekty JSON. Nie używamy tu sztywnych tabel, co daje nam ogromną elastyczność.
+* **E - Express.js (Backend / Szef kuchni i kelnerzy):**
+    - To framework działający na Node.js.
+    - Odbiera zamówienia od klientów (żądania HTTP), sprawdza przepisy (logika biznesowa),
+  idzie do magazynu po składniki (łączy się z MongoDB) i wydaje gotowe danie.
+    - Zabezpiecza też dostęp na zaplecze.
+* **R - React (Frontend / Interfejs i sala jadalna):**
+    - To wszystko, co widzi i z czym wchodzi w interakcję klient (UI).
+    - React to biblioteka do budowania dynamicznych interfejsów w przeglądarce.
+    - Kiedy klient klika przycisk "Zamów", React wysyła prośbę do naszego Express.js.
