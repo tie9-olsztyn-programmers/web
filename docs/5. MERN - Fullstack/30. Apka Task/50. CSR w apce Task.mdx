@@ -1,0 +1,246 @@
+---
+title: Aplikacja Task w CSR - metoda get
+---
+
+
+:::tip Metafora: "reorganizacja" restauracji
+Twój obecny plik `taskRoutes.ts` to kucharz, który stoi przy stoliku,
+przyjmuje zamówienie od klienta, sam obiera ziemniaki, wrzuca je do garnka,
+a potem sam niesie talerz z powrotem. Wzorce projektowe wprowadzają podział obowiązków
+(*Separation of Concerns*).
+
+:::
+
+Mamy działający kod, ale nasz plik z routingiem (ścieżkami) stał się zbyt duży i skomplikowany.
+
+Zrefaktoryzujmy (ulepszmy strukturę) proces **dodawania nowego zadania (`POST /tasks`)**.
+
+:::info Dlaczego dzielimy kod?
+1. **Controller (Kelner):**
+    - Tylko on wie, czym jest `req` (Request) i `res` (Response).
+    - Formatuje odpowiedź.
+2. **Service (Szef Kuchni):**
+    - Nie ma pojęcia o HTTP.
+    - Zajmuje się logiką (np. sprawdza, czy zadanie ma tytuł).
+3. **Repository (Magazynier):**
+    -Tylko on rozmawia z MongoDB (Mongoose).
+:::
+
+---
+
+## Budujemy *Repository*
+### Warstaw dostępu do danych
+### *Data Access Layer - DAL*
+
+
+:::tip "Magazynier"
+- *Repository* (nasz "Magazynier") jest warstwą najbardziej odizolowaną.
+- Nie wie absolutnie nic o tym, że nasza aplikacja działa w internecie.
+- Nie zna pojęć takich jak:
+    - `req` (żądanie HTTP),
+    - `res` (odpowiedź HTTP) czy
+    - kody statusów (np. 404, 500).
+
+:::
+
+Zróbmy nowy plik `src/repositories/task.repository.ts`
+
+
+:::note Pytanie
+- Wyobraź sobie, że tworzysz nowy plik `src/repositories/task.repository.ts` i
+- Piszesz w nim funkcję `getAllTasks()`.
+
+Który jeden, konkretny fragment (linijka) z powyższego kodu Expressa musisz wyciąć i wkleić
+do tej nowej funkcji, aby oddzielić czystą komunikację z bazą MongoDB od logiki HTTP (`req`/`res`)?
+
+:::
+
+`task.repository.ts`
+```ts
+
+import TaskModel , {Task} from "../models/Task";
+
+
+async function getAllTasks(): Promise<Task[]> {
+
+    return TaskModel.find();
+}
+```
+
+---
+
+## Budujemy *Service*
+### Warstwa logiki biznesowej
+### *Business Logic Layer - BLL*
+
+
+:::note "Kucharz"
+- Wspinamy się o piętro wyżej w naszej architekturze.
+- Skoro mamy już Magazyniera (Repository), który przynosi nam teczkę z zadaniami z bazy,
+czas przekazać ją Szefowi Kuchni, czyli warstwie `Service`.
+
+
+W przypadku pobierania wszystkich danych (getAllTasks), warstwa Service
+często wydaje się "zbędnym pośrednikiem".
+Szef Kuchni po prostu bierze teczkę od Magazyniera i od razu kładzie ją na ladzie dla Kelnera.
+Nie musi tu niczego gotować ani przyprawiać.
+
+Jednak trzymanie się tej struktury jest kluczowe dla spójności i czystości kodu (*Clean Code*).
+Jeśli w przyszłości zechcesz, aby system zwracał tylko zadania nieukończone,
+dodasz tę logikę biznesową właśnie tutaj,
+nie dotykając bazy danych ani kontrolera!
+
+:::
+
+
+Tworzymy nowy plik `src/services/task.service.ts`
+:::tip
+Kiedy tworzymy plik Service (Szefa Kuchni),
+musimy usunąć z tego kodu wszystko,
+co dotyczy internetu (czyli obiekty `req`, `res`, wysyłanie JSON-a oraz statusy HTTP).
+
+Serwis operuje tylko na czystych danych z bazy (które dostarcza mu Repository).
+
+:::
+
+```ts
+export async function fetchTasks(): Promise<Task[]> {
+    return await getAllTasks();
+}
+
+```
+
+
+
+---
+
+## Budujemy *Controller*
+### Warstwa prezentacji
+### *Presentation Layer (PL)*
+
+Nowy pliks `src/controllers/task.controller.ts`:
+```ts
+import { Request, Response } from "express";
+import {fetchTasks} from "../services/task.service";
+
+
+export async function getTasks(req: Request, res: Response) : Promise<void>  {
+    try {
+        // 1. Kelner prosi Serwis (Kuchnię) o przygotowanie danych
+        const tasks = await fetchTasks();
+
+        // 2. Kelner serwuje danie klientowi (React/Przeglądarka) ze statusem 200 (OK)
+        res.status(200).json(tasks);
+
+    } catch (error) {
+        res.status(500).json({error: `Not Found: ${error}`})
+    }
+}
+
+```
+
+---
+
+##  Zwieńczenie pracy: Czysty Router
+
+Kiedy podzieliliśmy naszą aplikację na warstwy:
+- *Repository*,
+- *Service*,
+- *Controller*,
+nasz główny plik ze ścieżkami (*Router*) staje się  czysty i czytelny.
+
+Zamiast pisać całą logikę połączenia z bazą danych i
+obsługi błędów bezpośrednio w definicji ścieżki,
+po prostu wskazujemy Expressowi odpowiedniego "Kelnera" (funkcję Kontrolera).
+
+
+```typescript title="src/routes/taskRoutes.ts"
+import express from "express";
+import { getTasks } from "../controllers/task.controller";
+
+const router = express.Router();
+
+// Magia czystego kodu:
+router.get("/", getTasks);
+//...
+
+```
+
+:::info Jak to działa pod spodem?
+- Zapis `router.get("/", getTasks)` to skrót.
+- Express domyślnie wie, że funkcja `getTasks` oczekuje obiektów `(req, res)`,
+więc automatycznie je tam wstrzykuje.
+- To dokładnie to samo, co zapisanie: `router.get("/", (req, res) => getTasks(req, res))`,
+ale jest znacznie krótsze i bardziej profesjonalne.
+:::
+
+
+
+---
+
+## Wyszukiwanie przez `id`
+Poprzednio nie mieliśmy wyszukiwanie przez `id`. Teraz dodamy taką funkcjonalność.
+
+## *Repository*
+```ts
+export async function getTaskById(id: string): Promise<Task | null> {
+    // Prosimy Mongoose o znalezienie jednego dokumentu na podstawie jego _id
+    return TaskModel.findById(id);
+}
+```
+
+## *Service*
+```ts
+
+export async function fetchTaskById(id: string): Promise<Task> {
+    const task = await getTaskById(id);
+
+    // Logika biznesowa: Co, jeśli ktoś poda ID, którego nie ma w bazie?
+    if (!task) {
+        throw new Error("Nie znaleziono zadania");
+    }
+
+    return task;
+}
+
+```
+
+
+
+## *Controller*
+```ts
+
+export async function getTasks(req: Request, res: Response): Promise<void> {
+    try {
+
+        const tasks = await fetchTasks();
+
+        res.status(200).json(tasks);
+
+    } catch (error) {
+
+        const errorMessage = error instanceof Error ? error.message : "Nieznany błąd";
+        res.status(500).json({ error: `Nie udało się pobrać zadań: ${errorMessage}` });
+    }
+
+}
+```
+
+## *Router*
+```ts
+router.get("/:id", getSingleTask);
+```
+
+## Sprawdzanie
+do pliku `.http` dopisujemy zapytanie testujące
+
+```http
+
+### GET by id
+GET {{baseUrl}}/tasks/<id_dokumentu_istniejącego_w_bazie>
+
+
+```
+
+
+

@@ -1,0 +1,63 @@
+---
+title: Metoda post w CSR
+---
+Kontynuacja aplikacji Task.
+
+Tym razem refaktoryzacji poddamy metodę `post`
+
+Będziemy kody dopisywać do naszych plików:
+- `task.repository.ts`,
+- `task.service.ts`,
+- `task.controller.ts`
+
+
+## *Repository*
+```ts
+export async function createTask(title: string, description: string): Promise<Task> {
+    const newTask = new TaskModel({ title, description });
+    return await newTask.save();
+}
+```
+
+## *Service*
+```ts
+export async function addTask(title: string, description: string): Promise<Task> {
+    // Prosta logika biznesowa: sprawdzamy, czy dane w ogóle istnieją
+    if (!title || !description) {
+        throw new Error("Tytuł i opis są wymagane do utworzenia zadania.");
+    }
+
+    return await createTask(title, description);
+}
+
+```
+
+
+## *Controller*
+```ts
+export async function postTask(req: Request, res: Response): Promise<void> {
+    try {
+        const { title, description } = req.body;
+
+        const newTask = await addTask(title, description);
+
+        res.status(201).json({ message: "Dodano nowe zadanie", task: newTask });
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
+        res.status(400).json({ error: `Nie udało się dodać zadania: ${errorMessage}` });
+    }
+}
+```
+
+## *Router*
+Teraz metoda `post` jest maksymalnie prosta
+```ts
+router.post("/", postTask);
+```
+
+
+
+
+
+
+

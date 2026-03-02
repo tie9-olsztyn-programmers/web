@@ -1,7 +1,8 @@
 ---
 title: Praca z mongoose - apka Task
 ---
-Poznamy pracę z biblioteką `mongoose` na przykładzie aplikacji `Task`, w której zadanie mam tytuł i krótki opis.
+Poznamy pracę z biblioteką `mongoose` na przykładzie aplikacji `Task`,
+w której zadania o strukturze tytuł i opis będą zapisywane do bazy danych.
 
 
 :::tip Interfejs (Interface)
@@ -13,9 +14,11 @@ Poznamy pracę z biblioteką `mongoose` na przykładzie aplikacji `Task`, w któ
 :::
 
 :::tip Schemat (mongoose.Schema)
-- to szablon dokumentów w kolekcji (określa strukturę danych w MongoDB i mówi, jakie pola powinny znaleźć się dokumencie
+- to szablon dokumentów w kolekcji (określa strukturę danych w MongoDB i mówi,
+jakie pola powinny znaleźć się dokumencie
 - wskazuje, jakie pola będą przechowywane i jakie mają typy.
-- w przeciwieństwie do interfejsu, `Schema` wpływa na bazę danych – decyduje, jakie dane będą zapisywane.
+- w przeciwieństwie do interfejsu, `Schema` wpływa na bazę danych – decyduje,
+jakie dane będą zapisywane.
 - używamy, gdy chcemy określić, jakie dane są przechowywane w bazie
 
 :::
@@ -47,9 +50,9 @@ export interface Task extends Document {
 }
 
 const TaskSchema = new mongoose.Schema({
-title: {type: String, required: true},
-description: {type: String, required: true},
-completed: {type: Boolean, default: false},
+        title: {type: String, required: true},
+        description: {type: String, required: true},
+        completed: {type: Boolean, default: false},
 })
 
 export default mongoose.model<Task>('Task', TaskSchema);
@@ -59,14 +62,15 @@ export default mongoose.model<Task>('Task', TaskSchema);
 
 `Task extends Document` -
 - `Task` rozszerza(dziedziczy po) `Document`, więc TypeScript wie, że jest to dokument MongoDB.
-- teraz TypeScript podpowiada nam, że właściwości obiektu muszą być określonego typu (np. title musi być string)
+- teraz TypeScript podpowiada nam, że właściwości obiektu muszą być określonego typu
+(np. `title` musi być `string`)
 - używamy, gdy chcemy mieć podpowiedzi i bezpieczeństwo typów w kodzie
 - dzięki temu dziedziczeniu `Task`
     - ma właściwość `_id`
     - ma dostęp do metod Mongoose:
         - **instancyjnych** (wywoływanych na obiekcie np. task.save()
             - `save()` - zapis dokumentu do bazy
-            - `deleteOne()` - usuwa dokument z bazy
+            - `deleteOne()` - usuwa jeden  dokument z bazy
             - `updateOne()` - aktualizuje jeden dokument
             - `toObject()` - konwersja do zwykłego obiektu
             - `toJSON()` - konwersja do JSON

@@ -1,0 +1,34 @@
+---
+title: Wzorzec architektoniczny CSR
+---
+
+Kolejność liter w skrócie nie jest przypadkowa
+– odzwierciedla ona przepływ żądania (*Request Flow*) z zewnątrz do wnętrza aplikacji:
+- *Controller* (Kelner) – jako pierwszy odbiera strzał z internetu.
+- *Service* (Szef Kuchni) – jako drugi przejmuje dane i weryfikuje zasady biznesowe.
+- *Repository* (Magazynier) – jako ostatni dotyka bazy danych.
+
+
+## Wzorzec Architektoniczny (Skala Makro)
+**CSR (Controller-Service-Repository)**, znany też szerzej jako Architektura Warstwowa
+(*Layered Architecture*), to **wzorzec architektoniczny**.
+
+
+Decyduje on o kształcie całej aplikacji:
+* Gdzie kładziemy pliki?
+* Kto może rozmawiać z bazą danych?
+* Gdzie sprawdzamy poprawność haseł i maili?
+Innym popularnym wzorcem architektonicznym jest np. MVVM.
+
+## Wzorzec Projektowy / Programistyczny (Skala Mikro)
+Z kolei **wzorzec projektowy (Design Pattern)** dotyczy ułożenia kodu wewnątrz pojedynczej funkcji lub
+klasy.
+To gotowe przepisy na to, jak rozwiązać mały problem z kodem, np.:
+* Jak upewnić się, że połączenie z bazą MongoDB zostanie nawiązane tylko raz? (Wzorzec: *Singleton*)
+* Jak elegancko tworzyć skomplikowane obiekty zadań? (Wzorzec: *Builder* lub *Factory*)
+
+:::tip Zapamiętaj!
+Architektura (CSR) to plan całego budynku (gdzie jest kuchnia, a gdzie sala dla gości).
+Wzorzec projektowy to sposób, w jaki stolarz zbił konkretny stół do tej kuchni.
+:::
+

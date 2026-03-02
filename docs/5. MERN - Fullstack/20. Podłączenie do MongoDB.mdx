@@ -11,8 +11,8 @@ Mongoose to ODM (*Object-Document Mapping*), czyli sposób na łatwiejsze zarzą
 :::
 
 ## Instalacja biblioteki `mongoose` i jej typów
-`npm install mongoose`
-`npm install @types/mongoose --save-dev`
+- `npm install mongoose`
+- `npm install @types/mongoose --save-dev`
 
 ## Konfiguracja połączenia `src/database.ts`
 Utwórz plik w `src/database.ts`
@@ -65,7 +65,7 @@ import connectDB from "./database";
     }
     process.exit(1)
   }
-})()
+})();
 
 
 // Załaduj zmienne środowiskowe z .env

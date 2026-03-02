@@ -1,0 +1,89 @@
+---
+title: Metoda put w CSR
+---
+
+Kontynuacja aplikacji `Task`.
+
+Teraz zrobimy refaktoryzację metody `put`, aby była ona zgodna ze wzorcem *CRS*.
+
+Będziemy kody dopisywać do naszych plików:
+- `task.repository.ts`,
+- `task.service.ts`,
+- `task.controller.ts`
+
+
+## *Repository*
+```ts
+export async function updateTaskById(id: string, updatedData: Partial<Task>): Promise<Task | null> {
+    return  TaskModel.findByIdAndUpdate(id, updatedData, { returnDocument: 'after' })
+}
+
+```
+
+:::tip `Parial<T>`
+- `Partial<>` to wbudowane narzędzie (tzw. *Utility Type*) w języku TypeScript.
+- Jego zadaniem jest wzięcie Twojego interfejsu i zrobienie z każdego jego pola wartości opcjonalnej.
+
+Gdybyś użył samego typu `Task`, TypeScript krzyczałby, że brakuje tytułu i opisu.
+Używając `Partial<Task>`, mówisz TypeScriptowi:
+> "Spokojnie, to jest aktualizacja.
+> Akceptuj obiekt, który ma część (lub wszystkie) właściwości z Task".
+
+
+:::
+
+:::note `{ returnDocument: 'after' }`
+Wydajesz Mongoose'owi polecenie:
+> "Zaktualizuj wiersz w bazie i zwróć mi ten nowy, nadpisany obiekt, a nie ten stary".
+
+
+:::
+
+
+## *Service*
+Pamiętaj o importach!
+
+```ts
+export async function modifyTask(id: string, updatedData: Partial<Task>): Promise<Task> {
+    const updatedTask = await updateTaskById(id, updatedData);
+
+    if(!updatedTask){
+        throw new Error("Missing required fields");
+    }
+
+    return updatedTask;
+}
+```
+
+
+## *Controller*
+```ts
+export async function putTask(req: Request, res: Response): Promise<void> {
+    try {
+        const  id  = req.params.id as string // bo samo id to string | string[]
+        const updateData = req.body;
+
+        const updatedTask = await modifyTask(id, updateData);
+
+        res.json({ message: "Zaktualizowano zadanie", task: updatedTask });
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
+
+        // Sprawdzamy, czy to błąd rzucony przez nasz Serwis (brak zadania)
+        if (errorMessage === "Nie znaleziono zadania") {
+            res.status(404).json({ error: errorMessage });
+        } else {
+            res.status(500).json({ error: "Nie udało się zaktualizować zadania" });
+        }
+    }
+}
+```
+
+## *Router*
+```ts
+router.put("/:id", putTask);
+
+```
+
+
+

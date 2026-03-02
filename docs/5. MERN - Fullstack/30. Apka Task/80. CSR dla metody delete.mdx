@@ -1,0 +1,71 @@
+---
+title: Metoda delete w CRS
+---
+
+Kontynuacja poprzedniej lekcji.
+
+
+
+Będziemy kody dopisywać do naszych plików:
+- `task.repository.ts`,
+- `task.service.ts`,
+- `task.controller.ts`
+
+
+## *Repository*
+```ts
+export async function deleteTaskById(id: string): Promise<Task | null> {
+    // Rozmawia z bazą i zwraca usunięty dokument, albo null (jeśli nie było takiego ID)
+    return await TaskModel.findByIdAndDelete(id);
+}
+
+```
+
+
+## *Service*
+```ts
+export async function removeTask(id: string): Promise<Task> {
+    const deletedTask = await deleteTaskById(id);
+
+    // Logika biznesowa: Sprawdzamy, czy baza faktycznie coś usunęła
+    if (!deletedTask) {
+        throw new Error("Nie znaleziono zadania");
+    }
+
+    return deletedTask;
+}
+```
+
+
+
+## *Controller*
+```ts
+export async function deleteTask(req: Request, res: Response): Promise<void> {
+    try {
+        // Używamy "as string", żeby "uspokoić" TypeScripta (tak jak przy PUT)
+        const id = req.params.id as string;
+
+        // Zlecamy usunięcie do Serwisu
+        const deletedTask = await removeTask(id);
+
+        // Odpowiadamy klientowi statusem 200 (domyślny dla res.json)
+        res.json({ message: "Usunięto zadanie", task: deletedTask });
+
+    } catch (err) {
+        // Zabezpieczenie typu błędu
+        const error = err instanceof Error ? err : new Error("Nieznany błąd");
+
+        // Decydujemy o kodzie HTTP na podstawie wiadomości z Serwisu
+        if (error.message === "Nie znaleziono zadania") {
+            res.status(404).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: `Nie udało się usunąć zadania: ${error.message}` });
+        }
+    }
+}
+```
+
+## *Router*
+```ts
+router.delete("/:id", deleteTask);
+```

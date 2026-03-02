@@ -60,20 +60,21 @@ app.use("/tasks", taskRoutes)
 Webstorm ma wbudowanego klienta do testowania endpointów RestApi.
 Zamiast tego wbudowanego narzędzia można używać aplikacji *Postman*.
 ```http request
+@baseUrl = http://localhost:5000
 
 
 ### GET request to example server
-GET http://localhost:5000
+GET {{baseUrl}}
 Content-Type: application/json
 ###
 
 
 ### GET request to example server
-GET http://localhost:5000/tasks
+GET {{baseUrl}}/tasks
 
 ###
 ### POST request to example server
-POST http://localhost:5000/tasks
+POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
@@ -81,7 +82,7 @@ Content-Type: application/json
   "description": "zrób to , a tamtego nie"
 }
 ###
-POST http://localhost:5000/tasks
+POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
@@ -90,7 +91,7 @@ Content-Type: application/json
 }
 ###
 ###  POST with Error
-POST http://localhost:5000/tasks
+POST{{baseUrl}}/tasks
 Content-Type: application/json
 
 {
