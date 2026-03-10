@@ -1,6 +1,199 @@
 ---
-title: Praca z obrazami
+title: Praca z obrazkami w React
 ---
+
+
+import useBaseUrl from "@docusaurus/useBaseUrl";
+
+# Praca z obrazami w React
+
+Wyświetlanie grafik to podstawa każdego nowoczesnego interfejsu.
+W React (i TypeScript) mamy trzy główne sposoby na dodanie obrazka do naszego komponentu.
+
+
+---
+
+## 1. Import z folderu `src` (Najlepsza praktyka)
+
+Jeśli obrazek jest częścią Twojej aplikacji (np. logo, ikona, tło) i znajduje się w folderze `src` (często w podfolderze `src/assets`),
+**musisz go zaimportować** na samej górze pliku, tak samo jak importujesz komponenty.
+
+**Dlaczego?**
+Narzędzie budujące Twoją aplikację (np. Vite):
+- zobaczy ten `import`,
+- zoptymalizuje obrazek i
+- zadba o to, by po zbudowaniu aplikacji ścieżka do pliku była zawsze poprawna.
+
+
+<a href={useBaseUrl('/myImages/castle.png')} download="zamek.png">
+    Pobierz obrazek: castle.png
+</a>
+
+
+Umieść ten obrazek w folderze `assets`
+
+```tsx
+import './App.css'
+// import obrazka, który jest w folderze assets
+import castle from "./assets/castle.png"
+
+function App() {
+
+  return (
+    <>
+      <div>
+        <h3>To jest zamek</h3>
+        <img src={castle} alt="Zamek" width="200" />
+
+      </div>
+    </>
+  )
+}
+
+export default App
+
+
+```
+
+:::danger Uwaga na błąd!
+Jeśli plik leży w folderze src, zapis `<img src="./assets/logo.png" />` NIE ZADZIAŁA.
+React nie zinterpretuje tego jako pliku do spakowania, a przeglądarka zgłosi błąd 404 (nie znaleziono pliku).
+Zawsze używaj import!
+:::
+
+
+
+## 2. Zewnętrzny URL (Linki z internetu)
+Jeśli obrazek pochodzi z zewnętrznego serwera lub z API (np. awatar użytkownika pobrany z bazy danych),
+po prostu przekazujemy link w formie zwykłego tekstu (string).
+
+
+```tsx
+export default function UserAvatar() {
+function App() {
+  const avatarUrl = "https://images.unsplash.com/photo-1511367461989-f85a21fda167";
+
+  return (
+    <>
+      <img  src={avatarUrl} alt="avatar użytkownika"
+            style={{ borderRadius :"70%"}} width={"200vh"} />
+    </>
+  )
+}
+
+export default App
+
+```
+
+
+## 3. Folder `public`
+- W strukturze projektu React znajdziesz też folder `public`.
+- Pliki umieszczone w tym folderze nie są przetwarzane przez Reacta.
+- Kopiują się one "jeden do jednego" do gotowej aplikacji.
+- Używamy tego rzadko (np. dla pliku `favicon.ico` lub bardzo dużych grafik 3D).
+- Ścieżkę podajemy od ukośnika `/`, ignorując samą nazwę folderu `public`.
+
+
+<a href={useBaseUrl('/myImages/castle.png')} download="zamek.png">
+    Pobierz obrazek: dragon.png
+</a>
+
+Umieść ten obrazek w folderze `public`.
+
+
+```jsx
+`
+  return (
+    <>
+      <img  src={"/public/dragon.png"} alt="dragon"
+            width="500" height="800" />
+    </>
+  )
+```
+
+---
+## Przekazywanie obrazków w `props`
+
+Kiedy budujemy własne komponenty (np. kartę produktu), często chcemy przekazać obrazek jako `prop` z rodzica do dziecka.
+W TypeScript, niezależnie od tego, czy jest to zaimportowany plik, czy link URL, pod spodem jest to po prostu ciąg znaków (`string`).
+
+
+### Kompopnent `ProductCard.tsx`
+
+Pobierz zdjęcia i wrzuć je do folderu `assets`.
+-  <a href={useBaseUrl('/myImages/appleM5.jpg')} download="appleM5.png"> apple M5 </a>
+-  <a href={useBaseUrl('/myImages/zxSpectrum.jpg')} download="zxSpectrum.png"> ZX Spectrum </a>
+
+
+`ProductCard.css`
+```css
+.image-container {
+    width: 300px;
+    border: 1px solid #abcdef;
+}
+
+.responsive-image{
+    width: 100%; // obrazek zajmuje całą szerokość rodzica
+    height: auto; // Wysokość dopasowuje się automatycznie
+    display: block;
+}
+```
+
+```tsx
+
+import "./ProductCard.css"
+
+interface ProductCardProps {
+    title: string;
+    imageUrl: string;
+}
+
+
+function ProductCard({title, imageUrl}: ProductCardProps) {
+
+    return (
+        <div className={"image-container"}>
+            <img className={"responsive-image"} src={imageUrl} alt={title} />
+            <h3>{title}</h3>
+        </div>
+    )
+}
+
+export default ProductCard
+
+```
+
+
+### Użycie komponentów w `App.tsx`
+```tsx
+import apple from "./assets/appleM5.jpg"
+import zx from "./assets/zxSpectrum.jpg"
+import ProductCard from "./ProductCard.tsx";
+
+function App() {
+
+  return (
+    <>
+        <div style={{display: "flex", flexDirection: "column", gap: 15}}>
+            <ProductCard title={"Apple M5"} imageUrl={apple} />
+            <ProductCard title={"ZX Spectrum"} imageUrl={zx} />
+        </div>
+
+    </>
+  )
+}
+
+export default App
+
+
+```
+
+
+
+
+
+
+
 
 
 
