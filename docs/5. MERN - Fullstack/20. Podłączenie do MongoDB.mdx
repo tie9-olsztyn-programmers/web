@@ -14,62 +14,110 @@ Mongoose to ODM (*Object-Document Mapping*), czyli sposób na łatwiejsze zarzą
 - `npm install mongoose`
 - `npm install @types/mongoose --save-dev`
 
-## Konfiguracja połączenia `src/database.ts`
-Utwórz plik w `src/database.ts`
+## Konfiguracja połączenia `src/config/db.ts`
+Utwórz plik w `src/config/db.ts`
 
 ```typescript
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import mongoose from 'mongoose';
 
-dotenv.config(); // wczytujemy dane z .env
+const connectDB = async (): Promise<void> => {
+    const MONGODB_URI = process.env.MONGO_URI;
 
-const MONGODB_URI = process.env.MONGO_URI as string; // pobieramy adres do bazy i rzutujemy go na string
-console.log(MONGODB_URI);
-
-const connectDB = async (): Promise<void> =>{
-    try{
-        await mongoose.connect(MONGODB_URI);
-        console.log("Połączono z MongoDB")
-    }catch(err: unknown){
-        if(err instanceof Error) {
-            console.error("Błąd połączenia z MongoDB ", err)
-
-        }else{
-            console.error("nieznany błąd ", err)
-        }
-        process.exit(1);
+    // Bezpieczne sprawdzenie, czy zmienna środowiskowa istnieje
+    if (!MONGODB_URI) {
+        throw new Error("Brak zdefiniowanej zmiennej MONGO_URI w pliku .env!");
     }
-}
 
-export default connectDB ;
+    // Pozbywamy się try/catch tutaj. Jeśli mongoose.connect rzuci błędem,
+    // poleci on wyżej, gdzie obsłużymy go w głównym pliku.
+    await mongoose.connect(MONGODB_URI);
+    console.log("👍 Pomyślnie połączono z MongoDB");
+};
+
+export default connectDB;
 
 ```
 
-## Zmiany w pliku `app.ts`
-na początku tego pliku dodajemy
-```typescript
-import connectDB from "./database";
+## Zmiany w pliku `app.ts` - czysty Express
+Ten plik powinien zajmować się wyłącznie **konfiguracją** Expressa (middleware, routing).
+Wyrzucamy stąd ładowanie bazy i dotenv.
 
-//connect jest funkcją asynchroniczną
-// więc uruchomimy ją z obsługą obietnicy, którą zwraca
-(async () =>{
-  try{
-    await connectDB()
-    console.log("Connected to DB...")
-  }catch(e: unknown){
-    if(e instanceof Error) {
-      console.error(`błąd połączenie z MongoDB ${e}`)
+```ts
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import path from "path";
 
-    }else{
-      console.log(`nie znany błąd połączenia `, e)
-    }
-    process.exit(1)
-  }
-})();
+const app = express();
 
+app.use(cors());
+app.use(express.json()); // Parsowanie JSON w requestach
 
-// Załaduj zmienne środowiskowe z .env
+app.use(express.static(path.join(__dirname, "../public")));
+
+app.get("/", (req, res) => {
+    res.json({ message: "API Express + TypeScript działa!" });
+});
+
+export default app;
 ...
 
 
 ```
+
+
+## Zmiany w pliku `www.ts` - server i baza
+To tutaj musimy wczytać zmienne środowiskowe, połączyć się z bazą i – jeśli się to uda – uruchomić serwer HTTP.
+Aby użyć `await` na najwyższym poziomie (lub w funkcji), zamkniemy start serwera w asynchronicznej funkcji `start()`.
+
+```ts
+import 'dotenv/config';
+import app from '../app';
+import debug from 'debug';
+import http from 'http';
+import connectDB from '../config/db';
+
+// Get port from environment and store in Express.
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+const debugLog = debug("express-ts-mongodb:server"); // Tworzy instancję loggera
+
+// Create HTTP server.
+const server = http.createServer(app);
+
+// -------- nowa część -----------------
+// Tworzymy asynchroniczną funkcję startową
+const start = async () => {
+    try {
+        // Najpierw łączymy się z bazą
+        await connectDB();
+
+        // Dopiero po sukcesie bazy, odpalamy serwer HTTP
+        server.listen(port);
+        server.on('error', onError);
+        server.on('listening', onListening);
+
+    } catch (error) {
+        console.error("🔴 Krytyczny błąd podczas uruchamiania aplikacji:", error);
+        process.exit(1);
+    }
+};
+
+//  Uruchamiamy wszystko
+start();
+
+// -------------------------------------
+
+
+// Normalize a port into a number, string, or false.
+function normalizePort(val: string): number | string | false {
+//...
+```
+
+
+
+
+
+
+
