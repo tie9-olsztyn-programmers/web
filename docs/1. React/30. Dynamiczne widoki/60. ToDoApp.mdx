@@ -1,0 +1,200 @@
+---
+title: ToDoApp
+---
+
+
+
+# Budujemy aplikację To-Do (Krok po kroku)
+
+Zanim napiszemy pierwszą linijkę kodu, musimy zaplanować naszą aplikację.
+W świecie Reacta nazywamy to fazą projektowania architektury.
+Zastanowimy się, co aplikacja ma robić, jakie dane musi pamiętać i z jakich "klocków" (komponentów) się składa.
+
+:::info Cel biznesowy
+Tworzymy prostą listę zadań, która pozwoli użytkownikowi dodawać nowe obowiązki,
+odznaczać je jako zrobione oraz usuwać z listy.
+:::
+
+## 1. Wymagania Funkcjonalne (Co aplikacja ma robić?)
+
+Oto lista funkcji, które musimy zaimplementować:
+1. **Wyświetlanie zadań:** Lista wszystkich dodanych zadań.
+2. **Brak zadań:** Jeśli lista jest pusta, wyświetlamy komunikat: *"Brak zadań na dziś! Odpoczywaj."* (Renderowanie warunkowe).
+3. **Dodawanie:** Formularz z polem tekstowym i przyciskiem "Dodaj".
+4. **Zaznaczanie:** Możliwość kliknięcia w zadanie, aby je przekreślić (zmiana statusu `isDone`).
+5. **Usuwanie:** Przycisk "X" obok zadania, który trwale usuwa je z listy.
+
+## 2. Architektura Stanu (Jakie dane musimy pamiętać?)
+
+Aby aplikacja działała, React musi śledzić dwie rzeczy (nasz stan - `useState`):
+* **Główna lista zadań:**
+    - Tablica obiektów.
+    - Zostanie umieszczona najwyżej w hierarchii (*Lifting State Up*), aby każdy element aplikacji miał do niej dostęp.
+* *Przykładowy obiekt:* `{ id: 1, text: "Nauczyć się Reacta", isDone: false }`
+* **Wpisany tekst:** Stan lokalny w formularzu, który pamięta, co aktualnie wpisujemy w pole input.
+
+## 3. Drzewo Komponentów (Z czego zbudujemy interfejs?)
+
+Dzielimy naszą aplikację na 4 logiczne komponenty.
+Zgodnie z zasadą jednokierunkowego przepływu danych rodzic (`App`) będzie przekazywał w dół do swoich dzieci (`props`):
+- dane i
+- funkcje
+
+* **`App` (Rodzic)**
+    * *Rola:*: Mózg operacji.
+        - Przechowuje główny stan (`tasks`) oraz
+        - wszystkie funkcje modyfikujące tablicę (`addTask`, `toggleTask`, `deleteTask`).
+    * *Renderuje:* `AddTodoForm` oraz `TodoList`.
+
+* **`AddTodoForm` (Dziecko 1)**
+    * *Rola:* Zbieranie danych od użytkownika.
+    * *Propsy:* Odbiera z `App` funkcję `addTask`.
+    * *Stan lokalny:* Przechowuje tekst z inputa.
+
+* **`TodoList` (Dziecko 2)**
+    * *Rola:* Decyduje, co wyświetlić.
+        - Jeśli tablica jest pusta – pokazuje komunikat.
+        - Jeśli pełna – robi `.map()`.
+    * *Propsy:* Odbiera z `App` tablicę `tasks` oraz funkcje `toggleTask` i `deleteTask`.
+
+* **`TodoItem` (Wnuk / Dziecko TodoList)**
+    * *Rola:* Wygląd pojedynczego zadania na liście (tekst + przycisk usuwania).
+    * *Propsy:* Odbiera obiekt pojedynczego zadania oraz funkcje wywoływane po kliknięciu.
+
+:::tip Wskazówka
+Zwróć uwagę, że `AddTodoForm` i `TodoList` to "rodzeństwo".
+Nie rozmawiają ze sobą bezpośrednio!
+Formularz wysyła nowe zadanie w górę do `App`, a `App` odświeża i wysyła nową listę w dół do `TodoList`.
+To klasyczny przykład **Lifting State Up**.
+:::
+
+---
+# Aplikacja
+
+Mamy już plan i architekturę.
+Czas przełożyć to na kod!
+Będziemy budować naszą aplikację krok po kroku, zaczynając od głównego komponentu, a kończąc na najmniejszych detalach.
+
+:::tip Zasada małych kroków
+Nie pisz całego kodu naraz!
+Zawsze twórz jeden komponent,
+podpinaj go i sprawdzaj w przeglądarce,
+czy działa, zanim przejdziesz do kolejnego.
+:::
+
+## App.tsx
+
+```tsx
+import {useState} from "react";
+
+export type Task = {
+    id: number;
+    text: string;
+    isDone: boolean;
+}
+
+function App() {
+    const [tasks, setTasks] = useState<Task[]>([
+        { id: 1, text: "Zrozumieć Lifting State Up", isDone: true },
+        { id: 2, text: "Nauczyć się React Routera", isDone: false },
+    ])
+
+    // Funkcja dodająca zadanie (nie używamy .push!)
+    const addTask = (newTaskText: string) => {
+        const newTask: Task = {
+            id: Date.now(), // prosty sposób na unikalne ID
+            text: newTaskText,
+            isDone: false
+        }
+        // Tworzymy nową tablicę: bierzemy wszystkie stare zadania (...tasks) i dorzucamy nowe
+        setTasks([...tasks, newTask])
+    }
+
+    // Funkcja usuwająca zadanie (używamy .filter)
+    const deleteTask = (taskId: number) => {
+        setTasks(tasks.filter(task => task.id !== taskId))
+    }
+
+    // Funkcja zmieniająca status zadania (zrobione / do zrobienia)
+    const toggleTask = (taskId: number) => {
+        setTasks(tasks.map(task => {
+            if (task.id === taskId) {
+                return { ...task, isDone: !task.isDone }; // odwracamy status
+            }
+            return task
+        }))
+    }
+
+
+  return (
+      <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
+          <h1>📝 Moja Lista Zadań</h1>
+
+          {/* Tu wstawimy Formularz. Przekazujemy mu funkcję addTask w propsie! */}
+          {/* <AddTodoForm onAdd={addTask} /> */}
+
+          {/* Tu wstawimy Listę. Przekazujemy jej stan i funkcje! */}
+          {/* <TodoList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} /> */}
+      </div>
+  )
+}
+
+export default App
+```
+
+
+## AddTodoForm.tsx
+Zróbmy nowy komponent. Będzie on miał właściwość `onAdd`. która prześle referencję do funkcji `addTask` z `App`.
+
+Funkcja ta przyje `string`, tworzy obiekt `Task` i przez użycie *spread* operatora `...tasks`
+dodaje go do tablicy `tasks` w `App`.
+```tsx
+import React from "react";
+import { useState } from 'react';
+
+// Odbieramy funkcję 'onAdd' z propsów (od rodzica App)
+// Funkcja przyjmuje string i nic nie zwraca (void
+function AddTodoForm({ onAdd }: { onAdd: (text: string) => void })
+ {
+    // Stan lokalny - tylko dla tego inputa
+    const [inputValue, setInputValue] = useState("");
+
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Zatrzymujemy domyślne przeładowanie strony!
+
+        if (inputValue.trim() === "") return; // Nie pozwalamy dodać pustego zadania
+
+        onAdd(inputValue); // Wysyłamy tekst zadania w górę (Lifting State Up!)
+        setInputValue(""); // Czyścimy input po dodaniu
+    };
+
+    return (
+        <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+            <input
+                type="text"
+                placeholder="Co masz do zrobienia?"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                style={{ padding: '8px', width: '70%' }}
+            />
+            <button type="submit" style={{ padding: '8px',
+                width: '25%', marginLeft: '5%' , marginTop: '10px'}}>
+                Dodaj
+            </button>
+        </form>
+    );
+}
+
+export default AddTodoForm;
+
+
+```
+
+
+## TodoList.tsx
+W `App` napisaliśmy  ` <TodoList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} /> `
+
+
+
+
+

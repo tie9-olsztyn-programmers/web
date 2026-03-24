@@ -1,0 +1,72 @@
+---
+title: Lifting State Up
+---
+
+- React opiera się na jednokierunkowym przepływie danych (z góry na dół, od rodzica do dziecka, przez propsy).
+- Rodzeństwo (np. komponent Formularz i komponent Lista) nie może komunikować się ze sobą bezpośrednio.
+- Jeśli dwa komponenty-rodzeństwo muszą mieć dostęp do tych samych danych (jeden chce je wyświetlać, drugi edytować),
+musimy wynieść stan do ich najbliższego wspólnego przodka (zazwyczaj do głównego komponentu, np. App).
+
+
+## Definiujemy główny komponent `App`
+```tsx
+import './App.css'
+import {useState} from "react";
+
+function App() {
+  const [licznik, setLicznik] = useState<number>(0)
+
+  const zwiekszLicznik = () => {
+    setLicznik(licznik + 1)
+  }
+
+  return (
+    <>
+      <h1>Wynoszenie stanu w górę</h1>
+      {/* przekazujemy stan w dół */}
+      <Wyswietlacz licznik={licznik} />
+      {/* przekazujemy funkcję modyfikującą w dół */}
+      <Przycisk onDodaj ={zwiekszLicznik} />
+
+    </>
+  )
+}
+
+export default App
+```
+
+## Dodajemy brakujące komponenty
+`Przycisk.tsx`
+```tsx
+
+function Przycisk({onDodaj}: {onDodaj: () => void}) {
+    return <button onClick={onDodaj}>Zwiększ o jeden</button>
+
+}
+
+export default Przycisk
+
+```
+
+`Wyswietlacz.tsx`
+```tsx
+function Wyswietlacz({licznik}: {licznik: number}) {
+
+    return <h2> Obecny stan licznika to: {licznik}</h2>
+}
+
+export default Wyswietlacz
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
