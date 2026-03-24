@@ -194,7 +194,108 @@ export default AddTodoForm;
 ## TodoList.tsx
 W `App` napisaliśmy  ` <TodoList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} /> `
 
+Nasz komponent przyjmie listę zadań oraz dwie funkcje:
+- zadanie zrobione, zadanie niezrobione
+- usuwanie zadania.
 
+`TodoList.tsx`
+```tsx
+import React from "react";
+import TodoItem from "./TodoItem";
+import type {Task} from "./App";
 
+type TodoListProps = {
+    tasks: Task[],
+    onToggle: (taskId: number) => void,
+    onDelete: (taskId: number) => void
+}
+
+function TodoList({ tasks, onToggle, onDelete }: TodoListProps) {
+    // Renderowanie warunkowe: Jeśli tablica jest pusta
+    if (tasks.length === 0) {
+        return (
+            <div style={{ textAlign: 'center', color: 'gray', padding: '20px' }}>
+                <h3>🎉 Brak zadań na dziś! Odpoczywaj.</h3>
+            </div>
+        );
+    }
+
+    // Jeśli są zadania, renderujemy listę za pomocą .map()
+    return (
+        <ul style={{ listStyleType: 'none', padding: 0 }}>
+            {tasks.map((task: Task) => (
+                <TodoItem
+                    key={task.id} // Wymagane przez React!
+                    task={task}
+                    onToggle={onToggle}
+                    onDelete={onDelete}
+                />
+            ))}
+        </ul>
+    );
+}
+
+export default TodoList;
+```
+
+## TodoItem.tsx
+W poprzednim komponecie użyliśmy nowego komponentu `TodoItem`.
+Przyjmuje on:
+- id zadania
+- zadanie
+- dwie funkcje
+    - `onToggle` - pochodzi z `App` (zmienia status zadania)
+    - `onDelete` - pochodzi z `App` (usuwa zadanie)
+
+```tsx
+import type {Task} from "./App";
+
+type TodoItemProps = {
+    task: Task,
+    onToggle: (taskId: number) => void,
+    onDelete: (taskId: number) => void
+}
+
+import React from 'react';
+
+function TodoItem({ task, onToggle, onDelete } : TodoItemProps) {
+    return (
+
+        <li style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '10px',
+            borderBottom: '1px solid #ccc',
+            alignItems: 'center'
+        }}>
+
+            {/* Warunkowe stylowanie: przekreślenie tekstu jeśli isDone === true */}
+            <span
+                onClick={() => onToggle(task.id)}
+                style={{
+                    cursor: 'pointer',
+                    textDecoration: task.isDone ? 'line-through' : 'none',
+                    color: task.isDone ? 'gray' : 'green'
+                }}
+            >
+                {task.isDone ? "✅ " : "⬜ "}
+                {task.text}
+            </span>
+
+            <button
+                onClick={() => onDelete(task.id)}
+                style={{ background: '#ff4d4d', color: 'white',
+                    border: 'none', padding: '5px 10px',
+                    borderRadius: '4px', cursor: 'pointer' }}
+            >
+                Usuń
+            </button>
+
+        </li>
+    );
+}
+
+export default TodoItem;
+```
 
 
