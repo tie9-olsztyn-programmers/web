@@ -1,0 +1,192 @@
+---
+title: Tworzymy server ExpressTS
+---
+
+
+
+## 🏰 Trzy Poziomy Władzy: Controller, Service, Repository
+Jeśli wrzucimy całą logikę do Kontrolera,
+Gandalf będzie musiał robić wszystko naraz:
+- odbierać listy,
+- sprawdzać zasady magii i
+- kopać w ziemi.
+
+To zła praktyka. Dzielimy to na trzy wyspecjalizowane gildie:
+
+### 1. 🛡️ Controller (Strażnicy Bramy / Dyplomacja)
+- Zadanie: Rozmawia ze światem zewnętrznym (Reactem). Rozumie język HTTP (`req`, `res`, statusy `200`, `404`).
+- Czego NIE robi: Nie myśli o zasadach biznesowych i nie wie, gdzie są dane.
+- Akcja:
+    - Odbiera paczkę od kuriera (Orła),
+    - rozpakowuje ją i
+    - przekazuje do Rady (Service).
+    - Na koniec odsyła odpowiedź.
+
+### 2. 🧙‍♂️ Service (Rada Elronda / Logika Biznesowa)
+- Zadanie:
+    - To mózg operacji.
+    - Tu zapadają decyzje.
+    - Sprawdza zasady:
+        - "Czy ten Hobbit ma odpowiedni poziom, by wziąć Pierścień?",
+        - "Czy to imię nie jest już zajęte?".
+- Czego NIE robi: Nie wie nic o HTTP, nie wie nic o bazie danych MongoDB.
+- Akcja:
+    - Otrzymuje czyste dane z Kontrolera,
+    - przetwarza je i
+    - wysyła polecenia do Kopalni (Repository).
+
+3. ⛏️ Repository (Krasnoludy z Morii / Dostęp do Danych)
+- Zadanie: Tylko oni wiedzą, jak obsługiwać narzędzia do kopania (Mongoose/MongoDB).
+- Czego NIE robi:
+    - Nie obchodzą ich zasady biznesowe.
+    - Jeśli każesz im usunąć miasto, zrobią to bez pytania.
+- Akcja: Rozmawiają bezpośrednio z bazą danych i zwracają surowe skarby (dane) do Service'u.
+
+---
+# Struktura servera ExpressTS
+```
+server/                      # Główny katalog backendu (Nasza twierdza)
+├── node_modules/            # Zainstalowane biblioteki (Nigdy nie wysyłamy na Git!)
+├── src/                     # Główny katalog z kodem źródłowym aplikacji
+│   ├── config/              # Konfiguracja (np. połączenie z bazą danych)
+│   │   └── db.ts            # Skrypt łączący z MongoDB
+│   ├── controllers/         # (Strażnicy) Odbierają zapytania HTTP i wysyłają odpowiedzi
+│   │   └── character.controller.ts
+│   ├── services/            # (Rada) Czysta logika biznesowa, reguły i operacje
+│   │   └── character.service.ts
+│   ├── repositories/        # (Kopalnia) Operacje bezpośrednio na bazie danych
+│   │   └── character.repository.ts
+│   ├── models/              # Schematy Mongoose określające jak dane wyglądają w MongoDB
+│   │   └── character.model.ts
+│   ├── routes/              # (Drogowskazy) Definicje ścieżek URL (endpointów)
+│   │   └── character.routes.ts
+│   ├── middlewares/         # (Filtry/Strażnicy) Kawałki kodu uruchamiane przed kontrolerem
+│   │   └── errorHandler.ts  # np. globalna obsługa błędów, weryfikacja tokenów
+│   ├── types/               # (Kontrakty) Interfejsy i typy TypeScript (współdzielone z frontem)
+│   │   └── character.ts
+│   └── index.ts             # Brama wejściowa - punkt startowy aplikacji Express
+├── .env                     # Zmienne środowiskowe (Hasła, porty - NIE dodajemy do Git!)
+├── .gitignore               # Lista plików, których Git ma "nie widzieć" (np. node_modules, .env)
+├── package.json             # Spis paczek (zależności) i skrypty startowe (npm run dev)
+└── tsconfig.json            # Zasady i konfiguracja kompilatora TypeScript
+```
+
+Odtwarzamy w naszym projekcie tę strukturę.
+
+## Plik `.gitignore`
+Plik `.gitignore` to nasza Elficka Peleryna (*Cloak of Elvenkind*).
+Dzięki niej ukrywamy przed wzrokiem Saurona (czyli przed publicznym repozytorium GitHub) wszystko to,
+co jest tajne, zbyt ciężkie do niesienia lub
+specyficzne tylko dla naszego lokalnego środowiska.
+
+```
+# ==========================================
+# 1. ZALEŻNOŚCI NODE.JS (Najcięższy bagaż)
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ==========================================
+# 2. SEKRETY I KONFIGURACJE (Zakazana wiedza)
+# ==========================================
+# NIGDY nie wysyłaj pliku .env do repozytorium!
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# ==========================================
+# 3. WYNIKI KOMPILACJI TYPESCRIPT (Zbudowane miasta)
+# ==========================================
+# Ignorujemy skompilowany kod JS, ponieważ zawsze
+# możemy go wygenerować na nowo z plików .ts
+dist/
+build/
+out/
+
+# ==========================================
+# 4. WEBSTORM / JETBRAINS (Lokalna magia IDE)
+# ==========================================
+# Pliki konfiguracyjne Twojego edytora. Każdy programista
+# w zespole może mieć własne ustawienia, więc ich nie współdzielimy.
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ==========================================
+# 5. SYSTEMY OPERACYJNE (Ślady po podróży)
+# ==========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+```
+
+---
+# Definicja ExpressTS
+
+Zgodnie z zasadami czystego kodu (Clean Code), ten plik nie powinien zawierać logiki biznesowej. Jego jedynym zadaniem jest konfiguracja serwera, załadowanie filtrów (middleware) i ustawienie drogowskazów (skierowanie ruchu do odpowiednich routerów).
+
+```ts
+import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+// Ładujemy ukryte zaklęcia z pliku .env (np. PORT, hasła do bazy)
+dotenv.config();
+
+// Inicjalizacja instancji aplikacji (Nasz Gandalf)
+const app: Express = express();
+const port = process.env.PORT || 5000;
+
+// Pozwala na komunikację między naszym Reactem (np. port 5173) a Expressem (port 5000)
+app.use(cors());
+// Uczy nasz serwer czytać wiadomości w formacie JSON (niezbędne przy metodach POST/PUT)
+app.use(express.json());
+
+
+// Tutaj wkrótce podłączymy nasze wyspecjalizowane ścieżki (Routery)
+// np. app.use('/api/characters', characterRoutes);
+
+// Prosty endpoint testowy - tzw. Health Check
+app.get('/api/health', (req: Request, res: Response) => {
+    res.status(200).json({
+        status: 'success',
+        message: '🧙‍♂️ Brama Gandalfa jest otwarta! Serwer ExpressTS nasłuchuje.'
+    });
+});
+
+
+//  START SERWERA
+app.listen(port, () => {
+    console.log(`⚡ Twierdza działa! Nasłuchiwanie na porcie: ${port}`);
+});
+```
+
+
+
+
+
+
+

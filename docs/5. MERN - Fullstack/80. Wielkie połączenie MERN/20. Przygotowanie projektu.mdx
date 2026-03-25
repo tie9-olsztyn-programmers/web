@@ -1,0 +1,97 @@
+---
+title: Przygotowanie projekti
+---
+
+## 🏗️ Krok 1: Przygotowanie Cytadeli (Struktura Projektu)
+W WebStormie otwórz pusty folder projektu (np. `mern-fellowship`).
+Wszystko, co zrobimy, będzie się działo wewnątrz niego (zrób puste foldery `client` i `server`)
+
+```
+mern-fellowship/
+├── client/          # Minas Tirith (React + Vite)
+└── server/          # Kopalnie Morii (Node.js + Express)
+```
+
+## 🧙‍♂️ Krok 2: Powołanie Gandalfa (Inicjalizacja Serwera)
+Otwórz terminal w WebStorm (Alt + F12) i wykonaj następujące zaklęcia:
+- `cd server` (wchodzimy do folderu serwera)
+- `npm init -y`
+- `npm install express mongoose cors dotenv`
+- `npm install --save-dev typescript @types/node @types/express @types/cors ts-node nodemon`
+- `npx tsc --init`
+
+W pliku `tsconfig.json`  podmieniamy całą jego zawartość na:
+```json
+{
+  "compilerOptions": {
+    // 1. JAK WYGLĄDA WYNIKOWY KOD:
+    // Tłumaczymy TS na najnowszy standard JS obsługiwany przez Node.js
+    "target": "esnext",
+
+    // 2. JAK ZARZĄDZAMY IMPORTAMI:
+    // Mówimy kompilatorowi: "Nasz Node.js korzysta z nowoczesnych modułów ESM (import/export)".
+    "module": "nodenext",
+
+    // 3. ORGANIZACJA FOLDERÓW:
+    // Skąd bierzemy nasz czysty kod TypeScript...
+    "rootDir": "./src",
+    // ...i dokąd wrzucamy gotowy, skompilowany kod JavaScript.
+    "outDir": "./dist",
+
+    // 4. BEZPIECZEŃSTWO I JAKOŚĆ KODU:
+    // "Surowy Strażnik": zapobiega błędom na serwerach Linux, pilnując wielkości liter w nazwach plików.
+    "forceConsistentCasingInFileNames": true,
+    // "Surowy Nauczyciel": włącza rygorystyczne sprawdzanie typów (np. chroni przed null/undefined).
+    "strict": true,
+
+    // 5. OPTYMALIZACJA I ZGODNOŚĆ:
+    // Magiczny klej, który pozwala bezbłędnie importować starsze biblioteki (CommonJS) do nowego kodu (ESM).
+    "esModuleInterop": true,
+    // Przyspiesza kompilację: TypeScript nie będzie tracił czasu na sprawdzanie typów w cudzym kodzie w node_modules.
+    "skipLibCheck": true,
+
+    // 6. Aby można było importować pliki Json
+    "resolveJsonModule": true
+  },
+
+  // 6. KTÓRE PLIKI UWZGLĘDNIAĆ:
+  // Kompiluj wszystko wewnątrz folderu src/ i jego podfolderach.
+  "include": ["src/**/*"],
+
+  // 7. CZEGO UNIKAĆ:
+  // Nie dotykaj folderu node_modules ani plików testowych (np. user.spec.ts).
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
+
+```
+
+## 🛡️ Krok 2: Cytadela Minas Tirith (Client w React + TS)
+`cd ../client`  wychodzimy z folderu serwera i wchodzimy do folderu klienta.
+```bash
+npm create vite@latest . -- --template react-ts
+```
+
+Jeżeli wydalibyśmy instrukcję `npm create vite@latest client -- --template react-ts`, to
+wewnątrz naszego folderu `client` zostałby utworzony folder `client`.
+
+
+Jeżeli podczas tworzenia projektu pojawi się w konsoli jakieś pytanie, wybierz `No`.
+
+Teraz instalujemy zależności potrzebne dla aplikacji React: `npm i`.
+
+Możemy sprawdzić, czy aplikacja działa poprawnie: `npm run dev`.
+
+
+## 🖌️ Krok 3: Utworzenie typu bohatera:
+W folderze `client` zróbmy folder `src`, a w nim folder `types`.
+Wewnątrz folderu  `types` utwórzmy plik `character.ts` i w nim wpiszemy:
+```ts
+export interface Character {
+    id?: string;
+    name: string;
+    race: 'Hobbit' | 'Elf' | 'Dwarf' | 'Human' | 'Wizard';
+    level: number;
+}
+```
+
+

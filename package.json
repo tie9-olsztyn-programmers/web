@@ -27,10 +27,15 @@
     "@docusaurus/module-type-aliases": "^3.8.1",
     "@docusaurus/tsconfig": "^3.8.1",
     "@docusaurus/types": "^3.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.25",
+    "@types/node": "^25.5.0",
     "autoprefixer": "^10.4.21",
     "baseline-browser-mapping": "^2.9.14",
+    "nodemon": "^3.1.14",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4",
+    "ts-node": "^10.9.2",
     "typescript": "~5.6.2"
   },
   "browserslist": {

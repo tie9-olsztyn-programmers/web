@@ -1,0 +1,41 @@
+---
+title: Wielkie połączenie MERN
+---
+
+
+
+## 💍 Lekcja:Drużyna MERN – Wyprawa po Dane
+W świecie nowoczesnych aplikacji webowych (CSR),
+nie budujemy jednego wielkiego zamku.
+Budujemy system sojuszy między różnymi krainami.
+
+### 🏔️ MongoDB: Kopalnie Morii (Baza Danych)
+- To tutaj, głęboko pod ziemią, przechowywane są najcenniejsze skarby – Dane.
+- Są zapisane na "kamiennych tablicach" (dokumentach JSON/BSON).
+- Moria nie wysyła skarbów sama z siebie.
+- Skarby tam po prostu są, czekając, aż ktoś zna odpowiednie hasło (Mellon!), by otworzyć bramy i je wydobyć.
+
+### 🧙‍♂️ Express.js + Node.js: Gandalf Szary (Serwer/API)
+- Gandalf jest jedynym, który wie, jak bezpiecznie poruszać się między krainami.
+- Middleware (Strażnik): Zanim wpuści kogoś do kopalni, sprawdza, czy to nie Ork (nieautoryzowane zapytanie).
+- Routing (Ścieżki): To on mówi: "Idziemy przez Przełęcz Caradhras (`/api/gory`) albo przez Morię (`/api/moria`)".
+- Logika:
+    - Gandalf nie jest skarbem.
+    - On tylko pośredniczy.
+    - Idzie do Morii, wyciąga dane i przygotowuje je do drogi.
+
+### 🛡️ React: Minas Tirith (Frontend / CSR)
+- To wielkie, białe miasto ludzi.
+- To tutaj dzieje się akcja, którą widzi świat.
+- Komponenty: To poszczególne poziomy miasta – mury, wieże, domy. Każdy ma swoje zadanie.
+- Stan  (`useState`):
+    - To zapasy w mieście.
+    - Jeśli zapasy się zmieniają, życie w mieście wygląda inaczej.
+- Efekt (`useEffect`):
+    - Minas Tirith wysyła sygnał ostrzegawczy (Zapytanie HTTP):
+  > "Gondor wzywa pomocy! Gandalfie, prześlij nam dane!".
+- 🦅 Fetch/Axios:
+    - Wielkie Orły (Komunikacja)
+    - Orły to posłańcy.
+    - To one niosą zapytania z Minas Tirith do Gandalfa i wracają z "paczkami" danych.
+    - Dzięki nim miasto nie musi się ruszać z miejsca, by wiedzieć, co dzieje się w oddali.
