@@ -1,0 +1,385 @@
+---
+title: 🔗 Dynamiczne parametry w URL (useParams)
+---
+
+## Dynamiczne ścieżki w React Router
+
+W poprzedniej lekcji stworzyliśmy sztywne, "statyczne" ścieżki,
+takie jak `/o-nas` czy `/kontakt`.
+
+
+Co jednak w sytuacji, gdy mamy sklep ze 100 produktami?
+Nie będziemy przecież pisać 100 osobnych komponentów i 100 tagów `<Route>` dla każdego z nich!
+
+Zamiast tego używamy **ścieżek dynamicznych**, które działają jak szablony.
+
+:::info Cel lekcji
+Nauczysz się, jak przekazywać dane przez adres URL
+(np. ID użytkownika lub numer produktu) i
+jak odczytywać je wewnątrz komponentu za pomocą hooka `useParams`.
+:::
+
+##  Definiowanie dynamicznej ścieżki
+
+Aby powiedzieć React Routerowi, że dany fragment adresu URL jest zmienny (dynamiczny),
+używamy dwukropka (`:`) w atrybucie `path`.
+
+Wyobraźmy sobie, że chcemy wyświetlać profil użytkownika na podstawie jego ID.
+
+```jsx
+// Zwykła ścieżka:
+<Route path="/profil" element={<Profile />} />
+
+// DYNAMICZNA ścieżka (dwukropek oznacza zmienną o nazwie "userId"):
+<Route path="/profil/:userId" element={<Profile />} />
+```
+
+## Odczytywanie parametrów (`useParams`)
+Skoro nasz komponent `<Profile />` wyświetla się dla wielu różnych adresów, musi wiedzieć,
+czyj konkretnie profil ma pokazać na ekranie.
+
+Do wyciągnięcia tej informacji z paska adresu służy specjalny hook od React Routera:
+- `useParams()`
+- Zwraca on obiekt zawierający wszystkie parametry przekazane w URL.
+
+
+
+## Komponent  `UserProfile`
+Dopiszmy ten komponent do projektu z poprzedniej lekcji.
+
+```tsx
+
+//  Komponent wyświetlający szczegóły - ODCZYTUJE PARAMETR
+import {useParams} from "react-router-dom";
+
+export default function UserProfile() {
+    // Wyciągamy zmienną "id" z adresu URL
+    // Nazwa "id" musi dokładnie pasować do nazwy po dwukropku w <Route>!
+    const { id } = useParams();
+
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc', marginTop: '20px' }}>
+            <h2>👤 Profil Użytkownika</h2>
+            <p>Przeglądasz profil pracownika o numerze ID: <strong>{id}</strong></p>
+        </div>
+    );
+}
+```
+
+Skasujmy to, co zwracał główny komponent  `App.tsx`:
+```tsx
+return (
+
+)
+```
+
+
+## Jakbyśmy łączyli się z bazą danych?
+W rzeczywistych aplikacjach samo wyświetlenie ID na ekranie to za mało.
+Zazwyczaj używamy tego ID,
+aby odszukać konkretny element w naszej tablicy (lub pobrać go z prawdziwej bazy danych).
+
+### Zmiany w komponencie `UserProfile`
+Doodajmy do naszego komponentu `UserProfile`:
+- dane jakby z bazy danych
+- wyszukiwanie użytkownika po id
+
+```tsx
+import {useParams} from "react-router-dom";
+
+type User = { id: string, name: string, role: string };
+// Przykładowa baza danych
+const users: User[] = [
+    { id: "1", name: "Jan", role: "Programista" },
+    { id: "2", name: "Anna", role: "Grafik" }
+];
+
+
+export default function UserProfile() {
+    // Wyciągamy zmienną "id" z adresu URL
+    // Nazwa "id" musi dokładnie pasować do nazwy po dwukropku w <Route>!
+    const { id } = useParams();
+
+    // Szukamy użytkownika, którego ID pasuje do tego z adresu URL
+    const user = users.find(u => u.id === id);
+
+    // Zabezpieczenie: co jeśli ktoś wpisze adres /pracownik/666 ?
+    if (!user) {
+        return <h2>❌ Nie znaleziono pracownika o takim ID.</h2>;
+    }
+
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc', marginTop: '20px' }}>
+            <h2>👤 Profil Użytkownika</h2>
+            <p>Przeglądasz profil pracownika <strong>{user.name}</strong></p>
+            <p>Stanowisko: {user.role}</p>
+        </div>
+    );
+}
+```
+
+
+### Zmiany w komponencie `App`
+```tsx
+function App() {
+  return (
+      <BrowserRouter>
+          <nav style={{ display: 'flex', gap: '15px', padding: '10px', background: '#eee' }}>
+              {/* Linki prowadzące do dynamicznych adresów */}
+              <Link to="/pracownik/1">Pracownik 1</Link>
+              <Link to="/pracownik/2">Pracownik 2</Link>
+              <Link to="/pracownik/777">Pracownik 777</Link>
+          </nav>
+
+          <Routes>
+              {/* Definicja dynamicznej ścieżki. Zmienna nazywa się "id" */}
+              <Route path="/pracownik/:id" element={<UserProfile />} />
+          </Routes>
+      </BrowserRouter>
+  );
+}
+
+```
+
+
+:::warning Zwróć uwagę na typy!
+Pamiętaj, że wartości wyciągnięte z paska adresu (przez `useParams`) zawsze są typu tekstowego
+(`string`).
+Jeśli Twoje ID w tablicy to liczby (`id: 1`),
+a URL to `/produkt/1`, porównanie `u.id === id` może nie zadziałać bez konwersji
+(np. użycia `Number(id)` lub luźnego porównania `==`).
+:::
+
+---
+## SoC i dynamika drugiego stopnia
+
+### 🧩 Wzorzec: Separation of Concerns (Rozdział Odpowiedzialności)
+- to jedna z najważniejszych i najbardziej uniwersalnych zasad w całej inżynierii oprogramowania.
+- Zasada ta mówi, że nasz kod powinien być podzielony na niezależne sekcje (moduły lub pliki),
+z których **każda zajmuje się tylko jednym, ściśle określonym zadaniem**.
+
+#### 👨‍🍳 Analogia z restauracją
+Wyobraź sobie dobrą restaurację:
+* **Kucharz** zajmuje się tylko przygotowywaniem jedzenia (Dane / Logika).
+* **Kelner** zajmuje się tylko przyjmowaniem zamówień i noszeniem talerzy (Router / Przekazywanie Propsów).
+* **Dekorator** zajmuje się tylko tym, żeby sala i stół ładnie wyglądały (UI / CSS).
+
+Co by się stało, gdyby kucharz musiał w połowie smażenia steka biec na salę,
+żeby przyjąć zamówienie i poprawić obrus?
+Zapanowałby chaos. Kiedy w restauracji (lub w kodzie) każdy robi tylko to,
+do czego został stworzony, wszystko działa płynnie.
+
+#### 💻 Zastosujemy ten wzorzec w naszej aplikacji React?
+Dzielimy kod na trzy pliki:
+
+1. **`data.js` (Warstwa Danych)**:
+    - Nic nie wie o React.
+    - Nie interesuje go wygląd.
+    - Po prostu trzyma nasze informacje.
+2. **`App.jsx` (Warstwa Logiki i Sterowania):**
+    - Pełni rolę menadżera.
+    - Pobiera dane i decyduje (za pomocą Routera), gdzie użytkownik ma zostać przekierowany.
+3. **`UserProfile.jsx` (Warstwa Prezentacji / UI):**
+    - Komponent "głupi" (tzw. *dumb component*).
+    - Nie interesuje go, skąd wzięły się dane (czy z pliku, czy z serwera).
+    - Jego jedynym zadaniem jest odebrać to, co dostanie w propsach, i ładnie to wyrenderować za pomocą HTML/CSS.
+
+:::tip 🚀 Dlaczego to jest tak ważne?
+* **Łatwiejsze szukanie błędów:**
+    - Jeśli zepsuje się wygląd przycisku, wiesz, że musisz szukać w pliku UI, a nie w bazie danych.
+* **Praca zespołowa:**
+    - Jedna osoba z pary może pracować nad danymi w `data.js`,
+  a druga w tym samym czasie stylować `UserProfile.jsx` bez powodowania konfliktów w systemie Git.
+* **Wielokrotne użycie (Reusability):**
+    - Możemy użyć tego samego komponentu wyświetlającego w wielu różnych miejscach aplikacji, podając mu tylko inne dane.
+
+:::
+
+
+Częściowo ten wzorzec już wypełniliśmy.
+Teraz musimy przenieść naszą listę pracowników do pliku `data.ts`.
+Ale potrzebujemy też typu `User` zdefiniowanego w oddzielnym pliku.
+
+`types.ts`
+```ts
+export type User = { id: number, name: string, role: string };
+```
+Zmieniliśmy typ `id` z `string` na `number`.
+
+
+:::tip Gdzie trzymać typy w TypeScript? (Złota Reguła)
+Aby utrzymać porządek w projekcie i zachować zasadę *Separation of Concerns*, stosuj prosty podział:
+
+* **🌍 Typy Globalne (Modele danych):**
+- Jeśli typ opisuje obiekt używany w wielu miejscach (np. `interface Pracownik`, `type Planeta`),
+wyrzuć go do osobnego pliku, np. `types.ts`.
+- Zapobiegnie to tzw. problemowi importów krzyżowych (*circular dependencies*).
+* **🏠 Typy Lokalne (Propsy):**
+- Jeśli typ opisuje wyłącznie to, jakich danych wymaga konkretny komponent (np. `interface UserProfileProps`),
+**zostaw go w tym samym pliku** co ten komponent (`.tsx`).
+- Nikt inny w aplikacji nie potrzebuje o nim wiedzieć!
+
+:::
+
+
+```ts
+import type {User} from "./types.ts";
+
+export const pracownicy: User[] = [
+    { id: 1, name: "Jan Kowalski", role: "Programista" },
+    { id: 2, name: "Anna Nowak", role: "Grafik" },
+    { id: 3, name: "Pan Szef", role: "CEO" },
+    { id: 4, name: "Piotr Wiśniewski", role: "Tester" }
+];
+```
+
+Teraz w `App.tsx` możemy pobrać dane z modułu `data.ts` przez import
+```tsx
+import { pracownicy } from './data';
+```
+
+
+## Dynamiczne generowanie linków
+W `App.tsx` zmienimy kod zwracany przez komponent tak, aby linki były dynamiczne generowane.
+```tsx
+
+import UserProfile from "./UserProfile.tsx";
+import type {User} from "./types.ts";
+
+function App() {
+  return (
+      <BrowserRouter>
+          {/* MENU */}
+          <nav style={{ display: 'flex', gap: '15px', padding: '10px', background: '#eee' }}>
+              {pracownicy.map((pracownik: User) => (
+                  <Link key={pracownik.id} to={`/pracownik/${pracownik.id}`}>
+                      Profil: {pracownik.name}
+                  </Link>
+              ))}
+          </nav>
+
+          {/* ŚCIEŻKI */}
+          <Routes>
+              <Route
+                  path="/pracownik/:id"
+                  element={<UserProfile listaPracownikow={pracownicy} />}
+              />
+          </Routes>
+      </BrowserRouter>
+  );
+}
+
+export default App
+```
+Rozbierzmy to na dwa współpracujące ze sobą mechanizmy:
+1. Nadajnik (nasze menu)
+2. Odbiornik (nasza ścieżka).
+
+### 1. "Nadajnik" – Dynamiczne Menu (`<nav>`)
+```ts
+{pracownicy.map((pracownik: User) => (
+    <Link key={pracownik.id} to={`/pracownik/${pracownik.id}`}>
+        Profil: {pracownik.name}
+    </Link>
+))}
+```
+- Zamiast pisać 100 linków ręcznie, używasz tu pętli `.map()`, która przechodzi przez tablicę pracownicy.
+- (`pracownik: User`): "Każdy element w tej tablicy musi pasować do kształtu modelu `User`".
+- `key={pracownik.id}`:
+    - Obowiązkowy atrybut dla Reacta przy renderowaniu list.
+    - Dzięki niemu React wie, który element jest który, gdyby trzeba było go zaktualizować lub usunąć.
+- `to={/pracownik/${pracownik.id}}`:
+    - To jest magia backticków (literałów szablonowych).
+    - Dla Jana Kowalskiego z ID 1 wygeneruje się link `<Link to="/pracownik/1">`.
+    - Dla Anny z ID 2 wygeneruje się `<Link to="/pracownik/2">`.
+
+
+
+### 2. "Odbiornik" – Dynamiczna Ścieżka (`<Route>`)
+```ts
+<Route
+    path="/pracownik/:id"
+    element={<UserProfile listaPracownikow={pracownicy} />}
+/>
+```
+- To jest reguła, która nasłuchuje zmian w pasku adresu przeglądarki.
+- `path="/pracownik/:id"`
+    - Dwukropek `:` jest tu kluczowy.
+    - Mówi Routerowi:
+  > "Jeśli ktoś wejdzie pod adres zaczynający się od /pracownik/, zignoruj to, co jest po ostatnim ukośniku,
+  > i potraktuj to jako zmienną o nazwie id".
+  > Dzięki temu jedna ścieżka łapie wszystkie możliwe linki wygenerowane w menu wyżej.
+
+- `element={<UserProfile listaPracownikow={pracownicy} />}`:
+    - Kiedy ścieżka zadziała, na ekranie pojawia się komponent `UserProfile`.
+    - Jednocześnie, zgodnie z zasadą Lifting State Up / Props,
+  przekazujesz do niego całą tablicę pracowników (jako prop `listaPracownikow`),
+  żeby ten komponent mógł sobie w niej poszukać konkretnej osoby.
+
+:::tip 🔄 Jak to działa w praktyce (Krok po kroku):
+1. Użytkownik klika na ekranie w wygenerowany link: "Profil: Anna Nowak".
+2. Komponent `<Link>` zmienia adres w przeglądarce na: `/pracownik/2`.
+3. Komponent `<Routes>` zauważa zmianę adresu.
+4. Sprawdza swoje reguły i widzi, że `/pracownik/2` idealnie pasuje do szablonu `/pracownik/:id`.
+5. Router przypisuje wartość `2` do zmiennej `id`.
+6. Router renderuje komponent `<UserProfile>`, wręczając mu pełną listę pracowników.
+7. Komponent `UserProfile` (w swoim własnym pliku, używając hooka useParams) odczytuje, że id to 2,
+przeszukuje listę i wyświetla na ekranie twarz Anny Nowak!
+
+:::
+
+## Przekazywanie danych do komponentu `UserProfile`
+W `UserProfile.tsx` zmienimy kod tak,
+```ts
+
+import {useParams} from "react-router-dom";
+import type {User} from "./types.ts";
+
+
+// Przykładowa baza danych
+// Odbieramy propsa od rodzica (z App.jsx)
+function UserProfile({ listaPracownikow }: { listaPracownikow: User[] }) {
+
+    //  Wyciągamy ID z paska adresu
+    const { id } = useParams();
+
+    //  Szukamy w otrzymanej z propsów tablicy
+    const user: User | undefined = listaPracownikow.find(u => u.id === Number(id));
+
+    // Jeśli ktoś wpisze złe ID (np. /pracownik/999)
+    if (!user) {
+        return <h2>Nie znaleziono pracownika o takim ID.</h2>;
+    }
+
+    // 4. Jeśli pracownik istnieje, wyświetlamy jego dane
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc', marginTop: '20px' }}>
+            <h2>Profil: {user.name}</h2>
+            <p>Stanowisko: <strong>{user.role}</strong></p>
+            <p>ID w systemie: {user.id}</p>
+        </div>
+    );
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

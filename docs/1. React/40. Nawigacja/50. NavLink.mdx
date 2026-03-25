@@ -1,0 +1,101 @@
+---
+title: 📍 Aktywne linki (`NavLink`)
+---
+
+# Inteligentne Menu z `NavLink`
+
+W poprzednim kroku zbudowaliśmy menu nawigacyjne przy użyciu standardowego komponentu `<Link>`.
+Działa on świetnie, ale ma jedną poważną wadę: jest "ślepy".
+Kiedy w niego klikniesz i zmienisz stronę, link nadal wygląda tak samo.
+Użytkownik może poczuć się zagubiony i zadać sobie pytanie:
+> "Zaraz, na której zakładce ja właściwie teraz jestem?"
+
+Rozwiązaniem tego problemu jest **`<NavLink>`**.
+
+
+## 1. Czym jest `NavLink`?
+
+`<NavLink>` to po prostu mądrzejszy brat bliźniak zwykłego `<Link>`.
+- Jego supermocą jest to, że potrafi sprawdzić aktualny pasek adresu w przeglądarce.
+- Jeśli adres pasuje do atrybutu `to` tego linku, `<NavLink>` automatycznie oznacza się jako **aktywny** i
+pozwala nam łatwo zmienić swój wygląd (np. zmienić kolor na czerwony lub dodać podkreślenie).
+
+### 🗺️ Metafora: Mapa w centrum handlowym
+- Wyobraź sobie, że zwykły `<Link>` to po prostu drogowskaz – mówi Ci, gdzie iść.
+- Z kolei `<NavLink>` to ta duża mapa w galerii handlowej, która oprócz drogowskazów ma wielką,
+czerwoną kropkę z napisem: **"TU JESTEŚ"**.
+- `<NavLink>` to właśnie ta czerwona kropka w świecie Reacta.
+
+## 2. Jak tego użyć w naszym kodzie?
+
+Wróćmy do naszego pliku `App.tsx` z poprzedniej lekcji.
+Podmienimy w nim zwykłe `<Link>` na inteligentne `<NavLink>`.
+
+Aby zmienić wygląd aktywnego linku, do właściwości `style` (lub `className`)
+nie przekazujemy już zwykłego obiektu, ale **funkcję**, która przyjmuje właściwość `isActive`
+(czy jest aktywny).
+
+```tsx
+
+function App() {
+
+    // 2. Tworzymy funkcję, która decyduje o wyglądzie linku
+    // React Router automatycznie dostarczy nam wartość 'isActive' (true lub false)
+    const getLinkStyle = ({ isActive }: { isActive: boolean }) => {
+        return {
+            padding: '10px 15px',
+            textDecoration: 'none',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            // Jeśli jest aktywny -> zielone tło i biały tekst
+            // Jeśli nie jest aktywny -> przezroczyste tło i szary tekst
+            backgroundColor: isActive ? '#069716' : 'transparent',
+            color: isActive ? 'white' : '#aaa',
+            transition: '0.3s'
+        };
+    };
+//...
+```
+
+Teraz w zwracanym TSX dodamy nowy link do komponentu `About`, który zrobiliśmy w poprzedniej lekcji.
+A `<Link/>` zamienimy na `<NavLink/>`:
+
+```tsx title=App.tsx
+return (
+        <BrowserRouter>
+            {/* Nasze nowe, inteligentne menu */}
+            <nav style={{ display: 'flex', gap: '15px', padding: '15px', background: '#333' }}>
+
+                {/* Przekazujemy naszą funkcję do właściwości style */}
+                <NavLink to="/" style={getLinkStyle}>
+                    Logowanie
+                </NavLink>
+
+                <NavLink to="/about" style={getLinkStyle}>
+                    O nas
+                </NavLink>
+
+            </nav>
+
+            <main style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+                <Routes>
+                    {/* Strona startowa to nasz formularz */}
+                    <Route path="/" element={<LoginForm />} />
+
+                    {/* Strona docelowa po udanym logowaniu */}
+                    <Route path="/panel-klienta" element={<Dashboard />} />
+
+                    {/* Dodatkowa strona, aby zaprezentować NavLink */}
+                    <Route path="/about" element={<About />} />
+
+                    {/* Zabezpieczenie przed wpisaniem złego adresu */}
+                    <Route path="*" element={<h2>404 - Strona nie istnieje</h2>} />
+                </Routes>
+            </main>
+```
+
+
+
+
+
+

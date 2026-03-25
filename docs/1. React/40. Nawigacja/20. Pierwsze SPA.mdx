@@ -1,0 +1,135 @@
+---
+title: Pierwsze SPA
+---
+
+
+W poprzedniej lekcji utworzyliśmy projekt React i doinstalowalśmy wszystkie potrzebne biblioteki.
+W tym kroku utworzymy pierwszą aplikację typu *Single Page Application* (SPA).
+
+
+## Komponenty `Home` i `About`
+Utwórzmy w oddzielnych plikach nowe komponenty (pamiętaj, aby plik nazywał się tak samo jak komponent).
+
+Oczywiście komponenty tworzymy w folderze `src`.
+
+```tsx
+// Zwykłe komponenty funkcyjne
+
+export default function Home() {
+    return <h2>🏠 Witaj na Stronie Głównej!</h2>;
+}```
+
+```tsx
+export default function About() {
+    return <h2>ℹ️ O nas: Uczymy się React Routera.</h2>;
+}
+
+```
+
+## Łączymy komponenty w App
+
+```tsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+function App() {
+  return (
+    <BrowserRouter>
+
+        {/* MENU NAWIGACYJNE - Będzie widoczne na każdej podstronie! */}
+        <nav style={{ padding: '10px', backgroundColor: '#eee' }}>
+          {/* Zamiast <a href="/"> używamy <Link to="/"> */}
+          <Link to="/" style={{ marginRight: '15px' }}>Start</Link>
+          <Link to="/o-nas">O nas</Link>
+        </nav>
+
+        <hr />
+
+        {/* GŁÓWNA ZAWARTOŚĆ - Tutaj "wskakują" nasze podstrony */}
+        <main style={{ padding: '20px' }}>
+          <Routes>
+            {/* Definiujemy ścieżki */}
+            <Route path="/" element={<Home />} />
+            <Route path="/o-nas" element={<About />} />
+          </Routes>
+        </main>
+
+      </BrowserRouter>
+    )
+export default App
+```
+
+:::danger
+Nigdy nie używaj w aplikacjach Reacta zwykłych linków HTML: `<a href="/o-nas">O nas</a>`.
+
+Kliknięcie w taki link spowoduje twarde przeładowanie strony przez przeglądarkę.
+
+Utracisz cały stan aplikacji (np. dane wpisane w formularze czy zalogowanego użytkownika)!
+
+Zawsze używaj komponentu `<Link to="...">`.
+:::
+
+
+## Komponent `404`
+
+- Co się stanie, jeśli użytkownik ręcznie wpisze w pasek przeglądarki adres,
+którego nie przewidzieliśmy, np. `localhost:3000/tajna-baza-danych`?
+- Domyślnie *React Router* po prostu nie wyrenderuje żadnego komponentu z sekcji `<Routes>`,
+co zaowocuje pustym miejscem na ekranie.
+- Z punktu widzenia UX (Doświadczenia Użytkownika) to bardzo zła sytuacja.
+    - Użytkownik może pomyśleć, że aplikacja się zepsuła.
+- Rozwiązaniem jest stworzenie tzw. ścieżki domyślnej (*Catch-all route*).
+- W *React Router* używamy do tego specjalnego znaku gwiazdki `*`.
+
+**PLAN**
+1. Tworzymy nowy komponent, np. `NotFound`, który poinformuje użytkownika o błędzie i pozwoli mu wrócić na stronę główną.
+2. Dodajemy nową ścieżkę `<Route>` na **samym dole** naszej listy wewnątrz `<Routes>`, ustawiając jej `path="*"` (co oznacza "każdy inny adres").
+
+```tsx
+import {Link} from "react-router-dom";
+
+
+export default function NotFound() {
+    return (
+        <div style={{
+            display: 'flex',          // Włączamy Flexboxa!
+            flexDirection: 'column',  // Układamy elementy z góry na dół
+            alignItems: 'center',     // Środkujemy w poziomie (zamiast textAlign)
+            marginTop: '50px',
+            gap: '20px'               // Teraz gap zadziała idealnie!
+        }}>
+            <h2 style={{ fontSize: '3rem', color: '#ff4d4d' }}>404</h2>
+            <p>Ups! Wygląda na to, że zgubiłeś się w cyberprzestrzeni.</p>
+            {/* Dodajemy link powrotny, żeby użytkownik nie utknął! */}
+            <Link to="/" style={{ padding: '10px',
+                background: '#069716', color: 'white',
+                textDecoration: 'none',
+                borderRadius: '5px' }}>
+                ⬅️ Wróć w bezpieczne miejsce
+            </Link>
+        </div>
+    );
+}
+```
+
+Dodajemy ten komponent do listy `<Routes>` `App.tsx`:
+
+```tsx
+<Routes>
+  {/* Istniejące ścieżki */}
+  <Route path="/" element={<Home />} />
+  <Route path="/o-nas" element={<About />} />
+
+  {/* TA LINIA OBSŁUGUJE BŁĄD 404 */}
+  <Route path="*" element={<NotFound />} />
+</Routes>
+
+```
+
+
+:::tip
+Kolejność ma znaczenie:
+- Ścieżka `path="*"` musi znajdować się na samym dole listy Twoich tras wewnątrz `<Routes>`.
+- React Router sprawdza ścieżki od góry do dołu.
+- Jeśli dasz ją na początku, każda strona pokaże błąd 404.
+
+:::

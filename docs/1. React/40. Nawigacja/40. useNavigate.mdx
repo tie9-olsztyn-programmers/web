@@ -1,0 +1,206 @@
+---
+title: 🚀 Nawigacja z kodu i Aktywne Linki
+---
+
+# Zaawansowana nawigacja w React Router
+
+Do tej pory używaliśmy komponentu `<Link>`, który wymagał od użytkownika **fizycznego kliknięcia**,
+aby przejść na inną podstronę.
+Co jednak w sytuacji, gdy chcemy przenieść użytkownika na inną stronę automatycznie?
+Na przykład: po poprawnym zalogowaniu, albo po wysłaniu formularza z nowym produktem?
+
+Do rozwiązywanie tego typu problemów służy  `useNavigate`.
+
+
+:::info Cel lekcji
+Nauczysz się przekierowywać użytkownika z
+poziomu kodu (tzw. nawigacja programatyczna `useNavigate`)
+:::
+
+## 1. Przekierowania z kodu (`useNavigate`)
+
+- `useNavigate` to hook, który daje nam "pilota do telewizora".
+- Pozwala nam zmienić stronę w dowolnym momencie, wewnątrz dowolnej funkcji
+(np. po kliknięciu zwykłego przycisku `Zapisz` lub po zakończeniu odliczania).
+
+### Kiedy tego używać?
+Najczęstszy scenariusz: Użytkownik wypełnia formularz logowania.
+- Kliknie "Zaloguj".
+- Twoja aplikacja sprawdza hasło.
+- Jeśli jest poprawne -> **automatycznie przerzuca go na stronę `/dashboard`**.
+
+### Przykład użycia w formularzu
+Zróbmy nowy komponent `LoginForm`:
+
+
+:::tip Uniwersalna wędka `ComponentProps<T>`
+- Typ dla kliknięcia w przycisk? 👉 `ComponentProps<'button'>['onClick']`
+- Typ dla zmiany w inpucie? 👉 `ComponentProps<'input'>['onChange']`
+- Typ dla wysłania formularza? 👉 `ComponentProps<'form'>['onSubmit']`
+- TypeScript sam zajrzy pod maskę najnowszej wersji Reacta i
+przypisze dokładnie taki typ, jaki na ten moment nie jest deprecated.
+- To uodparnia Wasz kod na przyszłe aktualizacje biblioteki!
+
+:::
+
+```jsx
+import React, { useState } from 'react';
+// 1. Importujemy hooka z biblioteki
+import { useNavigate } from 'react-router-dom';
+
+function LoginForm() {
+    // Tutaj TS domyśliłby się typu z pustego stringa, ale jawny zapis to dobra praktyka!
+    const [password, setPassword] = useState<string>('');
+
+    const navigate = useNavigate();
+
+    // ZMIANA TUTAJ: Typujemy stałą 'handleLogin', a 'e' zostawiamy bez typu!
+    // Wyciągamy idealny typ prosto z definicji formularza!
+    const handleLogin: ComponentProps<'form'>['onSubmit'] = (e) => {
+        e.preventDefault();
+
+        if (password === 'sekret123') {
+            alert("Zalogowano pomyślnie!");
+            navigate('/panel-klienta');
+        } else {
+            alert("Błędne hasło!");
+        }
+    };
+
+    return (
+        <form onSubmit={handleLogin}>
+            <h2>Logowanie do systemu</h2>
+            <input
+                type="password"
+                value={password}
+                //  TYPOWANIE ZDARZENIA INPUTA (ChangeEvent)
+                // Przy zapisie w jednej linii (inline) TypeScript często domyśla się typu sam.
+                // Gdybyś jednak chciał wyciągnąć tę funkcję wyżej, jej typ to: React.ChangeEvent<HTMLInputElement>
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <button type="submit">Zaloguj</button>
+        </form>
+    );
+}
+
+export default LoginForm;
+```
+:::note  🧰 Jak działa `ComponentProps` w TypeScript?
+Zamiast uczyć się na pamięć skomplikowanych nazw typów (jak `React.MouseEvent` czy `React.ChangeEvent`),
+możemy poprosić TypeScript, aby sam sprawdził, jakiego typu wymaga dany element HTML lub komponent.
+
+Do tego służy wbudowany typ `ComponentProps`.
+### 📌 Wzór ogólny (Syntaktyka)
+
+```typescript
+import { ComponentProps } from 'react';
+
+// 1. Aby pobrać WSZYSTKIE propsy danego elementu:
+type WszystkiePropsy = ComponentProps<Źródło>;
+
+// 2. Aby wyciągnąć TYLKO JEDEN konkretny prop (np. zdarzenie):
+type KonkretnyProp = ComponentProps<Źródło>['NazwaPropsa'];
+```
+:::tip Czym jest `<Źródło>`?
+Źródłem może być:
+- Zwykły znacznik HTML przekazany jako tekst (np. 'button', 'input', 'form', 'div').
+- Twój własny komponent Reactowy (wtedy używamy słówka typeof, np. typeof MojKomponent).
+
+
+:::
+
+---
+
+# Zastosowanie formularza logowania
+
+Mamy już nasz inteligentny formularz (`LoginForm`),
+który potrafi sprawdzić hasło i wywołać przekierowanie.
+Czas zbudować dla niego środowisko: stronę docelową (Panel Klienta) oraz
+główny plik aplikacji, który zarządza ścieżkami.
+
+
+
+## Krok 1: Tworzymy Panel Klienta (`Dashboard.tsx`)
+
+To komponent, który użytkownik zobaczy **tylko wtedy**, gdy wpisze poprawne hasło (`sekret123`) i
+zostanie przekierowany.
+Dodamy tu również przycisk do "wylogowania", który po prostu cofnie nas na stronę główną.
+
+
+```tsx title="src/Dashboard.tsx"
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+function Dashboard() {
+    const navigate = useNavigate();
+
+    // Funkcja wylogowująca - wracamy na stronę logowania
+    const handleLogout = () => {
+        // W prawdziwej aplikacji tutaj usunęlibyśmy też np. token z localStorage
+        alert("Wylogowano pomyślnie!");
+        navigate('/');
+    };
+
+    return (
+        <div style={{ padding: '20px', border: '2px solid #069716', borderRadius: '8px', marginTop: '20px' }}>
+            <h2>🚀 Witaj w Tajnym Panelu Klienta!</h2>
+            <p>Jeśli to widzisz, to znaczy, że znasz tajne hasło.</p>
+
+            <button
+                onClick={handleLogout}
+                style={{ background: '#ff4d4d', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            >
+                Wyloguj mnie
+            </button>
+        </div>
+    );
+}
+
+export default Dashboard;
+```
+
+
+## Krok 2: Spinamy wszystko w App.tsx
+Teraz musimy powiedzieć naszemu Routerowi o istnieniu obu tych widoków.
+- Ścieżka domyślna `/` wyświetli nasz `LoginForm`.
+- Ścieżka `/panel-klienta` wyświetli nowo stworzony `Dashboard`.
+
+```tsx title=App.tsx
+function App() {
+    return (
+        <BrowserRouter>
+            {/* Górne menu nawigacyjne (opcjonalne, ale ułatwia testy) */}
+            <nav style={{ display: 'flex', gap: '15px', padding: '15px',
+                          background: '#333', color: 'white' }}>
+                <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
+                    Start (Logowanie)
+                </Link>
+                {/*  celowo ukrywamy link do panelu klienta, żeby użytkownik musiał się zalogować! */}
+            </nav>
+
+            <main style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+                <Routes>
+                    {/* Strona startowa to nasz formularz */}
+                    <Route path="/" element={<LoginForm />} />
+
+                    {/* Strona docelowa po udanym logowaniu */}
+                    <Route path="/panel-klienta" element={<Dashboard />} />
+
+                    {/* Zabezpieczenie przed wpisaniem złego adresu */}
+                    <Route path="*" element={<h2>404 - Strona nie istnieje</h2>} />
+                </Routes>
+            </main>
+        </BrowserRouter>
+    );
+}
+
+export default App;
+
+```
+
+
+
+
+
+
+

@@ -1,0 +1,98 @@
+---
+title: 🧭 Wprowadzenie do nawigacji (React Router)
+---
+
+
+
+## Nawigacja w React (React Router)
+Do tej pory nasze aplikacje (np. Lista Zadań) żyły na jednym ekranie.
+Wszystko działo się w głównym komponencie `App`.
+Jednak profesjonalne aplikacje webowe posiadają wiele "podstron"
+- stronę główną,
+- panel logowania,
+- zakładkę kontaktową
+- czy szczegóły produktu.
+
+Aby to osiągnąć w React, nie tworzymy osobnych plików HTML. Używamy biblioteki **React Router**.
+
+:::info Cel lekcji
+Zrozumiesz różnicę między tradycyjnymi stronami
+a aplikacjami SPA oraz nauczysz się konfigurować
+podstawową nawigację między komponentami.
+:::
+
+### Tradycyjne strony (MPA) vs React (SPA)
+
+* **MPA (Multi-Page Application - tradycyjny HTML):**
+    - Wyobraź sobie wizytę w restauracji.
+    - Kiedy zamawiasz nowe danie (klikasz link `kontakt.html`),
+    - kelner zabiera cały Twój stół i przynosi zupełnie nowy stół z nowym daniem.
+    - Przeglądarka musi pobrać od zera cały dokument, co powoduje mignięcie i przeładowanie strony.
+* **SPA (Single-Page Application - React):**
+    - Siedzisz cały czas przy tym samym stole (jeden plik `index.html`).
+    - Kiedy klikasz link do innej zakładki, kelner (React Router) błyskawicznie podmienia
+    tylko talerz przed Tobą (komponent),
+  zostawiając obrus, sztućce i wystrój (np. górne menu i stopkę) nietknięte.
+    - Strona **nigdy** się nie przeładowuje.
+
+### Instalacja React Routera
+Strona *React Router*: https://reactrouter.com
+Tworzymy nowy projekt React: *Vite* + *TypeScript* + *React*.
+
+
+React domyślnie nie posiada wbudowanej nawigacji,
+dlatego musimy zainstalować zewnętrzną, oficjalnie wspieraną bibliotekę.
+W terminalu (w folderze projektu) wpisz:
+
+```bash
+npm install react-router-dom
+```
+
+---
+
+## "Wielka Czwórka" komponentów nawigacyjnych
+React Router dostarcza nam cztery specjalne komponenty, z których zbudujemy naszą nawigację.
+- `BrowserRouter`
+    - To jest nasz "świat".
+    - Obejmuje całą aplikację i nasłuchuje zmian w pasku adresu przeglądarki (URL).
+- `Routes`
+    - To pudełko (kontener) na wszystkie nasze ścieżki.
+    - Pilnuje, aby wyświetliła się tylko jedna strona naraz.
+- `Route`
+    - Definiuje konkretną regułę: "Jeśli adres URL to X, wyświetl komponent Y".
+- `Link`
+    - Magiczny przycisk nawigacji.
+    - Zastępuje tradycyjny znacznik `<a href="...">`.
+
+
+:::tip 📺 Metafora: Aplikacja jako Telewizor
+Wyobraź sobie, że Twoja aplikacja to nowoczesny telewizor.
+* 🔌 **`<BrowserRouter>` to sam Telewizor (zasilanie i antena).**
+    - Żeby cokolwiek obejrzeć, musisz najpierw podłączyć telewizor do prądu i anteny.
+    - `BrowserRouter` to właśnie taki prąd. O
+    - Oplata całą Twoją aplikację i sprawia, że w ogóle potrafi ona "odbierać sygnał"
+  z paska adresu przeglądarki.
+    - Bez niego reszta komponentów jest bezużyteczna.
+
+* 📦 **`<Routes>` to Dekoder (Tuner).**
+    - Do dekodera dociera sygnał ze wszystkich możliwych stacji na świecie.
+    - Jego zadaniem jest przefiltrować je i wyświetlić na ekranie **tylko jedną stację w danym momencie**.
+    - `Routes` pilnuje, żeby na ekranie nie nałożyły się na siebie jednocześnie
+        - strona główna,
+        - panel logowania
+        - kontakt
+        - ...
+
+* 📡 **`<Route>` to Konkretny Kanał.**
+    - To po prostu zapisana w dekoderze reguła.
+    - Mówi ona: *"Jeśli użytkownik wybierze kanał 4 (adres `/sport`), wyświetl mu mecz (komponent `<Sport />`)"*.
+    - Każdy `<Route>` to jeden zaprogramowany kanał.
+
+* 🎛️ **`<Link>` to Przycisk na pilocie.**
+    - Zamiast podchodzić do telewizora i ręcznie przestrajać kable (czyli wpisywać adres z palca w przeglądarce),
+  używasz pilota.
+    - Klikasz przycisk `<Link>`, a kanał zmienia się natychmiast, płynnie i
+  **bez wyłączania całego telewizora** (czyli bez przeładowania strony – i to jest właśnie magia SPA!).
+
+:::
+

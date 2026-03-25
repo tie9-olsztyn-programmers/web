@@ -93,10 +93,12 @@ export default App
 - Używamy tego rzadko (np. dla pliku `favicon.ico` lub bardzo dużych grafik 3D).
 - Ścieżkę podajemy od ukośnika `/`, ignorując samą nazwę folderu `public`.
 
-
+```
 <a href={useBaseUrl('/myImages/castle.png')} download="zamek.png">
     Pobierz obrazek: dragon.png
 </a>
+```
+
 
 Umieść ten obrazek w folderze `public`.
 
@@ -121,8 +123,8 @@ W TypeScript, niezależnie od tego, czy jest to zaimportowany plik, czy link URL
 ### Kompopnent `ProductCard.tsx`
 
 Pobierz zdjęcia i wrzuć je do folderu `assets`.
--  <a href={useBaseUrl('/myImages/appleM5.jpg')} download="appleM5.png"> apple M5 </a>
--  <a href={useBaseUrl('/myImages/zxSpectrum.jpg')} download="zxSpectrum.png"> ZX Spectrum </a>
+-  `<a href={useBaseUrl('/myImages/appleM5.jpg')} download="appleM5.png"> apple M5 </a>`
+-  `<a href={useBaseUrl('/myImages/zxSpectrum.jpg')} download="zxSpectrum.png"> ZX Spectrum </a>`
 
 
 `ProductCard.css`
