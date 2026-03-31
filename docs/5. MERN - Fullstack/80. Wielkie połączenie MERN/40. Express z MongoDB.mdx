@@ -1,0 +1,130 @@
+---
+title: Express z MongoDB
+---
+
+Czas otworzyć Wrota Durina i wejść do Kopalni Morii!
+W architekturze produkcyjnej nigdy nie trzymamy logiki połączenia z bazą w głównym pliku index.ts.
+Zamiast tego tworzymy wydzielony moduł konfiguracyjny.
+
+Wykorzystamy do tego bibliotekę Mongoose,
+która jest naszym "tłumaczem" między obiektowym światem TypeScriptu a dokumentowym światem MongoDB.
+
+
+
+## Tajne Hasło (.env)
+
+Nigdy nie wpisujemy haseł bezpośrednio w kodzie TypeScript!
+Używamy do tego pliku `.env` (Zmienne Środowiskowe / Environment Variables),
+którego zawartość ukrywamy przed systemem kontroli wersji (Git).
+
+Plik `.env` w folderze `server/` już powinniśmy mieć
+
+
+```env
+# server/.env
+PORT=5001
+# Zastąp poniższy adres swoim własnym z MongoDB Atlas lub lokalnego compass!
+MONGO_URI=mongodb://localhost:27017/mern_fellowship
+```
+
+## Zaklęcie Otwierające (`config/db.ts`)
+Teraz wypełniamy plik `db.ts` kodem, który zapewni nawiązanie stabilnego połączenia.
+```ts
+import mongoose from 'mongoose';
+
+export const connectDB = async (): Promise<void> => {
+    try {
+        // Pobieramy hasło z pliku .env.
+        const mongoURI = process.env.MONGO_URI;
+
+        if (!mongoURI) {
+            throw new Error("Brak zmiennej MONGO_URI w pliku .env!");
+        }
+
+        // Nawiązujemy połączenie z Morią
+        const conn = await mongoose.connect(mongoURI);
+
+        console.log(`⛏️ Połączono z Morią (MongoDB): ${conn.connection.host}`);
+    } catch (error: unknown) { // ✅ Używamy unknown, a nie any!
+
+        if (error instanceof Error) {
+            console.error(`Błąd połączenia z bazą: ${error.message}`);
+        } else {
+            // Przypadek brzegowy, gdy ktoś rzucił czymś innym niż obiektem Error
+            console.error(`Wystąpił nieznany błąd krytyczny:`, error);
+        }
+
+        // Ubijamy proces
+        process.exit(1);
+    }
+};
+
+```
+
+## Wywołanie zaklęcia w Bramie Głównej (index.ts)
+Skoro mamy już zaklęcie, Gandalf musi je wypowiedzieć zaraz po przebudzeniu.
+Wracamy do naszego `src/index.ts` i dodajemy wywołanie funkcji `connectDB`.
+
+```ts
+import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import {connectDB} from "./config/db";
+
+// Ładujemy ukryte zaklęcia z pliku .env (np. PORT, hasła do bazy)
+dotenv.config();
+
+// NOWA FUNKCJA
+const startServer = async () => {
+    // 1. Najpierw Gwarantujemy połączenie z bazą (Czekamy!)
+    await connectDB();
+
+    // 2. Dopiero gdy Baza odpowie statusem OK, otwieramy porty dla Reacta
+    app.listen(port, () => {
+        console.log(`⚡ Twierdza działa! Nasłuchiwanie na porcie: ${port}`);
+    });
+};
+//....
+// pod koniec pliku
+//  START SERWERA
+// app.listen(port, () => {
+//     console.log(`⚡ Twierdza działa! Nasłuchiwanie na porcie: ${port}`);
+// });
+startServer().catch((error: unknown) => {
+    console.error('🔥 Krytyczny błąd podczas podnoszenia twierdzy:', error);
+    process.exit(1);
+});
+```
+
+:::tip 🛡️ Architektura Startu: Dlaczego `startServer` i dlaczego `.catch()`?
+
+W świecie Node.js i TypeScriptu, poprawne zarządzanie czasem i błędami (asynchronicznością)
+to cecha odróżniająca amatora od inżyniera.
+Nasz kod startowy rozwiązuje dwa poważne problemy:
+
+1. **Dlaczego stworzyliśmy funkcję `async startServer`?**
+ - Zestawienie połączenia z Morią (MongoDB) wymaga czasu.
+ - Nie chcemy otwierać bram naszej twierdzy (`app.listen`) dla gości z Reacta,
+dopóki nie upewnimy się, że mamy dostęp do danych.
+ - Ponieważ nasz projekt używa systemu modułów CommonJS, nie możemy użyć słowa `await` "luzem" w
+głównym pliku (tzw. *Top-Level Await*).
+ - Dlatego zamykamy start w asynchronicznej funkcji, by wymusić na serwerze cierpliwe oczekiwanie.
+
+2. **Dlaczego wywołaliśmy to z `.catch()`?**
+ - Każda funkcja oznaczona słowem `async` automatycznie zwraca *Obietnicę* (Promise).
+ - Kiedy wywołujemy samo `startServer()`, wypuszczamy tę obietnicę w powietrze.
+ - WebStorm słusznie ostrzegał nas przed "Floating Promise" (Pływającą Obietnicą).
+ - Jeśli baza danych wybuchnie, obietnica zostanie odrzucona (Rejected).
+ - Jeśli tego nie złapiemy, powstanie tzw. *Unhandled Promise Rejection*, co w nowoczesnym Node.js
+powoduje crash całej aplikacji.
+ - Nasz `.catch()` działa jak **główny bezpiecznik prądu** – pozwala nam przechwycić krytyczny błąd,
+wyświetlić kulturalny komunikat i bezpiecznie zamknąć proces (kod wyjścia `1`).
+:::
+
+
+
+
+
+
+
+

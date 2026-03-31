@@ -1,0 +1,24 @@
+---
+title: Service
+---
+
+```ts
+import { Character } from '../types/character';
+// Importujemy za pomocą dokładnego imienia (Named Import)
+import { findAllCharacters, createCharacterInDB } from '../repositories/character.repository';
+
+export const getAllCharacters = async (): Promise<Character[]> => {
+  // Tutaj w przyszłości moglibyśmy dodać logikę, np. filtrowanie ukrytych postaci
+  return await findAllCharacters();
+};
+
+export const recruitNewCharacter = async (characterData: Character): Promise<Character> => {
+  // Reguła biznesowa: Hobbici zawsze zaczynają od poziomu 1, nawet jeśli ktoś prześle inaczej
+  if (characterData.race === 'Hobbit') {
+    characterData.level = 1;
+  }
+
+  return await createCharacterInDB(characterData);
+};
+
+```

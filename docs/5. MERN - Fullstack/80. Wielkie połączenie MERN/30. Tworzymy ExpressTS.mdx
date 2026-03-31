@@ -43,7 +43,9 @@ To zła praktyka. Dzielimy to na trzy wyspecjalizowane gildie:
 - Akcja: Rozmawiają bezpośrednio z bazą danych i zwracają surowe skarby (dane) do Service'u.
 
 ---
+
 # Struktura servera ExpressTS
+
 ```
 server/                      # Główny katalog backendu (Nasza twierdza)
 ├── node_modules/            # Zainstalowane biblioteki (Nigdy nie wysyłamy na Git!)
@@ -146,7 +148,9 @@ $RECYCLE.BIN/
 ---
 # Definicja ExpressTS
 
-Zgodnie z zasadami czystego kodu (Clean Code), ten plik nie powinien zawierać logiki biznesowej. Jego jedynym zadaniem jest konfiguracja serwera, załadowanie filtrów (middleware) i ustawienie drogowskazów (skierowanie ruchu do odpowiednich routerów).
+Zgodnie z zasadami czystego kodu (Clean Code), ten plik nie powinien zawierać logiki biznesowej.
+Jego jedynym zadaniem jest konfiguracja serwera, załadowanie filtrów (middleware) i
+ustawienie drogowskazów (skierowanie ruchu do odpowiednich routerów).
 
 ```ts
 import express, { Express, Request, Response } from 'express';
@@ -184,6 +188,39 @@ app.listen(port, () => {
 });
 ```
 
+## Doinstalowanie `tsx`
+
+:::info ⚡ `tsx`
+
+Tradycyjny `ts-node` (nasz stary wóz konny) przez lata służył dobrze,
+ale wraz ze wzrostem projektów zaczął działać wolno i często "potykał się" o
+nowe standardy modułów (np. konflikty między `require` a `import`).
+
+Narzędzie **`tsx`** (*TypeScript Execute*) to prawdziwy *Cienistogrzywy* wśród narzędzi deweloperskich:
+1. **Prędkość światła (esbuild):**
+    - Pod spodem `tsx` używa silnika kompilacji napisanego w języku Go,
+   co sprawia, że tłumaczy TypeScript na JavaScript setki razy szybciej niż standardowe narzędzia.
+2. **Brak problemów z ESM:**
+    - Automatycznie i bezbłędnie rozumie najnowszą składnię `import/export`,
+   całkowicie zdejmując z nas konieczność walki z plikiem `tsconfig.json` w kontekście modułów.
+3. **Developer Experience (DX):**
+    - Zapewnia natychmiastowy *feedback loop* – zapisujesz plik i w ułamku sekundy widzisz efekt.
+    - W nowoczesnych projektach komercyjnych to absolutny standard!
+:::
+
+INSTALACJA
+`npm install -D tsx`
+
+UŻYCIE w `package.json` w `script`
+```json
+"scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  }
+```
+
+Uruchom serwer `npm run dev`.
 
 
 

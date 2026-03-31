@@ -1,0 +1,104 @@
+---
+title: Routes
+---
+
+Oto ostatni, brakujący element naszej backendowej twierdzy! Mamy już krasnoludy kopiujące w bazie (Repository), Radę podejmującą decyzje (Service) i Strażników odbierających wiadomości (Controller).
+
+Teraz musimy postawić Drogowskazy (Routes). To one mówią Expressowi: "Jeśli zapytanie przyjdzie na ten konkretny adres i użyje tej konkretnej metody HTTP, wyślij je do tego konkretnego Strażnika".
+
+
+
+```ts
+import { Router } from 'express';
+// Importujemy naszych Strażników (zwróć uwagę na Named Imports!)
+import { getCharactersHandler, createCharacterHandler } from '../controllers/character.controller';
+
+const router = Router();
+
+
+// Kiedy ktoś wyśle GET na główny adres tego routera -> pokaż wszystkie postaci
+router.get('/', getCharactersHandler);
+
+// Kiedy ktoś wyśle POST (z danymi JSON) na ten sam adres -> stwórz nową postać
+router.post('/', createCharacterHandler);
+
+export default router;
+````
+
+
+
+---
+## Route w index.ts
+
+W pliku `index.ts` podpinamy nasz router:
+```ts
+//...
+
+// Pozwala na komunikację między naszym Reactem (np. port 5173) a Expressem (port 5000)
+app.use(cors());
+// Uczy nasz serwer czytać wiadomości w formacie JSON (niezbędne przy metodach POST/PUT)
+app.use(express.json());
+
+// NASZ ROUTER
+app.use('/api/characters', characterRoutes);
+
+//...
+```
+
+---
+## Testujemy api w `.http`
+Utwórzmy plik `tests-requests.http`
+```http
+### Zmienne globalne dla naszego zwiadowcy
+@host = http://localhost:5000/api
+
+### =========================================
+### 1. HEALTH CHECK - Czy Gandalf żyje?
+### =========================================
+GET {{host}}/health
+Accept: application/json
+
+### =========================================
+### 2. POBIERANIE - Pokaż wszystkich w Kopalni
+### =========================================
+GET {{host}}/characters
+Accept: application/json
+
+### =========================================
+### 3. REKRUTACJA - Dodanie poprawnej postaci
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Gimli",
+  "race": "Dwarf",
+  "level": 45
+}
+
+### =========================================
+### 4. TEST TARCZY - Próba oszukania systemu
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Gollum",
+  "race": "Potwór",
+  "level": -5
+}
+```
+
+
+
+---
+# Zabić zombi
+
+Gdyby kod był poprawny, a zapytania zwracałyby błędy, spróbuj zabić zombi procesy node'a:
+Otwórz nowy terminal w WebStormie i wpisz odpowiednią komendę dla Twojego systemu operacyjnego:
+- Windows: `taskkill /IM node.exe /F`
+- `macOS / Linux: killall -9 node`
+
+I ponownie uruchomić serwer `npm run dev`
+
+

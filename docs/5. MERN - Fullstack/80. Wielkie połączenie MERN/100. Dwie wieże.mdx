@@ -1,0 +1,228 @@
+---
+title: Połączenie Dwóch Wież (React + Express)
+---
+
+Mamy już działający Frontend (klient) i Backend (serwer).
+Teraz musimy sprawić, by uruchamiały się razem i potrafiły ze sobą rozmawiać.
+Użyjemy do tego narzędzia `concurrently` oraz magicznego tunelu w Vite.
+
+
+## Krok 1: Jeden Pierścień, by rządzić oboma (`concurrently`)
+
+Zamiast otwierać dwa osobne terminale, stworzymy jeden główny skrypt, który uruchomi obie aplikacje naraz.
+
+Wyjdź do **GŁÓWNEGO** folderu całego projektu (tam, gdzie masz foldery `client` i `server`).
+Otwórz tam terminal i wpisz:
+```bash
+npm init -y
+npm install concurrently --save-dev
+```
+
+Teraz otwórz wygenerowany w głównym folderze plik package.json i podmień sekcję scripts:
+```json
+"scripts": {
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+  },
+```
+
+:::info Magia jednego kliknięcia
+Teraz, wpisując po prostu `npm run dev` w głównym folderze (lub klikając Play w WebStormie),
+`concurrently` podniesie zarówno serwer Express (port 5001), jak i Reacta (port 5173),
+a logi z obu miejsc połączy w jednym, czytelnym terminalu!
+
+:::
+
+## Tajny Tunel (Vite Proxy)
+Kiedy React chce pobrać postaci, naiwnym podejściem byłoby napisanie:
+`fetch('http://localhost:5001/api/characters')`.
+To zła praktyka! Kiedy wrzucicie aplikację na prawdziwy serwer w internecie (produkcję),
+"localhost" przestanie istnieć, a wasz kod wybuchnie.
+
+Zamiast tego, nauczymy Vite'a, by działał jako "Tajny Tunel" (Proxy).
+
+Otwórz plik `client/vite.config.ts` i dodaj sekcję server:
+```ts
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      // Każde zapytanie w React zaczynające się od /api...
+      '/api': {
+        // ...zostanie po cichu przekierowane do naszego serwera Express!
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      }
+    }
+  }
+})
+```
+
+Dzięki temu w Reactcie możemy teraz pisać po prostu: `fetch('/api/characters')`,
+a Vite sam dopisze resztę adresu. Kod staje się czysty i gotowy na produkcję!
+
+
+## Wysłanie Kruków (Pobieranie danych w React)
+Przejdźmy do naszego frontendu.
+W pliku `client/src/App.tsx` użyjemy hooka `useEffect`,
+aby pobrać Drużynę z serwera zaraz po załadowaniu strony.
+
+ **PS PAMIĘTAJ IMPORTACH!!**
+
+`App.tsx`
+```tsx
+interface Character {
+  _id: string;
+  name: string;
+  race: string;
+  level: number;
+}
+
+function App() {
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        // Zobaczcie jak czysto wygląda ten adres dzięki Vite Proxy!
+        const response = await fetch('/api/characters');
+        const result = await response.json();
+
+        if (result.success) {
+          setCharacters(result.data);
+        }
+      } catch (error) {
+        console.error("Orkowie zestrzelili nasze kruki (Błąd sieci):", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCharacters();
+  }, []);
+
+
+
+  if (loading) return <div>⏳ Zbieranie Drużyny...</div>;
+
+  return (
+      <div style={{ padding: '20px' }}>
+        <h1>🏰 Drużyna Pierścienia</h1>
+        <ul style={{ listStyleType: 'none' }}>
+          {characters.map((char) => (
+              <li key={char._id}>
+                <strong>{char.name}</strong> ({char.race}) - Poziom: {char.level}
+              </li>
+          ))}
+        </ul>
+      </div>
+  );
+}
+
+export default App;
+
+```
+
+---
+# 🧱 Budowa Tawerny (Komponenty w React)
+
+Aby nasz kod był czysty (Clean Code), nie możemy trzymać całego wyglądu (HTML/JSX) w głównym pliku
+`App.tsx`.
+Zbudujemy osobny komponent, którego jedynym zadaniem będzie ładne wyświetlenie listy postaci.
+
+## Krok 1: Kontrakt (Współdzielone Typy)
+
+Ponieważ będziemy przesyłać dane między komponentami, TypeScript musi wiedzieć,
+jak one wyglądają.
+W folderze `client/src/` stwórzmy folder `types` i przenieśmy tam nasz interfejs.
+
+```typescript
+// client/src/types/character.ts
+
+export interface Character {
+  _id: string;
+  name: string;
+  race: string;
+  level: number;
+}
+
+```
+Zróbmy nowy folder `components` z plikiem `CharacterList.tsx`:
+```tsx
+// client/src/components/CharacterList.tsx
+
+import type {Character} from '../types/character';
+// Definiujemy, czego oczekuje ten komponent (Props)
+interface CharacterListProps {
+  characters: Character[];
+}
+
+export const CharacterList = ({ characters }: CharacterListProps) => {
+  // Obsługa pustej gospody (np. zaraz po wyczyszczeniu bazy)
+  if (characters.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <h3>Gospoda jest pusta. Żaden bohater nie odpowiedział na wezwanie!</h3>
+      </div>
+    );
+  }
+
+  // Wyświetlamy listę za pomocą metody .map()
+  return (
+    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+      {characters.map((char) => (
+        <div
+          key={char._id}
+          style={{
+            border: '2px solid #555',
+            borderRadius: '8px',
+            padding: '15px',
+            minWidth: '200px',
+            backgroundColor: '#2c2c2c',
+            color: 'white'
+          }}
+        >
+          <h3 style={{ margin: '0 0 10px 0', color: '#f39c12' }}>{char.name}</h3>
+          <p style={{ margin: '5px 0' }}><strong>Rasa:</strong> {char.race}</p>
+          <p style={{ margin: '5px 0' }}><strong>Poziom:</strong> {char.level}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+```
+
+Użyjemy tego komponentu w `App.tsx` (zmieniamy jsx zwracanego przez ten komponent):
+```tsx
+import {useEffect, useState} from 'react'
+import './App.css'
+import {CharacterList} from "./components/CharacterList.tsx";
+import type {Character} from "./types/character.ts";
+
+
+function App() {
+//...
+
+
+
+  return (
+      <div style={{ padding: '30px', fontFamily: 'sans-serif' }}>
+        <h1>🏰 Śródziemie: Lista Rekrutacyjna</h1>
+
+        {loading ? (
+            <p>⏳ Zbieranie Drużyny z Kopalni Morii...</p>
+        ) : (
+            /* Przekazujemy stan (dane) jako Props do komponentu dziecka */
+            <CharacterList characters={characters} />
+        )}
+      </div>
+  );
+}
+```
+
+
+

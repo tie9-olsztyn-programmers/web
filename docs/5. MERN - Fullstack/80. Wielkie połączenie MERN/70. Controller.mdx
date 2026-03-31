@@ -1,0 +1,34 @@
+---
+title: Controller
+---
+
+
+```ts
+import { Request, Response } from 'express';
+// Znów - idealnie działający autouzupełniacz dzięki Named Exports!
+import { getAllCharacters, recruitNewCharacter } from '../services/character.service';
+
+export const getCharactersHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const characters = await getAllCharacters();
+    res.status(200).json({ success: true, data: characters });
+  } catch (error: unknown) {
+    res.status(500).json({ success: false, message: 'Błąd podczas pobierania postaci' });
+  }
+};
+
+export const createCharacterHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // req.body zawiera dane przesłane przez Reacta
+    const newCharacter = await recruitNewCharacter(req.body);
+    // Status 201 oznacza "Created" (Utworzono)
+    res.status(201).json({ success: true, data: newCharacter });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(400).json({ success: false, message: error.message });
+    } else {
+      res.status(400).json({ success: false, message: 'Nieznany błąd walidacji' });
+    }
+  }
+};
+```

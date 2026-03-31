@@ -1,0 +1,68 @@
+---
+title: Model i Repository
+---
+
+Zbudujemy teraz pierwszą, najgłębszą warstwę naszego API.
+Zaczynamy od poinstruowania bazy danych, jak wyglądają nasze dane,
+a następnie tworzymy warstwę **Repository**, która jako jedyna
+w całej aplikacji ma prawo dotykać bazy MongoDB.
+
+
+## Model
+Plik `src/models/character.model.ts` to nasza matryca.
+Mongoose używa jej, by pilnować, żeby do bazy nie wpadły błędne dane
+(np. żeby Hobbit nie miał ujemnego poziomu).
+Zauważcie, jak łączymy tu nasz TypeScriptowy kontrakt (`Character`) ze Schematem Mongoose!
+
+```ts
+// Tworzymy Schemat Mongoose bazując na naszym interfejsie
+import {model, Schema} from "mongoose";
+import {Character} from "../types/character";
+
+const characterSchema = new Schema<Character>({
+    name: {
+        type: String,
+        required: [true, 'Postać musi mieć imię!'],
+        trim: true
+    },
+    race: {
+        type: String,
+        required: true,
+        enum: ['Hobbit', 'Elf', 'Dwarf', 'Human', 'Wizard'] // Zabezpieczenie na poziomie bazy!
+    },
+    level: {
+        type: Number,
+        required: true,
+        min: [1, 'Poziom nie może być mniejszy niż 1!']
+    }
+}, {
+    timestamps: true // Automatycznie doda createdAt i updatedAt
+});
+
+// Eksportujemy gotowy Model (Krasnoluda z kilofem)
+export const CharacterModel = model<Character>('Character', characterSchema);
+```
+
+## Definiujemy Repository
+```ts
+import { CharacterModel } from '../models/character.model';
+import {Character} from "../types/character";
+// ==========================================
+// ⛏️ GILDIA KRASNOLUDÓW (Operacje na Bazie)
+// ==========================================
+
+export const findAllCharacters = async (): Promise<Character[]> => {
+    // Wyciągamy wszystko z bazy. Mongoose zwróci nam to jako tablicę obiektów.
+    return await CharacterModel.find();
+};
+
+export const createCharacterInDB = async (characterData: Character): Promise<Character> => {
+    // Zapisujemy nową postać w Kopalni
+    const newCharacter = new CharacterModel(characterData);
+    return await newCharacter.save();
+};
+```
+
+
+
+

@@ -1,0 +1,79 @@
+---
+title: Zapełniamy MongoDB danymi
+---
+
+Utwórzmy nowy plik `seedData-requests.http` i wklejmy do niego:
+```http
+# 🧑‍🤝‍🧑 Zasilanie Bazy Danych (Seeding)
+
+Zanim zaczniemy budować frontend, dodajmy do naszej bazy danych Drużynę Pierścienia, abyśmy mieli co wyświetlać. Wklejcie poniższe zapytania do swojego pliku `requests.http` i kliknijcie zieloną strzałkę przy każdym z nich.
+
+```http
+### Zmienne globalne
+@host = http://localhost:5001/api
+
+### =========================================
+### 🧙‍♂️ GANDALF SZARY (Czarodziej)
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Gandalf Szary",
+  "race": "Wizard",
+  "level": 99
+}
+
+### =========================================
+### 🧝‍♂️ LEGOLAS (Elf)
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Legolas",
+  "race": "Elf",
+  "level": 60
+}
+
+### =========================================
+### 🗡️ ARAGORN (Człowiek)
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Aragorn",
+  "race": "Human",
+  "level": 50
+}
+
+### =========================================
+### 💍 FRODO BAGGINS (Hobbit)
+### =========================================
+POST {{host}}/characters
+Content-Type: application/json
+
+{
+  "name": "Frodo Baggins",
+  "race": "Hobbit",
+  "level": 50
+}
+
+### =========================================
+### 🔍 SPRAWDZENIE - Pobierz całą drużynę
+### =========================================
+GET {{host}}/characters
+Accept: application/json
+```
+
+
+
+
+
+
+
+
+
+
+
