@@ -1,0 +1,201 @@
+---
+title: The Coffee Shop App - Modular Architecture in Action
+---
+
+# Modular Architecture: Building a TypeScript Shopping Cart
+
+
+Welcome to the world of scalable Node.js architecture. When building applications, throwing everything into a single index.ts file is a fast track to spaghetti code. To prevent this, we divide our logic into discrete, manageable modules.
+
+Let's dive straight in with our Top-Down approach. We will build a fully functional, modular shopping cart application. First, we set up the environment, then we look at the complete codebase, and finally, we deconstruct how it all works.
+
+:::tip What is `tsx` and how does it differ from `ts-node`?
+
+**`tsx`** (*TypeScript Execute*) is a modern command-line tool that lets you run TypeScript (`.ts`) files directly in Node.js without manually compiling them to `.js` first.
+
+*(Note: Do not confuse the `tsx` CLI tool with the `.tsx` file extension used in React!)*
+
+**How does it differ from the older `ts-node`?**
+- **Blazing fast (powered by `esbuild`):** Unlike `ts-node`, which uses the standard, slower TypeScript compiler, `tsx` strips types on the fly in memory without performing heavy type-checking (your IDE handles checking types while you code).
+- **Zero-config ESM support:** `ts-node` frequently struggles with modern ES Modules (`import`/`export`) and `"type": "module"` in `package.json`. `tsx` supports both ESM and CommonJS seamlessly out of the box.
+- **Built-in Watch Mode:** You don't need extra tools like `nodemon`. Just run `npx tsx watch src/index.ts`, and your app will automatically restart every time you save a file.
+:::
+
+
+## Step 1: Project Setup
+1. Initialize a new Node.js project and install the necessary dependencies:
+```
+npm init -y
+npm install -D typescript tsx @types/node
+npx tsc --init
+```
+
+2. Configure your `package.json` to use ECMAScript Modules (ESM) by adding "type": "module" and set up a start script:
+```json{
+  "name": "shop-app-ts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
+```
+## Step 2: The Codebase
+Create a `src` directory and add the following four files.
+
+1. The Data Model (`src/product.ts`)
+This module defines the shape of our data. We use a named export.
+```ts
+// Data shape for our shop's inventory
+export type Product = {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+};
+
+```
+2. The Business Logic (`src/cart.ts`)
+This class handles operations on our product collection. Notice the `.js` extension in the import—a strict requirement for modern Node.js ESM.
+```ts
+import type { Product } from './product.js';
+
+export class Cart {
+    private items: Product[] = [];
+
+    add(product: Product): void {
+        this.items.push(product);
+    }
+
+    getTotal(): number {
+        return this.items.reduce(
+            (total: number, item: Product): number => total + item.price,
+            0
+        );
+    }
+
+    getAllItems(): Product[] {
+        // Returning a shallow copy via the spread operator to protect private state
+        return [...this.items];
+    }
+}
+```
+3. The Application Orchestrator (`src/app.ts`)
+This module binds the data and logic together. We use a default export since this file serves a single primary purpose.
+
+```ts
+import { Cart } from './cart.js';
+import type { Product } from './product.js';
+
+function runApp(): void {
+    const cart = new Cart();
+
+    const bigCoffee: Product = {
+        id: 1,
+        name: "Big Coffee",
+        price: 10.40,
+        description: "A large black coffee for the brave."
+    };
+
+    const chocolateCake: Product = {
+        id: 2,
+        name: "Chocolate Cake",
+        price: 8.70,
+        description: "Massive chocolate cake."
+    };
+
+    cart.add(bigCoffee);
+    cart.add(chocolateCake);
+
+    console.log("Total to pay:", cart.getTotal());
+    console.log(
+        cart.getAllItems().map(item => `${item.name} - $${item.price} - ${item.description}`)
+    );
+}
+
+export default runApp;
+
+```
+4. The Entry Point (`src/index.ts`)
+The launcher. It imports the default function (without curly braces) and executes it.
+
+```ts
+import runApp from "./app.js";
+
+runApp();
+```
+
+## Step 3: Execution
+Run the app via the terminal:
+```
+npm start
+```
+
+---
+Analysis Question: In src/cart.ts, why do we return [...this.items] instead of simply returning this.items in the getAllItems() method? (Hint: Think about what a rogue developer could do to your cart if you handed them the original array).
+
+
+---
+
+## The 4W2H Breakdown
+According to the 4W2H model, let's dissect the architectural decisions in this application:
+
+WHAT (The Domain): Processing Primitives vs. Complex Objects vs. DTOs.
+Our Product type acts as a Data Transfer Object (DTO)—a simple container for primitive values (numbers and strings). The Cart is a Complex Object that encapsulates state and provides specific methods to interact with that state.
+
+WHERE (State & Storage): Local Variables vs. Global State vs. Databases.
+State is encapsulated within the Cart instance (private items). We strictly avoid Global State. If we need to persist this data beyond the script execution, we would eventually connect this class to a Database.
+
+WHEN (Evaluation Strategies): Eager vs. Lazy execution paradigms.
+When npm start is executed, Node.js eagerly traverses the dependency graph. index.ts eagerly loads app.ts, which eagerly loads cart.ts and product.ts before executing a single line of business logic.
+
+WHO (Data Flow): Pull Model vs. Push Model dynamics.
+We are utilizing a mix. We Push data into the state using cart.add(). Later, console.log acts as a Pull Model, actively requesting the computed state via cart.getTotal().
+
+HOW (Reactivity): Regular variables vs. Reactive State/Broadcasters.
+This application uses Regular Variables. State mutation (push) does not automatically trigger events or UI updates. If this were a Reactive application (like an Angular or React frontend), adding to the cart would broadcast an event to instantly update a navbar counter.
+
+HOW LONG (Lifecycle): Volatile In-Memory vs. Persistent Storage.
+The cart's lifecycle is Volatile In-Memory. The moment the runApp() function finishes logging to the console, the Node process terminates, the garbage collector sweeps up our Cart instance, and our coffee is gone forever.
+
+
+
+
+## Pattern Comparison: Named vs. Default Exports
+Node.js ESM gives us two primary ways to share code between files. Our app demonstrates both:
+
+Named Exports (`export type Product`): Forces the consumer to use the exact name when importing (`import { Product }`). Excellent for utility files containing multiple helper functions or types.
+
+Default Exports (export default runApp): Allows the consumer to name the import whatever they want (import initializeShop from './app.js'). Best reserved for files that represent a single distinct entity, like a main component or a bootstrap function.
+
+
+
+
+## Software Design Patterns
+1. Object-Oriented Encapsulation
+In cart.ts, the items array is marked as private. By returning a shallow copy using the spread operator ([...this.items]), we prevent external mutations. If we returned the raw array, another module could bypass our add() method and arbitrarily push invalid data or manipulate prices.
+
+2. Functional Paradigms in a Class World
+While Cart is an Object-Oriented class, its methods leverage Functional Programming concepts. The getTotal() method uses .reduce(), a pure functional array method that transforms an array into a single value without mutating the original data. Similarly, app.ts uses .map() to cleanly format output strings.
+
+3. Single Responsibility Principle (SOLID)
+Our application adheres to the 'S' in SOLID. `product.ts` solely defines data shape. cart.ts solely manages list operations and math. app.ts orchestrates the workflow. index.ts solely boots the program. This separation guarantees that if we change how a product is discounted, we only touch cart.ts, leaving the orchestrator completely isolated from the math logic.
+
+
+
+
+
+---
+## Knowledge Check
+1. Why must you include the .js extension when importing TypeScript files in a Node.js ESM environment?
+2. According to the SOLID principles discussed, why is it bad practice to put the cart.getTotal() logic directly inside src/index.ts?
+3. If we used return this.items; instead of return [...this.items]; in our Cart class, what specific security/data-integrity risk are we introducing?
+
+
+
+

@@ -6,9 +6,9 @@ title: Podział projektu na moduły
 
 # Aplikacja sklepik
 
-W folderze `src` umieścimy nowe pliki obok `index.ts`
+W folderze `src` umieścimy nowe pliki obok `index.ts`:
 
-`product.ts`
+- `product.ts`
 ```ts
 // typ danych dla produktów w sklepie
 export type Product = {
@@ -20,7 +20,7 @@ export type Product = {
 ```
 
 
-`cart.ts`
+- `cart.ts`
 ```ts
 // klasa definiująca koszyk zakupowy
 import {Product} from './product'
@@ -44,7 +44,7 @@ export class Cart{
 }
 ```
 
-`app.ts`
+- `app.ts`
 ```ts
 // logika aplikacji
 import {Cart} from './cart';
@@ -71,7 +71,7 @@ export default runApp
 
 ```
 
-`index.ts`
+- `index.ts`
 ```ts
 // entrypoint naszej aplikacji
 import runApp from "./app"

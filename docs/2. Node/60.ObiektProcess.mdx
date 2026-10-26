@@ -1,0 +1,295 @@
+---
+title: "The `process` Object: Controlling the Investigation"
+---
+
+
+
+# The `process` Object: Inside the Mainframe
+
+:::info title="What is the `process` object?">
+    * In Node.js, every running application operates as an active **system process**.
+    * The `process` object is a **global object** (no `import` needed—it's always watching) that provides information about, and control over, the current Node.js runtime.
+    * With `process`, field agents can:
+    * Intercept startup arguments from the terminal (`process.argv`),
+    * Access classified environment variables (`process.env`),
+    * Pull the plug on a compromised operation (`process.exit()`),
+    * Communicate via standard input/output streams (`process.stdin`, `process.stdout`).
+:::
+
+---
+
+## 1. Exposing the System State
+
+Because `process` is global, you can inspect the entire operation at any time:
+
+```typescript
+console.log(process);
+```
+:::warning ⚠️ Clearing TypeScript Security Alerts (`@types/node`)
+If your IDE (like WebStorm or VS Code) highlights process in red and claims it doesn't exist,
+your TypeScript compiler lacks FBI security clearance for Node.js globals.
+
+Grant clearance by installing the Node.js type definitions in your project terminal:
+
+`npm i --save-dev @types/node`
+
+:::
+
+## 2. Intercepting Terminal Transmissions: `process.argv`
+
+What is `process.argv`?
+- `argv` stands for Arguments Vector.
+- It is an array of strings (`string[]`) containing the command-line arguments passed when the Node.js
+process was launched:
+    - `[0]` — The file system path to the Node.js (or ts-node) executable.
+    - `[1]` — The file system path to the script file being executed.
+    - `[2]` and beyond — Additional arguments passed by the agent in the terminal.
+
+
+Let's log the incoming transmission in src/index.ts:
+```ts
+console.log(process.argv);
+```
+
+### Scenario A: Standard Launch (No Extra Clues)
+When you run the script without extra parameters, only the executable and script paths are recorded:
+```bash
+$ ts-node src/index.ts
+
+/* Output:
+[
+  '/usr/bin/ts-node',
+  '/home/mulder/WebstormProjects/x-files-console/src/index.ts'
+]
+*/
+```
+
+
+### Scenario B: Passing Secret Codes via Terminal
+Any words or numbers separated by spaces after the file name are captured starting at index 2:
+```bash
+$ ts-node src/index.ts trust no one 1013
+
+/* Output:
+[
+  '/usr/bin/ts-node',
+  '/home/mulder/WebstormProjects/x-files-console/src/index.ts',
+  'trust',
+  'no',
+  'one',
+  '1013'
+]
+*/
+```
+:::tip 💡 Pro Tip: Extracting Only the User Arguments
+In real investigations, you rarely care about index `0` and `1`.
+Use `.slice(2)` to strip away the system paths and isolate the user's input:
+
+```ts
+const userClues: string[] = process.argv.slice(2);
+console.log("Extracted clues:", userClues);
+
+// If run with: ts-node src/index.ts roswell 1947
+// Output: Extracted clues: [ 'roswell', '1947' ]
+
+```
+
+## 3. Classified Environment & Emergency Abort
+
+To make full use of the capabilities mentioned in the briefing, here are two more essential
+`process` tools every agent needs:
+
+
+### Reading Top-Secret Variables (`process.env`)
+### Reading Top-Secret Variables (`process.env` & `.env` Files)
+
+Never hardcode passwords, database URLs, or API keys directly in your source code—if your repository leaks,
+the Syndicate will find them immediately. Instead, store them in a local **`.env`** file and read them via `process.env`.
+
+#### Step 1: Create the Classified `.env` File
+In the **root directory** of your project (right next to `package.json`), create a file named exactly
+`.env` (starts with a dot, no filename before it):
+
+```env
+# .env - TOP SECRET CREDENTIALS
+CLEARANCE_LEVEL=LEVEL_4_DIRECTOR
+ALIEN_DB_PASSWORD=trust_no_one_1947
+AREA_51_PORT=8080
+```
+:::warning Burn Before Pushing (`.gitignore`)
+CRITICAL PROTOCOL: Never upload your `.env` file to GitHub! Add `.env` to your `.gitignore`
+file immediately so Git ignores it. If you want other agents to know which variables are required without
+revealing the secrets, create a safe template file named .env.example with empty values.
+
+:::
+
+#### Step 2: Access the Variables in Your Code
+Inside your TypeScript file (`src/index.ts`), access these secrets through the process.env object:
+
+
+```ts
+const clearance = process.env.CLEARANCE_LEVEL || "UNCLASSIFIED";
+const dbPassword = process.env.ALIEN_DB_PASSWORD;
+
+console.log(`Agent Status: ${clearance}`);
+
+if (!dbPassword) {
+  console.error("SECURITY ALERT: Database password missing from environment!");
+}
+```
+
+#### Step 3: Load the `.env` File into Node.js
+By default, Node.js doesn't automatically read the `.env` file on its own—you have to tell it to decrypt and load it.
+You have two ways to do this:
+
+##### Option A: The Modern Native Way (Node.js v20.6+)
+Modern Node.js has a built-in flag (--env-file) that loads the file without installing any external packages:
+```bash
+node --env-file=.env dist/index.js
+# Or if running TypeScript directly with tsx:
+npx tsx --env-file=.env src/index.ts
+
+```
+
+##### Option B: The Classic dotenv Package (Most Popular in Archives)
+If you are using ts-node or older Node versions, install the industry-standard dotenv package:
+```
+npm i dotenv
+```
+
+Then, add this single line at the very top of your `src/index.ts` file to inject the secrets into `process.env`:
+
+```tsimport "dotenv/config"; // Must be the very first line!
+
+console.log("Clearance:", process.env.CLEARANCE_LEVEL);
+// Output: Clearance: LEVEL_4_DIRECTOR
+```
+
+
+
+
+### Pulling the Plug (`process.exit()`)
+If an unauthorized user tries to access the X-Files without arguments,
+you can terminate the script immediately. Passing `0` means a clean exit; passing `1` (or higher) signals
+the operating system that an error occurred:
+
+```tsconst args = process.argv.slice(2);
+
+if (args.length === 0) {
+  console.error("ACCESS DENIED: No case file ID provided. Terminating connection...");
+  process.exit(1); // Aborts the program immediately with an error code
+}
+
+console.log(`Opening case file: ${args[0]}...`);
+
+```
+
+
+
+
+[//]: # (---)
+
+[//]: # (title: Obiekt process)
+
+[//]: # (---)
+
+[//]: # (# Obiekt process)
+
+[//]: # (:::note Czym jest process?)
+
+[//]: # (- W Node.js każda aplikacja działa jako proces systemowy.)
+
+[//]: # (- Obiekt process to globalny obiekt, który reprezentuje aktualnie uruchomiony proces Node.js.)
+
+[//]: # (- Dzięki niemu możemy np.:)
+
+[//]: # (    - odczytać argumenty startowe &#40;`process.argv`&#41;,)
+
+[//]: # (    - sprawdzić zmienne środowiskowe &#40;`process.env`&#41;,)
+
+[//]: # (    - zakończyć program &#40;`process.exit&#40;&#41;`&#41;,)
+
+[//]: # (    - odczytać standardowe wejście/wyjście &#40;`process.stdin`, `process.stdout`&#41;.)
+
+[//]: # ()
+[//]: # (:::)
+
+[//]: # ()
+[//]: # (```typescript)
+
+[//]: # (console.log&#40;process&#41;)
+
+[//]: # (```)
+
+[//]: # (- *Webstorm* będzie zgłaszał błędy, ponieważ nie zainstalowaliśmy typów dla TS)
+
+[//]: # (- `npm i --save-dev @types/node`)
+
+[//]: # ()
+[//]: # (:::note Co to jest process.argv)
+
+[//]: # (- `argv` to *arguments vector* &#40;tablica argumentów&#41;.)
+
+[//]: # (- Jest to tablica `string[]`, która zawiera:)
+
+[//]: # (    - `[0]` ścieżkę do Node.js,)
+
+[//]: # (    - `[1]` ścieżkę do uruchamianego pliku,)
+
+[//]: # (    - `[2]` wszystkie argumenty podane przez użytkownika.)
+
+[//]: # ()
+[//]: # (:::)
+
+[//]: # (```typescript)
+
+[//]: # (console.log&#40;process.argv&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # ($ ts-node src/index.ts)
+
+[//]: # ()
+[//]: # (/*przykładowy wynik)
+
+[//]: # ([)
+
+[//]: # (  '/usr/bin/ts-node',)
+
+[//]: # (  '/home/js/WebstormProjects/my-process-console/src/index.ts')
+
+[//]: # (])
+
+[//]: # (*/)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # ()
+[//]: # ($ ts-node src/index.ts to jest coś 1234)
+
+[//]: # (/*przykładowy wynik)
+
+[//]: # ([)
+
+[//]: # (  '/usr/bin/ts-node',)
+
+[//]: # (  '/home/js/WebstormProjects/my-process-console/src/index.ts',)
+
+[//]: # (  'to',)
+
+[//]: # (  'jest',)
+
+[//]: # (  'coś',)
+
+[//]: # (  '1234')
+
+[//]: # (])
+
+[//]: # (```)

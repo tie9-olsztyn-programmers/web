@@ -1,0 +1,297 @@
+---
+title: "Capturing Console Input - Field Calculations"
+description: "Learn how to slice through system arrays, parse terminal arguments, and build a command-line cipher calculator."
+---
+
+# How to Capture Data from the Console?
+
+To intercept data passed directly from the terminal by an agent in the field, we use the `process.argv` array combined with standard JavaScript array methods.
+
+---
+
+## 1. Isolating Evidence: The `slice()` Method
+
+Before we extract arguments from `process.argv`, we need to understand how to cut away unwanted system data using the array `slice()` method.
+
+:::info How `slice()` Works
+* We call `.slice(start, end)` directly on an array.
+* It takes up to two arguments:
+* **`start`** — The zero-based index at which to begin extraction.
+* **`end`** *(optional)* — The index at which to end extraction (up to, **but not including**, this index). If omitted, it slices all the way to the end of the array.
+* **Non-Destructive:** It returns a **brand-new array** containing the extracted elements. The original array of evidence remains completely untouched!
+:::
+
+```typescript
+const evidenceCodes: number[] = [10, 20, 30, 40, 60, 70, 80, 90, 100];
+
+// 1. Slice from index 2 to the very end:
+console.log(evidenceCodes.slice(2)); // [ 30, 40, 60, 70, 80, 90, 100 ]
+
+// 2. Slice from index 2 up to (but not including) index 5:
+console.log(evidenceCodes.slice(2, 5)); // [ 30, 40, 60 ]
+
+// 3. The original array is unmodified:
+console.log(evidenceCodes);
+```
+
+Terminal Output:
+```
+[
+  30, 40, 60, 70,
+  80, 90, 100
+]
+[ 30, 40, 60 ]
+[
+  10, 20, 30, 40, 60,
+  70, 80, 90, 100
+]
+```
+
+
+## 2. Combining slice() with process.argv
+Remember that process.argv[0] (Node path) and process.argv[1] (script path) are just system metadata. By calling .slice(2), we bypass the first two elements and capture only the commands typed by the user.
+
+
+```ts
+const args: string[] = process.argv.slice(2);
+console.log(args);
+
+```
+
+When we trigger the transmission in the terminal:
+`ts-node src/index.ts decrypt_file 1013`
+
+
+We receive a clean array of strings:
+
+`[ 'decrypt_file', '1013' ]`
+
+
+## 3. Field Equipment: The Console Calculator
+
+Let's build a practical CLI (Command-Line Interface) calculator for Agent Scully to quickly compute coordinates
+and chemical ratios directly from the terminal.
+
+:::tip Beware of Strings! (Number())
+Everything inside process.argv is always a string (e.g., '10' + '20' would result in '1020').
+To perform actual math, we must convert the string arguments into numbers using Number().
+:::
+
+
+```ts
+const args: string[] = process.argv.slice(2);
+
+// Destructure or assign the arguments: e.g., "10 + 20"
+const a: number = Number(args[0]);
+const operation: string = args[1];
+const b: number = Number(args[2]);
+
+// Quick security check: did the agent provide valid numbers?
+if (isNaN(a) || isNaN(b)) {
+  throw new Error("Transmission error: Both operands must be valid numbers.");
+}
+
+let result: number;
+
+switch (operation) {
+  case "+":
+    result = a + b;
+    break;
+  case "-":
+    result = a - b;
+    break;
+  case "*":
+    result = a * b;
+    break;
+  case "/":
+    if (b === 0) {
+      throw new Error("Reality breach: Cannot divide by zero.");
+    }
+    result = a / b;
+    break;
+  default:
+    throw new Error(`Invalid operation: '${operation}'. Supported: +, -, *, /`);
+}
+
+console.log(`${a} ${operation} ${b} = ${result}`);
+
+```
+
+:::warning The Bash Wildcard Conspiracy ("*")
+Why did we have to wrap "*" in quotation marks?
+
+In shells like Bash or Zsh (Linux/macOS), a bare asterisk * is a special wildcard character that automatically expands into a list of all filenames in your current folder!
+
+If you run ts-node src/index.ts 21 * 125 without quotes, the terminal replaces * with package.json src tsconfig.json, breaking your calculator. Always wrap "*" in quotes (or escape it as \*) so the shell treats it as a plain multiplication symbol.
+:::
+
+[//]: # (---)
+
+[//]: # (title: Pobieranie danych z konsoli)
+
+[//]: # (----)
+
+[//]: # ()
+[//]: # (# Jak pobrać dane z konsoli?)
+
+[//]: # (Do pobieranie danych z konsoli wykorzystamy `process.argv`)
+
+[//]: # ()
+[//]: # ()
+[//]: # (## `slice&#40;&#41;`)
+
+[//]: # (- metodę `slice&#40;&#41;` wywołujemy na obiecie lista)
+
+[//]: # (- przyjmuje dwa argumenty:)
+
+[//]: # (    - start)
+
+[//]: # (    - end)
+
+[//]: # (- zwraca nową tablicę z elementami od start do end)
+
+[//]: # ()
+[//]: # (```typescript)
+
+[//]: # ()
+[//]: # (let tab = [10,20,30,40,60,70,80,90,100])
+
+[//]: # (console.log&#40;tab.slice&#40;2&#41;&#41; // [ 30, 40,  60, 70, 80, 90, 100 ])
+
+[//]: # (console.log&#40;tab.slice&#40;2,5&#41;&#41; // [ 30, 40, 60 ])
+
+[//]: # (console.log&#40;tab&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # (wynik)
+
+[//]: # ([)
+
+[//]: # (  30, 40,  60, 70,)
+
+[//]: # (  80, 90, 100)
+
+[//]: # (])
+
+[//]: # ([ 30, 40, 60 ])
+
+[//]: # ([)
+
+[//]: # (  10, 20, 30,  40, 60,)
+
+[//]: # (  70, 80, 90, 100)
+
+[//]: # (])
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Metoda `slice&#40;&#41;` z obiektem `process.argv`)
+
+[//]: # (Pominiemy dwa pierwsze elementy.)
+
+[//]: # (```typescript)
+
+[//]: # (const args = process.argv.slice&#40;2&#41;;)
+
+[//]: # (console.log&#40;args&#41;;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (- plik wywołamy `ts-node src/index.ts zrobcos 123`)
+
+[//]: # (- dostaniemy `[ 'zrobcos', '123' ]`)
+
+[//]: # ()
+[//]: # (## Konsolowy kalkulator)
+
+[//]: # ()
+[//]: # (```typescript)
+
+[//]: # ()
+[//]: # ()
+[//]: # (const args = process.argv.slice&#40;2&#41;;)
+
+[//]: # (const a: number = Number&#40;args[0]&#41;;)
+
+[//]: # (const b: number = Number&#40;args[2]&#41;;)
+
+[//]: # (const operation: string = args[1];)
+
+[//]: # ()
+[//]: # ()
+[//]: # (let result: number;)
+
+[//]: # ()
+[//]: # (switch &#40;operation&#41; {)
+
+[//]: # (    case '+':)
+
+[//]: # (        result = a + b;)
+
+[//]: # (        break;)
+
+[//]: # (    case '-':)
+
+[//]: # (        result = a - b;)
+
+[//]: # (        break;)
+
+[//]: # (    case '*':)
+
+[//]: # (        result = a * b;)
+
+[//]: # (        break;)
+
+[//]: # (    case '/':)
+
+[//]: # (        result = a / b;)
+
+[//]: # (        break;)
+
+[//]: # (    default:)
+
+[//]: # (        throw new Error&#40;'Invalid operation'&#41;;)
+
+[//]: # ()
+[//]: # (})
+
+[//]: # ()
+[//]: # (console.log&#40;`${a} ${operation} ${b} = ${result}`&#41;)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # ()
+[//]: # (- aby sprawdzić dodawania `ts-node src/index.ts 10 + 20`)
+
+[//]: # (- aby sprawdzić odejmownie `ts-node src/index.ts 10 - 20`)
+
+[//]: # (- aby sprawdzić mnożenie `$ ts-node src/index.ts 21 "*" 125`)
+
+[//]: # (    - `*` w powłoce bash to znak specjalny, więc musisz użyć `"*"`,)
+
+[//]: # (    - aby był zwykłym znakiem)
+
+[//]: # (- itd.,)
+
+[//]: # (    - czyli jedno działanie, na jedno wywołanie programu)
+
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()

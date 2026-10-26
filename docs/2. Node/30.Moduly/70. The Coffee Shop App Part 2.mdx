@@ -1,0 +1,301 @@
+---
+title: The Coffee Shop App Part 2 - Persistent Storage with JSON
+---
+
+# Persistent Architecture: Upgrading the Cart with JSON & `fs`
+
+In the previous lesson, our Coffee Shop app suffered from a critical flaw: **amnesia**. Because our state lived purely in RAM (Volatile In-Memory), the moment the Node.js process finished executing, the garbage collector wiped our `Cart` instance, and our customer's order vanished into thin air.
+
+To make our application production-ready without setting up a heavy SQL database, we will introduce a **Persistence Layer** using local JSON files, Node's built-in `node:fs` and `node:path` modules, and data serialization.
+
+:::tip Serialization vs. Deserialization (The JSON Bridge)
+
+Hard drives cannot store live JavaScript objects or class instances directly—they only understand raw bytes and text strings. To save our shopping cart to a file, we must cross the **JSON Bridge**:
+
+- **Serialization (`JSON.stringify`):** Converts an in-memory JavaScript object or array into a flat, formatted string of text so it can be written to disk via `fs.writeFileSync()`.
+- **Deserialization (`JSON.parse`):** Reads a raw text string from a file via `fs.readFileSync()` and reconstructs it back into a usable JavaScript array or object in memory.
+
+*(Warning: When you deserialize a JSON file in TypeScript, `JSON.parse()` returns the dreaded `any` type by default! Always cast or validate the parsed data back into your `Product[]` type.)*
+:::
+
+---
+
+## Step 1: Project Structure Upgrade
+
+We don't need to install any new packages (`fs` and `path` are built into Node.js). We will add a `data/` directory (which our code will generate automatically) and one new module: `src/storage.ts`.
+
+```text
+shop-app-ts/
+├── data/
+│   ├── catalog.json      # Read-only menu of available coffee shop items
+│   └── saved-cart.json   # Auto-generated persistent shopping cart state
+├── src/
+│   ├── product.ts        # (Unchanged) The Data Model
+│   ├── storage.ts        # (NEW!) The Persistence Layer (fs + path + JSON)
+│   ├── cart.ts           # (Updated) Now supports loading initial items
+│   ├── app.ts            # (Updated) Orchestrates reading/writing to JSON
+│   └── index.ts          # (Unchanged) The Entry Point
+└── package.json
+```
+
+---
+
+## Step 2: The Upgraded Codebase
+
+### 1. The Menu Database (`data/catalog.json`)
+Instead of hardcoding `bigCoffee` and `chocolateCake` inside our TypeScript code, create a folder named `data` in your project root and add `catalog.json`:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Big Coffee",
+    "price": 10.40,
+    "description": "A large black coffee for the brave."
+  },
+  {
+    "id": 2,
+    "name": "Chocolate Cake",
+    "price": 8.70,
+    "description": "Massive chocolate cake."
+  },
+  {
+    "id": 3,
+    "name": "Matcha Latte",
+    "price": 14.50,
+    "description": "Green energy booster with oat milk."
+  }
+]
+```
+
+### 2. The Data Model (`src/product.ts`)
+This file remains **100% unchanged**—a testament to good modular design!
+
+```ts
+export type Product = {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+};
+```
+
+### 3. The Persistence Layer (`src/storage.ts`) — *NEW!*
+This module isolates all file system operations (`fs` and `path`) and JSON conversions. Notice how we use `import.meta.dirname` (modern ESM equivalent of `__dirname`) to ensure paths work regardless of where the terminal command is run.
+
+```ts
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import type { Product } from './product.js';
+
+// Pointing safely to the /data directory at the root of the project
+const DATA_DIR = path.resolve(import.meta.dirname, '..', 'data');
+const CATALOG_PATH = path.join(DATA_DIR, 'catalog.json');
+const CART_PATH = path.join(DATA_DIR, 'saved-cart.json');
+
+export class StorageService {
+    // Deserialization: JSON File -> Product[]
+    static loadCatalog(): Product[] {
+        if (!fs.existsSync(CATALOG_PATH)) {
+            throw new Error(`Catalog file missing at: ${CATALOG_PATH}`);
+        }
+        const rawData: string = fs.readFileSync(CATALOG_PATH, 'utf-8');
+        return JSON.parse(rawData) as Product[];
+    }
+
+    // Deserialization with fallback: Returns [] if no cart was saved yet
+    static loadCart(): Product[] {
+        if (!fs.existsSync(CART_PATH)) {
+            return [];
+        }
+        const rawData: string = fs.readFileSync(CART_PATH, 'utf-8');
+        return JSON.parse(rawData) as Product[];
+    }
+
+    // Serialization: Product[] -> JSON File
+    static saveCart(items: Product[]): void {
+        if (!fs.existsSync(DATA_DIR)) {
+            fs.mkdirSync(DATA_DIR, { recursive: true });
+        }
+        // null, 2 formats the JSON with 2-space indentation for human readability
+        const jsonString: string = JSON.stringify(items, null, 2);
+        fs.writeFileSync(CART_PATH, jsonString, 'utf-8');
+    }
+}
+```
+
+:::warning Defensive Deserialization: Guarding Against Corrupted JSON (`try / catch`)
+
+Checking if a file exists (`fs.existsSync`) only protects you from missing files—it does **not** protect you if the file's contents are corrupted! If someone accidentally deletes a comma or bracket inside `saved-cart.json`, or leave the file completely empty (`0 bytes`), `JSON.parse()` will throw a fatal `SyntaxError: Unexpected end of JSON input` and crash your entire Node.js process.
+
+In production-grade applications, always wrap `JSON.parse()` in a **`try / catch`** block to gracefully recover from corrupted data:
+
+```ts
+    static loadCart(): Product[] {
+        if (!fs.existsSync(CART_PATH)) {
+            return [];
+        }
+
+        try {
+            const rawData: string = fs.readFileSync(CART_PATH, 'utf-8');
+            return JSON.parse(rawData) as Product[];
+        } catch (error) {
+            console.warn("⚠️ Warning: saved-cart.json is corrupted or unreadable. Resetting to an empty cart.");
+            return []; // Fallback to a safe, empty state instead of crashing!
+        }
+    }
+```
+:::
+
+
+### 4. The Business Logic (`src/cart.ts`)
+We make one small upgrade to our `Cart` class: a `constructor` that accepts previously saved items when the cart is initialized.
+
+```ts
+import type { Product } from './product.js';
+
+export class Cart {
+    private items: Product[] = [];
+
+    // Allows hydrating the cart with items loaded from disk
+    constructor(initialItems: Product[] = []) {
+        this.items = [...initialItems];
+    }
+
+    add(product: Product): void {
+        this.items.push(product);
+    }
+
+    getTotal(): number {
+        const sum = this.items.reduce(
+            (total: number, item: Product): number => total + item.price,
+            0
+        );
+        // Round to 2 decimal places to avoid floating-point math issues
+        return Number(sum.toFixed(2));
+    }
+
+    getAllItems(): Product[] {
+        return [...this.items];
+    }
+}
+```
+
+### 5. The Application Orchestrator (`src/app.ts`)
+Now `app.ts` loads the menu from `catalog.json`, restores previous shopping sessions from `saved-cart.json`, adds a new item, and saves the updated state back to disk.
+
+```ts
+import { Cart } from './cart.js';
+import { StorageService } from './storage.js';
+import type { Product } from './product.js';
+
+function runApp(): void {
+    // 1. Load the menu and any previously saved cart items from JSON
+    const catalog: Product[] = StorageService.loadCatalog();
+    const previousItems: Product[] = StorageService.loadCart();
+
+    // 2. Hydrate the Cart with previous items
+    const cart = new Cart(previousItems);
+    console.log(`Restored ${cart.getAllItems().length} item(s) from previous session.`);
+
+    // 3. Pick a random item from the catalog and add it to the cart
+    const randomProduct = catalog[Math.floor(Math.random() * catalog.length)];
+    if (randomProduct) {
+        cart.add(randomProduct);
+        console.log(`Added to cart: ${randomProduct.name} ($${randomProduct.price})`);
+    }
+
+    // 4. Display current state
+    console.log("-----------------------------------------");
+    console.log("Current Cart Contents:");
+    console.log(
+        cart.getAllItems().map(item => `- ${item.name} ($${item.price}): ${item.description}`)
+    );
+    console.log("Total to pay: $", cart.getTotal());
+
+    // 5. Persist the updated state back to data/saved-cart.json
+    StorageService.saveCart(cart.getAllItems());
+    console.log("✅ Cart saved to data/saved-cart.json!");
+}
+
+export default runApp;
+```
+
+---
+
+## Step 3: Execution (Testing Persistence!)
+
+Run the application **twice** in your terminal using `npm start`:
+
+```bash
+$ npm start
+Restored 0 item(s) from previous session.
+Added to cart: Big Coffee ($10.4)
+-----------------------------------------
+Total to pay: $ 10.4
+✅ Cart saved to data/saved-cart.json!
+
+$ npm start
+Restored 1 item(s) from previous session.
+Added to cart: Matcha Latte ($14.5)
+-----------------------------------------
+Total to pay: $ 24.9
+✅ Cart saved to data/saved-cart.json!
+```
+
+Open `data/saved-cart.json` in your IDE—you will see your serialized shopping cart surviving across runs!
+
+---
+
+> **Analysis Question:** Why did we create a separate `StorageService` in `src/storage.ts` instead of simply importing `node:fs` directly inside our `Cart` class (`src/cart.ts`) and saving the file inside the `cart.add()` method? *(Hint: What happens if tomorrow your boss asks you to save the cart to a cloud database or browser `localStorage` instead of a local JSON file?)*
+
+---
+
+## The 4W2H Breakdown (Persistence Edition)
+
+Let's examine how introducing JSON storage shifts our architectural coordinates in the 4W2H model:
+
+* **WHAT (The Domain):** **In-Memory DTOs vs. Serialized Strings.**
+On disk, our data exists as a dead UTF-8 string formatted in JSON. Once `JSON.parse()` deserializes it, it becomes an array of `Product` DTOs, which we use to **hydrate** our complex `Cart` object.
+* **WHERE (State & Storage):** **RAM vs. Local File System.**
+While the script runs, active state lives in `Cart` (RAM). However, the *source of truth* now resides on the hard drive inside `data/saved-cart.json`.
+* **WHEN (Evaluation Strategies):** **Synchronous Blocking I/O.**
+By using `fs.readFileSync` and `fs.writeFileSync`, we use a **Synchronous (Blocking)** strategy. Node.js pauses execution and waits for the hard drive to finish reading/writing the JSON file before moving to the next line of code.
+* **WHO (Data Flow):** **Hydration (Pull) & Flush (Push).**
+At startup, `app.ts` **Pulls** historical data from `StorageService` to hydrate the cart. At shutdown, `app.ts` **Pushes** (flushes) the updated state back to `StorageService.saveCart()`.
+* **HOW (Reactivity):** **Manual Snapshot Persistence.**
+Our storage is not reactive. Calling `cart.add()` only mutates RAM. The JSON file on disk is only updated when we explicitly call `StorageService.saveCart()` at the end of our workflow.
+* **HOW LONG (Lifecycle):** **Persistent Storage!**
+We have escaped the Volatile In-Memory trap. The cart's lifecycle is now tied to the physical file system—it will survive terminal closures, Node.js crashes, and even computer reboots.
+
+---
+
+## Pattern Comparison: `JSON.stringify(data)` vs. `JSON.stringify(data, null, 2)`
+
+When serializing data to a file, `JSON.stringify` accepts two optional arguments (`replacer` and `space`):
+
+* **Minified (`JSON.stringify(items)`):** Outputs everything on a single line with zero whitespace: `[{"id":1,"name":"Big Coffee"}]`. Best for network transmission (APIs) to save bandwidth.
+* **Pretty-Printed (`JSON.stringify(items, null, 2)`):** Inserts line breaks and indents nested levels with 2 spaces. Essential for local configuration and database files (`saved-cart.json`) so developers can inspect and debug them easily in an IDE.
+
+---
+
+## Software Design Patterns
+
+### 1. Separation of Concerns (Persistence Ignorance)
+Notice that `src/cart.ts` has **no idea** that JSON files or the `fs` module even exist. This is called **Persistence Ignorance**. Because the `Cart` class only cares about in-memory array math, you could take `cart.ts` and drop it directly into a React frontend app (where `node:fs` doesn't exist!) and it would work without changing a single line of code.
+
+### 2. State Hydration Pattern
+In `new Cart(previousItems)`, we pass raw deserialized data into the constructor of a class to restore its previous state.
+In software engineering, taking "dry" data from disk/network (JSON) and pouring it into a "live" class instance with
+methods is called **Hydration**.
+
+### 3. Defensive File I/O (Fail-Safe Initialization)
+In `StorageService.loadCart()`, we check `if (!fs.existsSync(CART_PATH))` before reading. If the user is running the app for the very first time, `saved-cart.json` won't exist yet. Instead of crashing with an ugly `ENOENT: no such file or directory` error, our service gracefully returns an empty array `[]`.
+
+---
+
+## Knowledge Check
+
+1. What Happens if you serialize a `Cart` instance directly (`JSON.stringify(cart)`) instead of serializing `cart.getAllItems()`? Are class methods like `getTotal()` saved inside a `.json` file?
+2. Why did we use `path.join()` and `path.resolve()` inside `src/storage.ts` instead of writing `fs.readFileSync('../data/catalog.json')`?
+3. Look at `StorageService.loadCart()`. If someone manually opens `data/saved-cart.json` in Notepad and deletes a closing bracket `]`, what will happen when `JSON.parse()` runs, and how could we prevent the app from crashing?

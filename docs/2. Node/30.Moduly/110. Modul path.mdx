@@ -1,0 +1,236 @@
+---
+title: "The `path` Module: Navigating the File System"
+---
+
+
+# The `path` Module: The Truth is in the File System
+
+:::info title="FBI Basement Briefing">
+    "Scully, you have to see this. Someone hardcoded backslashes into the mainframe database.
+    The syndicate is trying to crash our Linux servers."
+
+:::
+
+## Why Do We Need the `path` Module?
+
+When investigating classified files across different networks, operating systems don't always speak the same language:
+
+* **Linux / macOS (POSIX):** Uses forward slashes `/` (e.g., `x-files/roswell/1947.txt`).
+* **Windows:** Uses backslashes `\` (e.g., `x-files\roswell\1947.txt`).
+* **The Conspiracy:** If you hardcode file paths as plain strings, your code might run fine on Agent Mulder's Mac,
+but it will crash immediately on Skinner's Windows machine.
+* **The Solution:** The built-in Node.js `path` module. It automatically detects the host operating system and
+formats paths accordingly.
+
+To begin your investigation, import the module into your TypeScript file:
+
+```typescript
+import * as path from "node:path"; // 'node:path' is the modern standard, 'path' also works!
+```
+
+## 1. Connecting the Clues: `path.join()`
+`path.join()` concatenates path segments using the platform-specific separator as a delimiter,
+then normalizes the resulting path.
+Even if someone slips an extra slash into a folder name, `path.join` cleans it up.
+
+
+## 2. Pinpointing the Location: `path.resolve()`
+While `join()` simply glues strings together, `path.resolve()` resolves a sequence of paths into an absolute path.
+Think of it as satellite coordinates—it tells you the exact location starting from the root directory
+of the hard drive, using your current working directory as the starting point.
+
+```ts
+import * as path from "node:path";
+
+const absoluteEvidencePath = path.resolve("alien_autopsy.mp4");
+console.log(absoluteEvidencePath);
+// Output: /Users/mulder/fbi-basement/investigations/alien_autopsy.mp4
+```
+
+:::warning Trust No One (Especially Relative Paths)
+`path.resolve()` depends on where you run the terminal command from (Current Working Directory),
+not necessarily where your `.ts` file is saved!
+See the section on `__dirname` below for how to lock onto your script's exact location.
+
+:::
+
+
+## 3. Forensic Analysis of a Path
+When you intercept a mysterious file path, you often need to dissect it to extract the file name,
+its extension, or the folder it's hiding in.
+
+```ts
+import * as path from "node:path";
+
+const absPath = path.resolve("syndicate_members.encrypted");
+
+console.log("Absolute Path:", absPath);
+console.log("File Name:    ", path.basename(absPath));
+console.log("Extension:    ", path.extname(absPath));
+console.log("Directory:    ", path.dirname(absPath));
+console.log("Clean Name:   ", path.basename(absPath, path.extname(absPath))); // Bonus: strips extension!
+
+console.log("--------------");
+console.log("Script Dir:   ", __dirname);
+console.log("Script File:  ", __filename);
+```
+
+Terminal Output Breakdown
+```
+Absolute Path: /home/mulder/projects/x-files/src/syndicate_members.encrypted  <-- Full system path
+File Name:     syndicate_members.encrypted                                    <-- The file name with extension
+Extension:     .encrypted                                                     <-- Just the file extension
+Directory:     /home/mulder/projects/x-files/src                              <-- The folder containing the file
+Clean Name:    syndicate_members                                              <-- File name without the extension
+--------------
+Script Dir:    /home/mulder/projects/x-files/src                              <-- Directory where the executing script resides
+Script File:   /home/mulder/projects/x-files/src/index.ts                     <-- Exact path of the executing script
+````
+
+## 4. Deep Autopsy: `path.parse()`
+Instead of calling `basename`, `extname`, and `dirname` separately like an amateur, Agent Scully prefers
+a full autopsy report at once using `path.parse()`.
+It returns a neat JavaScript object with every piece of information:
+
+```ts
+import * as path from "node:path";
+
+const parsedData = path.parse("/classified/area51/craft_blueprints.pdf");
+console.log(parsedData);
+```
+
+Autopsy Report (Output):
+```json
+{
+  "root": "/",
+  "dir": "/classified/area51",
+  "base": "craft_blueprints.pdf",
+  "ext": ".pdf",
+  "name": "craft_blueprints"
+}
+```
+
+## 5. Classified Addendum: CommonJS vs. ES Modules
+In older FBI archives (CommonJS), `__dirname` and `__filename` are globally available out of the box.
+However, if your TypeScript project uses modern ES Modules (`"type": "module"` in `package.json`),
+those variables are wiped from the record!
+
+Here is how you reconstruct them in modern Node.js (v20.11+):
+```ts
+// Modern Node.js (v20.11.0 and above)
+console.log(import.meta.dirname);  // Replaces __dirname
+console.log(import.meta.filename); // Replaces __filename
+```
+
+**Why is `__dirname` so important?**
+If you want to load a file located in the exact same folder as your script,
+always combine `path.join()` with `__dirname` (or `import.meta.dirname`):
+
+```ts
+import * as path from "node:path";
+
+// Safe against directory manipulation!
+// Always points to the folder where THIS code lives.
+const safeEvidencePath = path.join(__dirname, "smoking_man_dna.txt");
+```
+
+
+[//]: # ()
+[//]: # ()
+[//]: # (## Po co używać modułu `path`?)
+
+[//]: # (- W systemie Linux/Mac ścieżki mają / &#40;np. `data/file.txt`&#41;.)
+
+[//]: # (- W systemie Windows ścieżki mają \ &#40;np. `data\file.txt`&#41;.)
+
+[//]: # (- Jeśli napiszemy ścieżkę „na sztywno”, kod może działać na jednym systemie, a na innym się wywali.)
+
+[//]: # (- Rozwiązanie: moduł `path` &#40;wbudowany w Node.js&#41;.)
+
+[//]: # (- Użycie modułu w kodzie `import * as path from "path";`)
+
+[//]: # ()
+[//]: # (## Łączenie - path.join&#40;&#41;)
+
+[//]: # (Łączy fragmenty ścieżki w sposób zgodny z systemem operacyjnym.)
+
+[//]: # (```typescript)
+
+[//]: # (import * as path from 'path')
+
+[//]: # ()
+[//]: # (const filePath = path.join&#40;"data", "notes", "file.txt"&#41;;)
+
+[//]: # (console.log&#40;filePath&#41;;)
+
+[//]: # (// data/notes/file.txt &#40;linux&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Ścieżka absolutna - `path.resolve&#40;&#41;`)
+
+[//]: # (Buduje pełną ścieżkę absolutną od bieżącego katalogu.)
+
+[//]: # (```typescript)
+
+[//]: # (import * as path from 'path')
+
+[//]: # (const absPath = path.resolve&#40;"test3.txt"&#41;;)
+
+[//]: # (console.log&#40;absPath&#41;;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Analiza ścieżki)
+
+[//]: # (```typescript)
+
+[//]: # (import * as path from 'path')
+
+[//]: # ()
+[//]: # (const absPath = path.resolve&#40;"test3.txt"&#41;;)
+
+[//]: # (console.log&#40;absPath&#41;;)
+
+[//]: # (console.log&#40;path.basename&#40;absPath&#41;&#41;)
+
+[//]: # (console.log&#40;path.extname&#40;absPath&#41;&#41;;)
+
+[//]: # (console.log&#40;path.dirname&#40;absPath&#41;&#41;;)
+
+[//]: # (console.log&#40;"--------------"&#41;)
+
+[//]: # (console.log&#40;__dirname&#41;;)
+
+[//]: # (console.log&#40;__filename&#41;;)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (kod zwraca)
+
+[//]: # (```bash)
+
+[//]: # (/home/js/WebstormProjects/myFsModul/src/test3.txt - to ścieżka absolutna)
+
+[//]: # (test3.txt - nazwa pliku)
+
+[//]: # (.txt - rozszerzenie pliku)
+
+[//]: # (/home/js/WebstormProjects/myFsModul/src - katologia pliku)
+
+[//]: # (--------------)
+
+[//]: # (/home/js/WebstormProjects/myFsModul/src - katalog, w którym jest uruchomiony kod)
+
+[//]: # (/home/js/WebstormProjects/myFsModul/src/index.ts - plik, w którym znajduje się kod)
+
+[//]: # ()
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # ()
+[//]: # ()

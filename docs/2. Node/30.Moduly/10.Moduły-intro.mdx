@@ -1,0 +1,70 @@
+---
+title: Modules - Introduction
+---
+
+## What is a Module in Node.js?
+- A set of functions, objects, variables, or types (interfaces).
+- It can be exported and imported to be used in another TypeScript or JavaScript file.
+- Modules help organize code by splitting it into smaller, manageable, and reusable pieces.
+- In Node.js, **every file is treated as a separate module** with its own private scope (variables are not global by default).
+
+---
+
+## Types of Modules in Node.js
+
+- **Built-in (Core) Modules**
+Node.js provides many built-in modules out of the box that offer core functionality, such as:
+- file system operations,
+- networking,
+- interacting with the operating system.
+- Examples (imported using the `node:` prefix):
+- `node:fs` (for working with the file system),
+- `node:http` (for creating HTTP servers),
+- `node:path` (for handling and transforming file paths).
+
+- **External (Third-party) Modules**
+- Modules that you can install using a package manager like **npm** (Node Package Manager).
+- Created by the community, they offer a wide range of functionalities:
+- working with databases,
+- building APIs and web servers,
+- advanced developer tools (e.g., `tsx`, `typescript`).
+
+- **Custom (Local) Modules**
+You can create your own modules by:
+- writing code in a separate file,
+- explicitly exporting elements so they can be imported in other files.
+
+### Creating a module:
+```ts
+// file: math.ts
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+
+```
+
+### Importing it in another file:
+```ts
+// file: app.ts
+// Note: In Node.js with ESM, we use the .js extension in the import path,
+// even though the source file is .ts!
+import { add } from "./math.js";
+
+console.log(add(2, 3)); // Output: 5
+```
+
+
+## Two Module Systems in Node.js
+- CommonJS (CJS) – the legacy system (module.exports, require()). Still found in older projects.
+- ECMAScript Modules (ESM) – the modern standard (export, import).
+    - In TypeScript and modern Node.js projects, we use ESM by default.
+    - To enable ESM in Node.js, we add "type": "module" to our package.json file.
+
+
+
+
+
+
+
+
