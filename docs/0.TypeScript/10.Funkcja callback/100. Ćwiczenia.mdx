@@ -1,0 +1,228 @@
+---
+title: ćwiczenia
+---
+
+
+### Zadanie 1: Selekcja na wejściu (Bramkarz)
+Cel: `filter` + `map`
+
+Masz listę osób próbujących wejść na koncert.
+Twoim zadaniem jest stworzyć tablicę zawierającą tylko imiona osób, które mają ukończone 18 lat.
+ Wskazówka: Użyj `filter`, a zaraz po nim dopnij `map`.
+
+```ts
+interface Person {
+    name: string;
+    age: number;
+}
+const people: Person[] = [
+    { name: "Jan", age: 17 }, { name: "Anna", age: 22 },
+    { name: "Zofia", age: 15 }, { name: "Piotr", age: 30 }
+];
+// Oczekiwany wynik: ["Anna", "Piotr"]
+```
+
+
+### Zadanie 2: Podsumowanie koszyka
+Cel: `reduce`
+
+Napisz funkcję, która przyjmuje koszyk zakupowy i zwraca całkowitą kwotę do zapłaty.
+Pamiętaj, aby pomnożyć cenę przez ilość sztuk!
+
+```ts
+interface CartItem {
+    product: string;
+    price: number;
+    quantity: number;
+}
+const cart: CartItem[] = [
+    { product: "Myszka", price: 100, quantity: 2 },
+    { product: "Klawiatura", price: 250, quantity: 1 },
+    { product: "Kabel HDMI", price: 30, quantity: 3 }
+];
+// Oczekiwany wynik: 540
+```
+
+
+### Zadanie 3: Kontrola jakości ocen (Stypendium)
+Cel: `every` oraz `some`
+
+Masz obiekt ucznia z jego ocenami. Napisz dwie funkcje strzałkowe:
+- `canPass(grades)` – zwraca true, jeśli każda ocena jest większa niż `1`.
+- `hasDistinction(grades)` – zwraca true, jeśli uczeń ma choć jedną ocenę `6`.
+
+```ts
+interface Student {
+name: string;
+grades: number[];
+}
+const student: Student = { name: "Marek", grades: [3, 4, 5, 2, 6, 4] };
+// Oczekiwany wynik: canPass -> true, hasDistinction -> true
+```
+
+### Zadanie 4: Tabela wyników (Leaderboard)
+Cel: `sort` + `map`
+
+Masz listę graczy. Posortuj ich malejąco według liczby punktów,
+a następnie przekształć listę w tablicę stringów w formacie: `"1. [Imię]: [Punkty] pkt"`.
+
+```ts
+interface Player {
+    nickname: string;
+    score: number;
+}
+const players: Player[] = [
+    { nickname: "Ninja", score: 850 }, { nickname: "Noob", score: 50 },
+    { nickname: "ProGamer", score: 1200 }
+];
+// Oczekiwany wynik: ["1. ProGamer: 1200 pkt", "2. Ninja: 850 pkt", "3. Noob: 50 pkt"]
+```
+
+### Zadanie 5: Masowa wysyłka powiadomień
+Cel: `filter` + `forEach`
+
+Z listy subskrybentów wybierz tylko tych, którzy są aktywni (`isActive: true`),
+a następnie dla każdego z nich wyświetl w konsoli wiadomość:
+`"Wysyłam email do: [email]"`. Zwróć uwagę, że ta funkcja nic nie zwraca (`void`), tylko wykonuje akcję.
+
+```ts
+interface Subscriber {
+    email: string;
+    isActive: boolean;
+}
+const subscribers: Subscriber[] = [
+    { email: "a@test.pl", isActive: true },
+    { email: "b@test.pl", isActive: false },
+    { email: "c@test.pl", isActive: true }
+];
+```
+
+### Zadanie 6: Raport płacowy w IT
+Cel: łączenie metod (`filter` -> `map` -> `reduce`)
+
+Oblicz, ile łącznie firma wydaje na pensje pracowników, ale tylko z działu "IT".
+Wskazówka: Najpierw odfiltruj dział, potem zrób tablicę samych pensji
+(lub użyj `reduce` od razu na przefiltrowanej liście obiektów).
+
+```ts
+interface Employee {
+    name: string;
+    department: string;
+    salary: number;
+}
+const employees: Employee[] = [
+    { name: "Jan", department: "IT", salary: 5000 },
+    { name: "Anna", department: "HR", salary: 4500 },
+    { name: "Piotr", department: "IT", salary: 7000 }
+];
+// Oczekiwany wynik: 12000
+```
+
+
+
+### Zadanie 7: Zaawansowane sortowanie sklepu
+Cel: `sort` (złożone warunki)
+Posortuj produkty w sklepie tak, aby na samej górze były produkty dostępne w magazynie (`isAvailable: true`).
+Jeśli kilka produktów jest dostępnych, posortuj je dodatkowo od najtańszego do najdroższego.
+
+```ts
+interface Product {
+    name: string;
+    price: number;
+    isAvailable: boolean;
+}
+const catalog: Product[] = [
+    { name: "Monitor", price: 1200, isAvailable: false },
+    { name: "Mysz", price: 150, isAvailable: true },
+    { name: "Klawiatura", price: 300, isAvailable: true }
+];
+```
+
+
+### Zadanie 8: Inwentarz RPG (Waga ekwipunku)
+Cel: `filter` + `reduce`
+
+Bohater gry może unieść tylko określoną wagę. Oblicz łączną wagę przedmiotów w ekwipunku,
+ale pomiń przedmioty zniszczone (`broken: true`).
+
+```ts
+interface Item {
+    id: string;
+    weight: number;
+    broken: boolean;
+}
+const inventory: Item[] = [
+    { id: "Miecz", weight: 5, broken: false },
+    { id: "Tarcza", weight: 10, broken: true },
+    { id: "Mikstura", weight: 0.5, broken: false }
+];
+// Oczekiwany wynik: 5.5
+```
+
+
+### Zadanie 9: Projekt idealny
+Cel: `filter` z zagnieżdżonym every
+Masz listę projektów. Każdy projekt ma tablicę zadań.
+Zwróć tablicę zawierającą tylko nazwy projektów, w których wszystkie zadania mają status ukończony
+(`done: true`).
+
+```ts
+interface Task {
+    title: string;
+    done: boolean;
+}
+
+interface Project {
+    projectName: string;
+    tasks: Task[];
+}
+
+const projects: Project[] = [
+{
+    projectName: "Strona WWW",
+    tasks: [{ title: "Design", done: true }, { title: "HTML", done: true }]
+},
+{
+    projectName: "Aplikacja Mobilna",
+    tasks: [{ title: "Baza danych", done: true }, { title: "UI", done: false }]
+}
+];
+// Oczekiwany wynik: ["Strona WWW"]
+```
+
+
+### Zadanie 10 (Wyzwanie - "Boss Fight"): Zliczanie tagów
+Cel: `reduce` zwracające obiekt
+
+Masz tablicę stringów (np. tagów z artykułów na blogu).
+Napisz funkcję, która za pomocą `reduce` stworzy obiekt zliczający wystąpienia każdego tagu.
+Wskazówka: Stanem początkowym w `reduce` będzie pusty obiekt `{}`.
+
+
+```ts
+const tags: string[] = [
+    "javascript", "typescript", "react",
+    "typescript", "javascript", "css", "javascript"
+];
+
+// Oczekiwany wynik:
+// {
+//   javascript: 3,
+//   typescript: 2,
+//   react: 1,
+//   css: 1
+// }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
